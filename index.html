@@ -1,0 +1,1828 @@
+<!doctype html><html lang="ja"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="売上日報"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="theme-color" content="#eceff3" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0a0f1a" media="(prefers-color-scheme: dark)"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"></head><body>
+<title>タクシー売上日報</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one narrow column for a phone held in one hand. Meter panel on top, the speak-and-record box right under it, then the day's rides. */
+:root{
+  --bg:#eceff3; --surface:#ffffff; --ink:#131a2a; --muted:#5a6375; --line:#d3d8e1;
+  --accent:#0b7a5c; --accent-ink:#ffffff; --accent-soft:#dcefe8;
+  --meter-bg:#0f1628; --meter-ok:#3ddba9; --meter-fg:#ffc64a; --meter-sub:#aab4c8; --meter-line:#27324d;
+  --danger:#b93426; --field:#f5f6f9; --warn-bg:#fff3d1; --warn-line:#dfb84a;
+  --num:"Barlow Condensed","Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Meiryo,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0a0f1a; --surface:#141b2b; --ink:#e9edf5; --muted:#97a1b5; --line:#28324a;
+  --accent:#2fbf95; --accent-ink:#04261d; --accent-soft:#143429;
+  --meter-bg:#060a13; --meter-fg:#ffc64a; --meter-sub:#97a1b5; --meter-line:#232d45;
+  --danger:#ff7a6b; --field:#0e1422; --warn-bg:#33290c; --warn-line:#6f5a1c; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0a0f1a; --surface:#141b2b; --ink:#e9edf5; --muted:#97a1b5; --line:#28324a;
+  --accent:#2fbf95; --accent-ink:#04261d; --accent-soft:#143429;
+  --meter-bg:#060a13; --meter-fg:#ffc64a; --meter-sub:#97a1b5; --meter-line:#232d45;
+  --danger:#ff7a6b; --field:#0e1422; --warn-bg:#33290c; --warn-line:#6f5a1c; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+.app{max-width:560px;margin:0 auto;padding-block:12px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.top h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.04em}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg a{padding:8px 9px;border-radius:7px;text-decoration:none;color:var(--muted);font-size:14px;font-weight:600}
+.seg a[aria-current="page"]{background:var(--ink);color:var(--bg)}
+
+.datebar{display:flex;align-items:center;gap:8px}
+.datebar .d{flex:1;min-width:0;text-align:center;font-weight:700;font-size:18px}
+.ib{min-width:48px;height:48px;border:1px solid var(--line);background:var(--surface);border-radius:12px;font-size:20px;line-height:1;padding:0 12px}
+.ib.txt{font-size:14px;font-weight:600}
+
+.meter{background:var(--meter-bg);color:var(--meter-sub);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--meter-line)}
+.meter .lab{font-size:13px;letter-spacing:.14em;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.meter .big{color:var(--meter-fg);font-size:64px;line-height:.95;font-weight:600;display:flex;align-items:baseline;gap:6px}
+.meter .big small{font-size:24px;font-weight:500}
+.meter .row{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;border-top:1px solid var(--meter-line);padding-top:10px}
+.meter .row b{color:#fff;font-weight:600;font-family:var(--num);font-size:19px;margin-left:5px;font-variant-numeric:tabular-nums}
+.meter .pays{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px}
+.meter .pays b{color:#fff;font-family:var(--num);font-size:17px;margin-left:5px;font-weight:500;font-variant-numeric:tabular-nums}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.tawrap{position:relative}
+textarea#say{width:100%;min-height:76px;resize:none;border:2px solid var(--line);background:var(--field);border-radius:12px;padding:12px 14px;font-size:19px;line-height:1.4;display:block}
+textarea#say:focus{border-color:var(--accent);outline:none}
+.tawrap.hasmic textarea#say{padding-right:64px}
+#mic{position:absolute;right:8px;top:8px;width:48px;height:48px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+#mic.on{background:var(--danger);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){#mic.on{animation:none}}
+.hint{font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:flex-start}
+.hint svg{flex:none;margin-top:3px}
+#partial{font-size:15px;color:var(--muted);font-style:italic;min-height:0}
+.parsed{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pf{background:var(--field);border-radius:10px;padding:8px 10px;min-width:0}
+.pf span{display:block;font-size:12.5px;color:var(--muted);letter-spacing:.1em}
+.pf strong{display:block;font-size:17px;overflow-wrap:anywhere;min-height:25px}
+.pf strong.empty{color:var(--muted);font-weight:400}
+.pf.fare{grid-column:1 / -1;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.pf.fare strong{font-family:var(--num);font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.pf.fare em{font-style:normal;font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:42px;padding:0 14px;border-radius:21px;border:1px solid var(--line);background:var(--surface);font-size:15px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:700}
+.go{min-height:58px;border:none;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-size:20px;font-weight:700;letter-spacing:.2em}
+.go:disabled{background:var(--line);color:var(--muted);cursor:default}
+.why{font-size:14px;color:var(--muted);text-align:center;margin-top:-4px}
+
+h2{font-size:14px;margin:6px 0 -6px;color:var(--muted);letter-spacing:.12em;font-weight:600;display:flex;justify-content:space-between}
+.list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.list li+li{border-top:1px solid var(--line)}
+.trip{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;padding:12px 14px;background:none;border:none;text-align:left;min-height:62px}
+.trip .t{font-family:var(--num);font-size:19px;color:var(--muted);font-variant-numeric:tabular-nums;grid-row:1 / 3}
+.trip .r{min-width:0;font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.trip .r i{font-style:normal;color:var(--muted);margin:0 4px;font-weight:400}
+.trip .f{font-family:var(--num);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;grid-row:1 / 3;grid-column:3}
+.trip .m{grid-column:2;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 8px}
+.tag{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:12.5px}
+.blank{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:var(--muted);font-size:14px}
+.blank b{color:var(--ink);font-size:15px}
+.ex{text-align:left;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:10px 12px;font-size:15px;min-height:46px}
+
+details.card summary{font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:30px;cursor:pointer}
+details.card summary::-webkit-details-marker{display:none}
+details.card summary span{font-weight:400;font-size:13px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
+label.f input,label.f select{width:100%;min-width:0;height:48px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:0 12px;font-size:17px;color:var(--ink)}
+label.f.wide{grid-column:1 / -1}
+.kv{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;color:var(--muted)}
+.kv b{color:var(--ink);font-family:var(--num);font-size:19px;margin-left:5px;font-variant-numeric:tabular-nums}
+
+.mtable{width:100%;border-collapse:collapse;font-size:15px;table-layout:fixed}
+.mtable th:nth-child(2){width:17%}.mtable th:nth-child(3){width:24%}.mtable th:nth-child(4){width:29%}
+.mtable th{font-size:12.5px;color:var(--muted);font-weight:600;text-align:right;padding:6px 4px;letter-spacing:.08em}
+.mtable th:first-child,.mtable td:first-child{text-align:left}
+.mtable td{padding:0;border-top:1px solid var(--line);text-align:right}
+.mtable td button{all:unset;display:block;width:100%;padding:13px 4px;box-sizing:border-box;cursor:pointer}
+.mtable td.n button{font-family:var(--num);font-size:19px;font-variant-numeric:tabular-nums}
+.mtable tr.sun td:first-child{color:var(--danger)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn{flex:1;min-height:50px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:15px;padding:0 14px}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.del{color:var(--danger);flex:0 0 auto}
+#csvbox,#y-csvbox{width:100%;height:120px;font-size:12px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px}
+.goal{display:flex;flex-direction:column;gap:5px}
+.goal .bar{height:8px;background:var(--meter-line);border-radius:4px;overflow:hidden}
+.goal .bar i{display:block;height:100%;width:0;background:var(--meter-fg);border-radius:4px}
+.goal .bar i.done{background:var(--meter-ok)}
+.goal .gt{display:flex;justify-content:space-between;gap:8px;font-size:14px;flex-wrap:wrap}
+.goal .gt span:last-child{color:#fff;font-weight:600}
+.setgoal{align-self:flex-start;background:none;border:1px dashed var(--meter-line);color:var(--meter-sub);border-radius:8px;min-height:40px;padding:0 12px;font-size:14px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.cmdbox{background:var(--field);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.cmdbox span{font-size:12.5px;color:var(--muted);letter-spacing:.1em}
+.cmdbox b{font-size:16px;overflow-wrap:anywhere}
+.cmdbox em{font-style:normal;font-size:16px;color:var(--accent);font-weight:700}
+.mtable td.best{color:var(--accent);font-weight:600}
+.cap{font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:-6px}
+.mtable td.pl{padding:11px 4px}
+.mtable td.n.pl{font-family:var(--num);font-size:19px;font-variant-numeric:tabular-nums}
+.mtable+.mtable{margin-top:8px}
+.sync{font-size:13px;color:var(--muted);text-align:center}
+
+.ov{position:fixed;inset:0;background:rgba(5,8,16,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--surface);width:100%;max-width:560px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+.sheet h3{margin:0;font-size:17px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;font-size:15px;z-index:30;max-width:calc(100% - 32px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+#toast button{border:1px solid currentColor;background:none;color:inherit;border-radius:9px;min-height:40px;padding:0 12px;font-weight:700;white-space:nowrap}
+
+/* v5: record bar that stays in thumb reach, collapsible help and payment breakdown, wrong-day notice */
+.more{background:none;border:none;color:var(--meter-sub);font-size:13px;letter-spacing:0;padding:12px 2px 12px 12px;margin:-12px 0;display:flex;align-items:center;gap:7px;min-height:44px}
+.more::after{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.more[aria-expanded="true"]::after{transform:translateY(2px) rotate(-135deg)}
+.help summary{list-style:none;cursor:pointer;font-size:14px;color:var(--muted);min-height:44px;margin-block:-8px;display:flex;align-items:center;gap:9px}
+.help summary::-webkit-details-marker{display:none}
+.help summary::before{content:"";flex:none;width:7px;height:7px;margin-left:3px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg)}
+.help[open] summary::before{transform:translateY(-2px) rotate(45deg)}
+.help .hint{margin-top:10px}
+.warn{background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:10px 12px;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.warn span{min-width:0}
+.warn button{flex:none;min-height:42px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:14px}
+h2 small{font-weight:400;letter-spacing:0;font-size:12.5px;margin-left:8px}
+.recbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.14);padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.recbar-in{max-width:528px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.recbar-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.recbar-t b{font-family:var(--num);font-size:28px;line-height:1;font-variant-numeric:tabular-nums}
+.recbar-t span{font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recbar .go{flex:none;min-width:136px;padding:0 18px}
+body.hasbar .app{padding-bottom:128px}
+body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+#ymode .chip{flex:1 1 auto;padding:0 8px;font-size:14px;white-space:nowrap}
+#yrange .grid2{margin-bottom:10px}
+#yrange label.f input{padding:0 6px;font-size:16px}
+#ypre{margin-bottom:8px}
+#yq .chip{flex:1 1 auto;padding:0 8px;font-size:14px;white-space:nowrap}
+.mtable tr.sel td{background:var(--accent-soft)}
+/* v8: distance sits beside the fare, typed on a number pad or spoken */
+.prow{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) clamp(100px,30vw,118px);gap:8px}
+.prow .pf.fare{grid-column:auto;display:block}
+.prow .pf.fare strong{font-size:clamp(26px,8.6vw,34px);margin-top:4px}
+.pf.km{cursor:text}
+.pf.km .kmin{display:flex;align-items:center;gap:5px;letter-spacing:0;margin-top:3px}
+.pf.km input{flex:1;min-width:0;width:100%;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 7px;text-align:right;font-family:var(--num);font-size:22px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pf.km input::placeholder{color:var(--muted);opacity:.7}
+.pf.km input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+.pf.km i{font-style:normal;font-size:14px;color:var(--muted)}
+.pextra{grid-column:1 / -1;font-size:13.5px;color:var(--muted);padding:0 2px}
+.meter .row i{font-style:normal;margin-left:3px}
+/* v11: 一覧 — the rides as a table, read left to right like the paper 日報; the time column stays put while the rest scrolls sideways */
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-inline:-14px}
+.ltable{border-collapse:separate;border-spacing:0;min-width:100%;font-size:15px;white-space:nowrap}
+.ltable th{font-size:12.5px;color:var(--muted);font-weight:600;text-align:left;letter-spacing:.06em;padding:8px;border-bottom:1px solid var(--line)}
+.ltable td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.ltable th.n,.ltable td.n{text-align:right}
+.ltable td.n{font-family:var(--num);font-size:18px;font-variant-numeric:tabular-nums;line-height:1.25}
+.ltable td.pl{white-space:normal;min-width:5.5em;max-width:8.5em;overflow-wrap:anywhere}
+.ltable th:last-child,.ltable td:last-child{padding-right:14px}
+.ltable .st{position:sticky;left:0;z-index:1;background:var(--surface);padding-left:14px;box-shadow:1px 0 0 var(--line)}
+.ltable td.st b{font-family:var(--num);font-weight:500;font-size:18px;font-variant-numeric:tabular-nums;line-height:1.25}
+.ltable td.st small{color:var(--muted);font-size:12px}
+.ltable.day td.st small{display:inline-block;min-width:1.5em;margin-right:6px;text-align:right}
+.ltable.month td.st small{display:block;line-height:1.3}
+.ltable tbody tr.dsep td{border-top:2px solid var(--line)}
+.ltable tbody tr:first-child.dsep td{border-top:none}
+.ltable tfoot td{font-weight:700;border-bottom:none;border-top:2px solid var(--line)}
+/* v12: every cell of the 一覧 table opens a one-field editor. Typed fields dock at the top so the keyboard never covers them; choices sit at the bottom, under the thumb. */
+.ltable tbody td[data-f]{cursor:pointer}
+.ltable tbody td[data-f]:active{background:var(--accent-soft)}
+.ltable tbody td.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.ov.top{align-items:flex-start}
+.ov.top .sheet{border-radius:0 0 20px 20px;padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:18px}
+.c-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.c-head div{min-width:0;display:flex;flex-direction:column;gap:2px}
+.c-head span{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+#c-all{flex:none;min-height:42px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:13.5px;font-weight:600}
+#c-in{width:100%;min-width:0;height:54px;border:2px solid var(--line);background:var(--field);border-radius:12px;padding:0 14px;font-size:21px;color:var(--ink)}
+#c-in:focus{border-color:var(--accent);outline:none}
+#c-err{font-size:14px;color:var(--danger)}
+#cv .btn.x{flex:0 0 auto}
+.mtable.c6 th:nth-child(2){width:11%}.mtable.c6 th:nth-child(3){width:16%}.mtable.c6 th:nth-child(4){width:18%}.mtable.c6 th:nth-child(5){width:21%}.mtable.c6 th:nth-child(6){width:14%}
+.mtable.c6 td.n button{font-size:16.5px}.mtable.c6 th{letter-spacing:0}
+/* v15: meter readings at pickup and drop-off; their difference fills the distance */
+.pf.odo{cursor:text}
+.pf.odo .kmin{display:flex;align-items:center;gap:5px;letter-spacing:0;margin-top:3px}
+.pf.odo input{flex:1;min-width:0;width:100%;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 7px;text-align:right;font-family:var(--num);font-size:21px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pf.odo input::placeholder{color:var(--muted);opacity:.7}
+.pf.odo input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+.pf.odo i{font-style:normal;font-size:14px;color:var(--muted)}
+.pextra.bad{color:var(--danger)}
+/* v17: pickup and drop-off times, stamped with one tap */
+.pf.tm .kmin{display:flex;align-items:center;gap:5px;letter-spacing:0;margin-top:3px}
+.pf.tm input{flex:1;min-width:0;width:100%;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 4px;font-family:var(--num);font-size:18px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pf.tm input::-webkit-calendar-picker-indicator{display:none}
+.pf.tm input::-webkit-datetime-edit{padding:0}
+.pf.tm input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+.pf.tm .now{flex:none;height:36px;min-width:34px;padding:0 6px;border:1px solid var(--accent);border-radius:8px;background:var(--accent-soft);color:var(--ink);font-size:14px;font-weight:700}
+/* v18: 乗車・降車 — one big button under the date that stamps the pickup and drop-off times and shows whether a passenger is aboard */
+.ride{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 10px 10px 16px}
+.ride.on{border-color:var(--accent);background:var(--accent-soft)}
+.ride-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.ride-t b{font-size:18px;letter-spacing:.06em}
+.ride-t span{font-size:13.5px;color:var(--muted)}
+.ride.on .ride-t span{color:var(--ink)}
+.ride-x{flex:none;min-height:44px;padding:0 8px;border:none;background:none;color:var(--muted);font-size:13.5px;text-decoration:underline}
+.ride-b{flex:none;min-width:110px;min-height:54px;border:none;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-size:19px;font-weight:700;letter-spacing:.15em;padding:0 14px}
+.ride-b.drop{background:var(--ink);color:var(--bg)}
+.ride-b.go2{background:var(--surface);color:var(--ink);border:1px solid var(--line);letter-spacing:.05em;font-size:16px}
+/* v19: the pickup and drop-off meters sit under the 乗車 button; the last few digits are enough */
+.ride{flex-wrap:wrap}
+.ride-o{flex:1 0 100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 10px;border-top:1px solid var(--line);padding-top:10px;margin-right:6px}
+.ride-o .ro{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:13.5px;color:var(--muted)}
+.ride-o .roin{display:flex;align-items:center;gap:4px}
+.ride-o input{flex:1;min-width:0;width:100%;height:48px;border:2px solid var(--line);border-radius:12px;background:var(--surface);padding:0 6px;text-align:right;font-family:var(--num);font-size:clamp(18px,5.2vw,22px);font-variant-numeric:tabular-nums;color:var(--ink)}
+.ride-o input::placeholder{color:var(--muted);opacity:.7}
+.ride-o input:focus{border-color:var(--accent);outline:none}
+.ride-o .rmic{flex:none;width:40px;height:48px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--accent);display:grid;place-items:center;padding:0}
+.ride-o .roh{grid-column:1 / -1;font-size:13.5px;color:var(--muted)}
+.ride.on .ride-o .roh{color:var(--ink)}
+/* v20: the fare can be typed on a number pad */
+.pf.fare{cursor:text}
+.pf.fare .kmin{display:flex;align-items:center;gap:5px;letter-spacing:0;margin-top:3px}
+.pf.fare input{flex:1;min-width:0;width:100%;height:44px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 8px;text-align:right;font-family:var(--num);font-weight:600;font-size:clamp(26px,8.2vw,32px);font-variant-numeric:tabular-nums;color:var(--ink)}
+.pf.fare input::placeholder{color:var(--muted);opacity:.7;font-weight:400}
+.pf.fare input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+.pf.fare i{font-style:normal;font-size:19px;color:var(--muted)}
+.resetb{align-self:center;min-height:44px;padding:0 14px;border:none;background:none;color:var(--muted);font-size:14px;text-decoration:underline}
+/* v23: one input card from the sentence box to 記録; takings shrink to a strip on top, the full panel sits under the card */
+.sumbar{display:flex;align-items:baseline;gap:10px;width:100%;min-height:50px;background:var(--meter-bg);color:var(--meter-sub);border:1px solid var(--meter-line);border-radius:14px;padding:9px 16px;text-align:left;font-size:13.5px}
+.sumbar b{font-family:var(--num);font-size:27px;line-height:1;font-weight:600;color:var(--meter-fg);font-variant-numeric:tabular-nums}
+.sumbar span:last-child{margin-left:auto;text-align:right;color:#fff}
+.routeline{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;font-size:17px}
+.routeline span{font-size:12.5px;color:var(--muted);letter-spacing:.1em}
+.routeline strong{overflow-wrap:anywhere}
+.routeline strong.empty{color:var(--muted);font-weight:400}
+.routeline i{font-style:normal;color:var(--muted)}
+#nbox0 .pextra{padding:0}
+.card .ride:not(.on){background:var(--field)}
+.opt summary{list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:9px;font-size:14px;color:var(--muted)}
+.opt summary::-webkit-details-marker{display:none}
+.opt summary::before{content:"";flex:none;width:7px;height:7px;margin-left:3px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg)}
+.opt[open] summary::before{transform:translateY(-2px) rotate(45deg)}
+.opt summary b{margin-left:auto;min-width:0;color:var(--ink);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.optin{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+/* v24: breaks — one button beside 乗車, a list with totals under 乗務情報・目標 */
+.ride-k{flex:none;min-height:54px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-size:15px;font-weight:700}
+#brk-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+#meta .cap{margin:14px 0 6px}
+.brow{display:flex;align-items:center;gap:6px}
+.brow input{flex:1 1 0;min-width:0;height:46px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:0 6px;font-size:16px;color:var(--ink)}
+.brow span{color:var(--muted)}
+.brow b{flex:none;min-width:4.2em;text-align:right;font-size:14px}
+.brow button{flex:none;min-height:46px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--danger);font-size:14px;font-weight:600}
+/* v25: 出庫・帰庫 as one-tap buttons above the input card; empty-running distance; a one-page report of the shift */
+.shift{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px 10px 8px 16px}
+.shift .ride-b{min-height:48px;min-width:96px;font-size:17px}
+.shift .ride-k{min-height:44px}
+.shift-o{flex:1 0 100%;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:4px 10px;border-top:1px solid var(--line);padding-top:8px;margin-right:6px}
+.shift-o label{font-size:13.5px;color:var(--muted)}
+.shift-o input{min-width:0;width:100%;height:48px;border:2px solid var(--line);border-radius:12px;background:var(--field);padding:0 10px;text-align:right;font-family:var(--num);font-size:24px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.shift-o input:focus{border-color:var(--accent);outline:none}
+.shift-o span{grid-column:1 / -1;font-size:13.5px;color:var(--muted)}
+#rv .btn.x{flex:0 0 auto}
+#rv-body{display:flex;flex-direction:column;gap:14px}
+.rtable{width:100%;border-collapse:collapse;font-size:15px}
+.rtable th{text-align:left;font-weight:400;color:var(--muted);padding:7px 4px;border-top:1px solid var(--line);font-size:14px}
+.rtable td{text-align:right;padding:7px 4px;border-top:1px solid var(--line);font-family:var(--num);font-size:18px;font-variant-numeric:tabular-nums}
+.rtable tr:first-child th,.rtable tr:first-child td{border-top:none}
+.rtable td.tx{font-family:var(--body);font-size:15px;text-align:left;overflow-wrap:anywhere}
+.rtable td.tm{text-align:left;white-space:nowrap;color:var(--muted)}
+.rcap{font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:-8px}
+#rv-csv{width:100%;height:120px;font-size:12px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px}
+/* v26: backup and restore of every record */
+#bk>*+*{margin-top:10px}
+#bk .cap{margin:16px 0 0}
+#bk label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
+#bk-text{width:100%;height:92px;font-size:12px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px;color:var(--ink)}
+#bk-confirm .btnrow{margin-top:6px}
+#bk-drive{width:100%}
+#geo-box{display:flex;flex-direction:column;gap:12px}
+#geo-msg{padding:0}
+#bk-drive-a{color:var(--accent);font-weight:700}
+/* v30: comparison with the period before, and a bar chart of how takings moved */
+.ctitle{font-weight:700;font-size:15px}
+.chart svg{display:block;width:100%;height:auto}
+.chart svg text{font-family:var(--num);font-size:10px;fill:var(--muted)}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .ba{fill:var(--accent)}
+.chart .bb{fill:var(--muted);opacity:.38}
+.lg{display:flex;gap:14px;font-size:13px;color:var(--muted)}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.lg i.a{background:var(--accent)}
+.lg i.b{background:var(--muted);opacity:.38}
+.mtable.cmp th:nth-child(2),.mtable.cmp th:nth-child(3){width:24%}
+.mtable.cmp th:nth-child(4){width:27%}
+.mtable.cmp td.n.pl{font-size:17px}
+.mtable.cmp td small{display:block;font-family:var(--body);font-size:12px}
+.mtable.cmp td.up{color:var(--accent)}
+.mtable.cmp td.down{color:var(--danger)}
+.meter .big{font-size:clamp(40px,14.5vw,64px)}
+/* v31: hold up on narrow phones and when the number face has not loaded */
+details.card summary{min-height:44px}
+.mtable td.n button,.mtable td.n.pl{font-size:clamp(15px,4.6vw,19px)}
+.mtable.cmp td.n.pl{font-size:clamp(14px,4.2vw,17px)}
+.pf.km input{font-size:clamp(17px,5.2vw,22px);padding:0 5px}
+@media (max-width:359px){.ride-o{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <h1>売上日報</h1>
+    <nav class="seg" aria-label="表示切替"><a href="#day" id="tab-day">日報</a><a href="#list" id="tab-list">一覧</a><a href="#month" id="tab-month">月集計</a><a href="#year" id="tab-year">年集計</a></nav>
+  </header>
+
+  <section id="v-day" style="display:contents">
+    <div class="datebar">
+      <button class="ib" id="prev" aria-label="前の日">‹</button>
+      <div class="d" id="dlabel"></div>
+      <button class="ib" id="next" aria-label="次の日">›</button>
+      <button class="ib txt" id="today">今日</button>
+    </div>
+    <button type="button" class="sumbar" id="sumbar" aria-label="営収の詳しい内訳へ移動"><span>営収</span><b id="sb-total">¥0</b><span id="sb-sub"></span></button>
+
+    <div class="shift" id="shift"><div class="ride-t"><b id="sh-s">出庫前</b><span id="sh-d"></span></div><button type="button" class="ride-x" id="sh-x" hidden>帰庫を取り消す</button><button type="button" class="ride-b" id="sh-b">出庫</button><div class="shift-o" id="sh-o" hidden><label for="sh-odo" id="sh-ol">出庫メーター km</label><input type="text" inputmode="decimal" id="sh-odo" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><span id="sh-oh"></span></div></div>
+
+    <div class="card" id="composer">
+      <div class="warn" id="daywarn" hidden><span id="daywarn-t"></span><button id="daywarn-b">今の日報へ</button></div>
+      <div class="tawrap" id="tawrap">
+        <textarea id="say" rows="2" placeholder="例：新宿駅から渋谷まで 2400円 カード" autocomplete="off" autocapitalize="off" enterkeyhint="done" aria-label="乗車内容を話すか入力"></textarea>
+        <button id="mic" hidden aria-label="音声入力を開始"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      </div>
+      <div id="partial" hidden></div>
+      <div class="stack" id="nbox0">
+        <div class="routeline" id="routeline" hidden><span>乗車地</span><strong id="p-from" class="empty">—</strong><i>→</i><span>降車地</span><strong id="p-to" class="empty">—</strong></div>
+        <div class="pextra" id="p-extra" hidden></div>
+        <div class="pextra" id="geo-msg" hidden></div>
+      </div>
+      <div class="ride" id="ride" aria-live="polite"><div class="ride-t"><b id="ride-s">空車</b><span id="ride-d"></span></div><button class="ride-x" id="ride-x" hidden>取り消す</button><button type="button" class="ride-k" id="brk-b">休憩</button><button class="ride-b" id="ride-b">乗車</button><div class="ride-o"><label class="ro" for="r-o1"><span>乗車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o1" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="メーター " aria-label="乗車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><label class="ro" for="r-o2"><span>降車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o2" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="降車メーター " aria-label="降車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><span class="roh" id="r-o1-h"></span></div></div>
+      <div hidden><input type="text" id="p-o1" autocomplete="off"><input type="text" id="p-o2" autocomplete="off"><div class="pextra" id="p-odo" hidden></div></div>
+      <div class="stack" id="nbox">
+      <div class="parsed">
+        <div class="prow">
+          <label class="pf fare" for="p-fare"><span>料金</span><span class="kmin"><i>¥</i><input type="text" inputmode="numeric" pattern="[0-9]*" id="p-fare" autocomplete="off" enterkeyhint="done" maxlength="7" placeholder="—" aria-label="料金（円）"></span></label>
+          <label class="pf km" for="p-km"><span>距離</span><span class="kmin"><input type="text" inputmode="decimal" id="p-km" autocomplete="off" enterkeyhint="done" maxlength="6" placeholder="—" aria-label="実車距離（キロ）"><i>km</i></span></label>
+        </div>
+      </div>
+      <div class="cap">支払方法</div>
+      <div class="chips" id="paychips" role="group" aria-label="支払方法"></div>
+      <details class="opt" id="opt">
+        <summary><span>時刻・客層・きっかけ・天気</span><b id="opt-sum"></b></summary>
+        <div class="optin">
+          <div id="geo-box" hidden>
+            <div class="cap">位置から場所を入れる</div>
+            <div class="chips" id="geochips" role="group" aria-label="位置から場所を入れる"><button type="button" class="chip" data-geo="from">乗車地を今いる場所に</button><button type="button" class="chip" data-geo="to">降車地を今いる場所に</button><button type="button" class="chip" data-geo="toggle" id="geo-toggle" aria-pressed="true">乗車・降車で自動</button></div>
+          </div>
+          <div class="parsed">
+            <div class="pf tm"><span>乗車時刻</span><span class="kmin"><input type="time" id="p-t1" aria-label="乗車時刻"><button type="button" class="now" data-now="p-t1" aria-label="乗車時刻に今の時刻を入れる">今</button></span></div>
+            <div class="pf tm"><span>降車時刻</span><span class="kmin"><input type="time" id="p-t2" aria-label="降車時刻"><button type="button" class="now" data-now="p-t2" aria-label="降車時刻に今の時刻を入れる">今</button></span></div>
+          </div>
+          <div class="cap">客層（もう一度押すと解除）</div>
+          <div class="chips" id="segchips" role="group" aria-label="客層"></div>
+          <div class="cap">乗車のきっかけ（もう一度押すと解除）</div>
+          <div class="chips" id="srcchips" role="group" aria-label="乗車のきっかけ"></div>
+          <div class="cap">天気（もう一度押すと解除）</div>
+          <div class="chips" id="wxchips" role="group" aria-label="天気"></div>
+        </div>
+      </details>
+      </div>
+      <div class="cmdbox" id="cmdbox" hidden></div>
+      <button class="go" id="go" disabled>記録</button>
+      <div class="why" id="why">料金を話すか、料金の欄に数字で入れると記録できます</div>
+      <button type="button" class="resetb" id="reset">入力をリセット</button>
+      <details class="help" id="help">
+      <summary id="help-s">話し方と直し方</summary>
+      <div class="hint" id="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span id="hint-t">上の枠をタップし、キーボードのマイクボタンを押して話してください。</span></div>
+      <div class="hint"><span>直すときは「さっきのはカード」「さっきの 3000円」、消すときは「取り消し」。料金は、話すかわりに料金の欄へ数字キーで入れることもできます。距離は「4.2キロ」と話すか、料金の横の欄に数字で入れます。あとから足すときは「さっきの 4.2キロ」。乗車時と降車時のメーターを入れると、差が距離に入ります。乗車時メーターは乗せたときに入れておけば、記録するまで残ります。メーターの欄には、乗車時も降車時も下3桁だけ入れれば、残りの桁を補います。「メーター 230」「降車メーター 241」と話しても入ります。メーター欄の横のマイクのボタンを押すと、入力欄に「メーター」が入るので、続けて数字だけ話します。乗車時刻・降車時刻は、「乗車」「降車」ボタンを押すとその時刻が入ります。「時刻・客層・きっかけ・天気」を開くと、時刻を直せます。</span></div>
+      <div class="hint"><span>人数・迎車・高速代も「迎車 2名 高速1320円」のように続けて話せます。乗車のきっかけは「流し」「付け待ち」「無線」「アプリ配車」「予約」と話すか、ボタンで選びます。出庫と帰庫は、いちばん上の「出庫」「帰庫」を押すと時刻が入り、続けてメーターを入れられます。休憩は、空車のときに「休憩」を押して入り、「休憩終了」で終わります。合計と一覧は「乗務情報・目標」に出ます。客層・きっかけ・天気のボタンは、「時刻・客層・きっかけ・天気」を開くと出ます。</span></div>
+      </details>
+    </div>
+
+    <div class="meter" id="meterp" aria-live="polite">
+      <div class="lab"><span>営収（税込）</span><button class="more" id="m-more" aria-expanded="false" aria-controls="m-pays" hidden>内訳を見る</button></div>
+      <div class="big num"><small>¥</small><span id="m-total">0</span></div>
+      <div class="goal" id="m-goal" hidden><div class="bar"><i id="m-goal-bar"></i></div><div class="gt"><span id="m-goal-l"></span><span id="m-goal-r"></span></div></div>
+      <button class="setgoal" id="m-setgoal">目標を設定</button>
+      <div class="row"><span>回数<b id="m-count">0</b></span><span>単価<b id="m-avg">0</b></span><span>税抜<b id="m-net">0</b></span><span id="m-hour-w" hidden>時間あたり<b id="m-hour">0</b></span><span id="m-km-w" hidden>実車<b id="m-km"></b><i>km</i></span><span id="m-rate-w" hidden>実車率<b id="m-rate"></b></span><span id="m-brk-w" hidden>休憩<b id="m-brk"></b></span></div>
+      <div class="pays" id="m-pays" hidden></div>
+    </div>
+
+    <h2><span>乗車記録<small id="l-tip" hidden>押すと修正</small></span><span id="l-count"></span></h2>
+    <div id="listwrap"></div>
+    <button type="button" class="btn" id="rv-open">この日の日報を1枚で見る</button>
+
+    <details class="card" id="meta">
+      <summary>乗務情報・目標 <span id="meta-sum">出庫・帰庫・メーター</span></summary>
+      <div class="grid2">
+        <label class="f">出庫時刻<input type="time" id="f-start"></label>
+        <label class="f">帰庫時刻<input type="time" id="f-end"></label>
+        <label class="f">出庫メーター km<input type="number" inputmode="numeric" id="f-odo1" min="0"></label>
+        <label class="f">帰庫メーター km<input type="number" inputmode="numeric" id="f-odo2" min="0"></label>
+        <label class="f">1日の目標 円<input type="number" inputmode="numeric" id="f-goal-d" min="0" step="1000"></label>
+        <label class="f">月の目標 円<input type="number" inputmode="numeric" id="f-goal-m" min="0" step="10000"></label>
+        <label class="f wide">1日の休憩の目標 分（例：180）<input type="number" inputmode="numeric" id="f-goal-b" min="0" step="10"></label>
+      </div>
+      <div class="kv" id="meta-kv"></div>
+      <div class="cap">休憩</div>
+      <div id="brk-list"></div>
+      <button type="button" class="btn" id="brk-add">休憩をあとから追加</button>
+    </details>
+
+    <details class="card" id="bk">
+      <summary>バックアップ <span>全記録の保存と復元</span></summary>
+      <div class="hint"><span id="bk-info"></span></div>
+      <div class="btnrow"><button type="button" class="btn pri" id="bk-save" hidden>バックアップを保存</button><button type="button" class="btn" id="bk-copy">バックアップをコピー</button></div>
+      <button type="button" class="btn" id="bk-drive" hidden>Googleドライブに保存</button>
+      <div class="hint" id="bk-drive-h" hidden><span>ClaudeにGoogleドライブを連携していると、マイドライブに直接保存できます。初めて押したときに、許可の確認が出ます。</span></div>
+      <div class="hint" id="bk-drive-l" hidden><a id="bk-drive-a" href="https://drive.google.com/" target="_blank" rel="noopener">保存したファイルをGoogleドライブで開く</a></div>
+      <div class="cap">バックアップから復元する</div>
+      <div class="hint"><span>保存したバックアップのファイルを選ぶか、コピーしておいた内容を下の枠に貼り付けて読み込みます。読み込んだあと、内容を確かめてから復元します。</span></div>
+      <label class="btn" for="bk-file">バックアップのファイルを選ぶ</label>
+      <input type="file" id="bk-file" accept=".json,application/json,text/plain" hidden>
+      <textarea id="bk-text" placeholder="コピーしておいたバックアップを、ここに貼り付けます" aria-label="バックアップの内容"></textarea>
+      <button type="button" class="btn" id="bk-read">貼り付けた内容を読み込む</button>
+      <div class="cmdbox" id="bk-confirm" hidden></div>
+      <button type="button" class="btn" id="bk-undo" hidden>直前の復元を取り消す</button>
+      <div class="hint" id="bk-msg"><span></span></div>
+    </details>
+  </section>
+
+  <section id="v-month" hidden style="display:contents">
+    <div class="datebar">
+      <button class="ib" id="mprev" aria-label="前の月">‹</button>
+      <div class="d" id="mlabel"></div>
+      <button class="ib" id="mnext" aria-label="次の月">›</button>
+    </div>
+    <div class="meter">
+      <div class="lab">月間営収（税込）</div>
+      <div class="big num"><small>¥</small><span id="mm-total">0</span></div>
+      <div class="goal" id="mm-goal" hidden><div class="bar"><i id="mm-goal-bar"></i></div><div class="gt"><span id="mm-goal-l"></span><span id="mm-goal-r"></span></div></div>
+      <button class="setgoal" id="mm-setgoal">目標を設定</button>
+      <div class="row"><span>出番<b id="mm-days">0</b></span><span>回数<b id="mm-count">0</b></span><span>1出番平均<b id="mm-avg">0</b></span><span>税抜<b id="mm-net">0</b></span><span id="mm-km-w" hidden>実車<b id="mm-km"></b><i>km</i></span><span id="mm-rate-w" hidden>実車率<b id="mm-rate"></b></span><span id="mm-brk-w" hidden>休憩<b id="mm-brk"></b></span></div>
+      <div class="pays" id="mm-pays"></div>
+    </div>
+    <div class="card chart" id="m-trend" hidden></div>
+    <div class="card" id="m-cmp" hidden></div>
+    <div class="card" id="mcard"></div>
+    <div class="card" id="timecard" hidden></div>
+    <div class="card" id="segcard" hidden></div>
+    <div class="card">
+      <div class="btnrow"><button class="btn pri" id="csv-save" hidden>CSVを保存（Excel用）</button><button class="btn" id="csv-copy">CSVをコピー</button></div>
+      <textarea id="csvbox" hidden readonly aria-label="CSVデータ"></textarea>
+      <div class="hint" id="csv-msg"><span>この月の乗車記録を1行ずつ書き出します。</span></div>
+    </div>
+  </section>
+
+  <section id="v-year" hidden style="display:contents">
+    <div class="chips" id="ymode" role="group" aria-label="集計の単位"></div>
+    <div class="card" id="yrange" hidden>
+      <div class="grid2">
+        <label class="f">開始日<input type="date" id="y-from"></label>
+        <label class="f">終了日<input type="date" id="y-to"></label>
+      </div>
+      <div class="chips" id="ypre" role="group" aria-label="期間の早見"><button type="button" class="chip" data-pre="thismonth">今月</button><button type="button" class="chip" data-pre="lastmonth">先月</button><button type="button" class="chip" data-pre="d90">過去90日</button><button type="button" class="chip" data-pre="all">全期間</button></div>
+      <div class="hint"><span id="yrange-h"></span></div>
+    </div>
+    <div class="datebar" id="ybar">
+      <button class="ib" id="yprev" aria-label="前の年">‹</button>
+      <div class="d" id="ylabel"></div>
+      <button class="ib" id="ynext" aria-label="次の年">›</button>
+    </div>
+    <div class="chips" id="yq" role="group" aria-label="集計する期間"></div>
+    <div class="meter">
+      <div class="lab" id="y-lab">年間営収（税込）</div>
+      <div class="big num"><small>¥</small><span id="y-total">0</span></div>
+      <div class="row"><span>出番<b id="y-days">0</b></span><span>回数<b id="y-count">0</b></span><span>月平均<b id="y-mavg">0</b></span><span>1出番平均<b id="y-avg">0</b></span><span>税抜<b id="y-net">0</b></span><span id="y-km-w" hidden>実車<b id="y-km"></b><i>km</i></span></div>
+      <div class="pays" id="y-pays"></div>
+    </div>
+    <div class="card chart" id="y-trend" hidden></div>
+    <div class="card" id="y-cmp" hidden></div>
+    <div class="card" id="yqcard"></div>
+    <div class="card" id="ycard"></div>
+    <div class="card" id="ygcard" hidden></div>
+    <div class="card">
+      <div class="btnrow"><button class="btn pri" id="y-csv-save" hidden>この期間のCSVを保存</button><button class="btn" id="y-csv-copy">この期間のCSVをコピー</button></div>
+      <textarea id="y-csvbox" hidden readonly aria-label="この期間のCSVデータ"></textarea>
+      <div class="hint" id="y-csv-msg"><span>上で選んだ期間の乗車記録を1行ずつ書き出します。</span></div>
+    </div>
+  </section>
+
+  <section id="v-list" hidden style="display:contents">
+    <div class="chips" id="lscope" role="group" aria-label="一覧にする期間"></div>
+    <div class="datebar">
+      <button class="ib" id="lprev" aria-label="前へ">‹</button>
+      <div class="d" id="llabel"></div>
+      <button class="ib" id="lnext" aria-label="次へ">›</button>
+    </div>
+    <div class="card" id="lcard"></div>
+  </section>
+
+  <div class="sync" id="sync">この端末に保存しています</div>
+  <div class="sync" id="geo-credit" hidden>地名の取得：© OpenStreetMap contributors ／ 国土地理院</div>
+</div>
+
+<div class="ov" id="ov" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
+    <h3 id="sh-h">乗車記録を修正</h3>
+    <div class="grid2">
+      <label class="f">時刻<input type="time" id="e-t"></label>
+      <label class="f">料金 円<input type="number" inputmode="numeric" id="e-fare" min="0"></label>
+      <label class="f">乗車時刻<input type="time" id="e-t1"></label>
+      <label class="f">降車時刻<input type="time" id="e-t2"></label>
+      <label class="f">実車距離 km<input type="number" inputmode="decimal" step="0.1" min="0" id="e-km"></label>
+      <label class="f">支払方法<select id="e-pay"></select></label>
+      <label class="f">乗車時メーター km<input type="text" inputmode="decimal" id="e-o1" autocomplete="off"></label>
+      <label class="f">降車時メーター km<input type="text" inputmode="decimal" id="e-o2" autocomplete="off"></label>
+      <label class="f wide">乗車地<input type="text" id="e-from"></label>
+      <label class="f wide">降車地<input type="text" id="e-to"></label>
+      <label class="f">人数<input type="number" inputmode="numeric" id="e-pax" min="1" max="9"></label>
+      <label class="f">高速代 円<input type="number" inputmode="numeric" id="e-toll" min="0"></label>
+      <label class="f">迎車<select id="e-mukae"><option value="0">なし</option><option value="1">あり</option></select></label>
+      <label class="f">客層<select id="e-seg"></select></label>
+      <label class="f wide">乗車のきっかけ<select id="e-src"></select></label>
+      <label class="f wide">天気<select id="e-w"></select></label>
+      <label class="f wide">メモ<input type="text" id="e-note"></label>
+    </div>
+    <div class="btnrow"><button class="btn del" id="e-del">削除</button><button class="btn" id="e-cancel">閉じる</button><button class="btn pri" id="e-save">保存</button></div>
+  </div>
+</div>
+<div class="ov" id="cv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="c-h">
+    <div class="c-head"><div><h3 id="c-h"></h3><span id="c-sub"></span></div><button id="c-all">全項目・削除</button></div>
+    <input type="text" id="c-in" autocomplete="off" enterkeyhint="done" aria-labelledby="c-h" hidden>
+    <div class="chips" id="c-chips" role="group" aria-labelledby="c-h" hidden></div>
+    <div id="c-err" role="alert" hidden></div>
+    <div class="btnrow"><button class="btn x" id="c-cancel">閉じる</button><button class="btn" id="c-next">保存して次へ</button><button class="btn pri" id="c-save">保存</button></div>
+  </div>
+</div>
+<div class="ov" id="rv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rv-h">
+    <h3 id="rv-h"></h3>
+    <div id="rv-body"></div>
+    <textarea id="rv-csv" hidden readonly aria-label="日報のCSVデータ"></textarea>
+    <div class="hint" id="rv-msg"><span>会社の日報に写すときは、この画面を上から読みます。CSVにも同じ内容が入ります。</span></div>
+    <div class="btnrow"><button type="button" class="btn x" id="rv-close">閉じる</button><button type="button" class="btn" id="rv-copy">CSVをコピー</button><button type="button" class="btn pri" id="rv-save" hidden>CSVを保存</button></div>
+  </div>
+</div>
+<div class="recbar" id="bar" hidden><div class="recbar-in"><div class="recbar-t"><b id="bar-fare"></b><span id="bar-sum"></span></div><button class="go" id="bar-go">記録</button></div></div>
+<div id="toast" hidden role="status"><span id="toast-t"></span><button id="toast-b">取り消す</button></div>
+
+<script>
+/*PARSE-START*/
+const PAYS=[['cash','現金'],['card','カード'],['emoney','電子マネー'],['qr','QR決済'],['app','アプリ決済'],['ticket','チケット']];
+const PAYNAME=Object.fromEntries(PAYS);
+const PAYRE=[
+ ['ticket',/(タクシー)?チケット|タクシー券|タク券|クーポン/i],
+ ['qr',/QR(コード)?|ペイペイ|PayPay|楽天ペイ|d払い|au ?PAY|メルペイ|バーコード|コード決済/i],
+ ['emoney',/電子マネー|交通系(IC)?(カード)?|Suica|スイカ|PASMO|パスモ|QUICPay|クイックペイ|nanaco|ナナコ|WAON|ワオン|Edy|エディ/i],
+ ['app',/GO ?(Pay|ペイ|決済|払い)|ゴーペイ|アプリ(決済|払い)?|ネット決済|S\.?RIDE|エスライド|Uber|ウーバー|DiDi|ディディ/i],
+ ['card',/クレジット(カード)?|クレカ|カード/i],
+ ['cash',/現金|キャッシュ/i]
+];
+const SEGS=[['biz','ビジネス'],['tour','観光'],['inbound','訪日客'],['senior','高齢者'],['hosp','通院'],['shop','買い物'],['drink','飲み帰り'],['family','家族連れ'],['student','学生']];
+const SEGNAME=Object.fromEntries(SEGS);
+const SRCS=[['nagashi','流し'],['wait','付け待ち'],['radio','無線'],['app','アプリ配車'],['book','予約'],['other','その他']];
+const SRCNAME=Object.fromEntries(SRCS);
+const SRCRE=[
+ ['app',/アプリ配車|配車アプリ|(?:GO|ゴー|Uber|ウーバー|DiDi|ディディ|S\.?RIDE|エスライド)\s*の?配車/i],
+ ['radio',/無線(配車)?/],
+ ['wait',/付け待ち|つけ待ち|駅待ち/],
+ ['book',/予約/],
+ ['nagashi',/流し/]
+];
+const SEGRE=[
+ ['inbound',/外国人(観光)?客?|インバウンド|訪日客?/],
+ ['biz',/ビジネス(マン|客)?|サラリーマン|会社員|出張客?/],
+ ['tour',/観光客?|旅行(客|者)/],
+ ['senior',/高齢(者|の方)?|お?年寄り|年配(の方)?|シニア/],
+ ['hosp',/通院/],
+ ['shop',/買い?物(客|帰り)?/],
+ ['drink',/飲み(会)?帰り|酔客|酔っ払い|飲み客/],
+ ['family',/家族(連れ)?|子連れ|親子(連れ)?/],
+ ['student',/学生(さん)?/]
+];
+const KD={'〇':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
+const NUM='[\\d〇一二三四五六七八九十百千万][\\d,〇一二三四五六七八九十百千万]*';
+function jaNum(s){
+  s=String(s).replace(/[,\s]/g,'');
+  if(/^\d+$/.test(s))return parseInt(s,10);
+  let total=0,sec=0,cur='';
+  const flush=()=>{const v=cur===''?null:parseInt(cur,10);cur='';return v};
+  for(const ch of s){
+    if(/\d/.test(ch))cur+=ch;
+    else if(ch in KD)cur+=KD[ch];
+    else if(ch==='十'||ch==='百'||ch==='千'){const u={'十':10,'百':100,'千':1000}[ch];const v=flush();sec+=(v==null?1:v)*u}
+    else if(ch==='万'){const v=flush();sec+=(v||0);total+=(sec||1)*10000;sec=0}
+  }
+  sec+=(flush()||0);
+  return total+sec;
+}
+function parseSay(raw){
+  const o={from:'',to:'',fare:null,toll:0,pay:null,seg:null,src:null,pax:1,paxSet:false,km:null,o1:null,o2:null,t:null,mukae:false};
+  let s=(raw||'').normalize('NFKC').replace(/\s+/g,' ').trim();
+  if(!s)return o;
+  let m;
+  /* Meter readings: 「メーター 230」「降車メーター 241」. Spoken forms vary (メータ, 乗車時のメーター, 二百三十, 2 3 0); the last one said wins, so saying it again corrects it. */
+  {const MN='((?:\\d\\s){1,6}\\d(?!\\d|\\s*円)|\\d[\\d,]*(?:\\.\\d)?(?!\\d|\\s*円)|[〇一二三四五六七八九十百千万]+(?![\\d〇一二三四五六七八九十百千万]|\\s*円))\\s*(?:キロメートル|キロ|km)?';
+   const take=pre=>{const re=new RegExp(pre+'メータ[ー]?(?:の?数字?|の?値)?(?:は|が|を)?\\s*'+MN,'gi'),all=[...s.matchAll(re)];if(!all.length)return null;
+     const r=all[all.length-1][1].replace(/[\s,]/g,'');s=s.replace(re,' ');return /^[\d.]+$/.test(r)?r:String(jaNum(r))};
+   o.o2=take('降(?:車|り)(?:時|の)*');o.o1=take('(?:乗(?:車|り)(?:時|の)*)?');}
+  if((m=s.match(new RegExp('高速(?:代|料金|料)?\\s*('+NUM+')\\s*円?')))){o.toll=jaNum(m[1]);s=s.replace(m[0],' ')}
+  if((m=s.match(/(\d{1,2})\s*時\s*(半|(\d{1,2})\s*分)?(?!間)/))&&+m[1]<24){
+    o.t=String(+m[1]).padStart(2,'0')+':'+String(m[2]==='半'?30:(m[3]?Math.min(59,+m[3]):0)).padStart(2,'0');s=s.replace(m[0],' ');
+  }else if((m=s.match(/(\d{1,2}):(\d{2})/))&&+m[1]<24&&+m[2]<60){o.t=String(+m[1]).padStart(2,'0')+':'+m[2];s=s.replace(m[0],' ')}
+  if((m=s.match(/お?(\d|[一二三四五六七八九])\s*(?:名|人)(?!町)(?:様|さま)?/))){o.pax=jaNum(m[1])||1;o.paxSet=true;s=s.replace(m[0],' ')}
+  else if((m=s.match(/お?(ひとり|ふたり)(?:様|さま)?/))){o.pax=m[1]==='ひとり'?1:2;o.paxSet=true;s=s.replace(m[0],' ')}
+  if((m=s.match(/(\d+(?:\.\d+)?|[一二三四五六七八九十]+)\s*(?:キロメートル|キロ|km)(半)?/i))){o.km=Math.round(((/^\d/.test(m[1])?parseFloat(m[1]):jaNum(m[1]))+(m[2]?.5:0))*10)/10;s=s.replace(m[0],' ')}
+  else if((m=s.match(/(\d{2,5})\s*メートル/))){o.km=Math.round(+m[1]/100)/10;s=s.replace(m[0],' ')}
+  if((m=s.match(new RegExp('('+NUM+')\\s*円')))){o.fare=jaNum(m[1]);s=s.replace(m[0],' ')}
+  else{
+    const re=/(^|[^\d,])(\d[\d,]{2,})(?![\d,])(?!\s*(?:丁目|番|号|階|条|km|キロ))/g;let k,last=null;
+    while((k=re.exec(s)))last=k;
+    if(last){o.fare=jaNum(last[2]);s=s.slice(0,last.index+last[1].length)+' '+s.slice(last.index+last[0].length)}
+  }
+  for(const [key,re] of SRCRE){if((m=s.match(re))){o.src=key;s=s.replace(m[0],' ');break}}
+  for(const [key,re] of PAYRE){
+    if((m=s.match(re))){o.pay=key;s=s.replace(new RegExp(re.source+'(払い|ばらい|支払い?|決済)?',re.flags),' ');break}
+  }
+  for(const [key,re] of SEGRE){
+    if((m=s.match(re))){o.seg=key;s=s.replace(new RegExp('('+re.source+')(のお客様?|のお客さん|の方|さん)?'),' ');break}
+  }
+  if(/迎車/.test(s)){o.mukae=true;s=s.replace(/迎車(料金|あり)?/g,' ')}
+  s=s.replace(/[、。,.円]/g,' ');
+  const drop=new Set(['で','です','でした','を','は','と','の','にて','払い','支払い','お客様','お客さん','に','へ','が']);
+  const tok=s.split(' ').map(x=>x.trim()).filter(x=>x&&!drop.has(x));
+  const clean=x=>x.replace(/(まで|迄|へ)$/,'').replace(/^(で|を)\s+/,'').trim();
+  s=tok.join(' ');
+  if((m=s.match(/^(.*?)\s*から\s*(.*)$/))){o.from=clean(m[1]);o.to=clean(m[2])}
+  else if((m=s.match(/^(.+?)\s*(?:→|->|⇒|~|〜)\s*(.+)$/))){o.from=clean(m[1]);o.to=clean(m[2])}
+  else if(/(まで|迄)$/.test(s)){o.to=clean(s)}
+  else if(tok.length>=2){o.from=clean(tok[0]);o.to=clean(tok.slice(1).join(' '))}
+  else if(tok.length===1){o.from=clean(tok[0])}
+  return o;
+}
+/* A meter reading typed with fewer digits than the last one keeps the last one's leading digits: 230 after 45218 is 45230. */
+function resolveOdo(str,base){
+  const s=String(str==null?'':str).normalize('NFKC').replace(/[,\s]/g,'').replace(/[^\d.]/g,'');if(!s)return null;
+  const n=parseFloat(s);if(!isFinite(n)||n<0||n>=10000000)return null;
+  const ip=s.split('.')[0];
+  if(base!=null&&ip.length>0&&ip.length<String(Math.floor(base)).length){const m=Math.pow(10,ip.length);let v=Math.floor(base/m)*m+n;if(v<Math.floor(base))v+=m;return Math.round(v*10)/10}
+  return Math.round(n*10)/10;
+}
+function parseCmd(raw){
+  const s=(raw||'').normalize('NFKC').replace(/\s+/g,' ').trim();let m;
+  if(/^((さっき|今|直前|前)の(記録)?(は|を)?[、 ]*)?(取り?消し?|取消|キャンセル|なし|削除)(して(ください)?|で)?[。.]?$/.test(s))return {cmd:'undo'};
+  if((m=s.match(/^(?:(?:さっき|今|直前|前)の(?:記録)?(?:は|を|の)?|訂正|修正)[、, ]*(.*)$/)))return {cmd:'fix',rest:m[1]};
+  return null;
+}
+function changes(tr,rest){
+  let r=(rest||'').replace(/(に)?(変更|訂正|修正)(して(ください)?)?/g,' ').replace(/(でした|だった|です)[。.]?\s*$/,' ');
+  const set={},list=[],f=n=>Math.round(n).toLocaleString('ja-JP');let m;
+  if((m=r.match(/降車(?!時|の?メータ)地?(?:は|を|が)?\s*([^\s、。]+)/))){set.to=m[1].replace(/(まで|迄|へ|に)$/,'');r=r.replace(m[0],' ')}
+  if((m=r.match(/乗車(?!時|の?メータ)地?(?:は|を|が)?\s*([^\s、。]+)/))){set.from=m[1].replace(/(から|に)$/,'');r=r.replace(m[0],' ')}
+  const p=parseSay(r);
+  if(p.from&&p.to&&!set.from&&!set.to){set.from=p.from;set.to=p.to}
+  if(p.t&&p.t!==tr.t){set.t=p.t;list.push('時刻 '+tr.t+' → '+p.t)}
+  if(set.from&&set.from!==tr.from)list.push('乗車地 → '+set.from);else delete set.from;
+  if(set.to&&set.to!==tr.to)list.push('降車地 → '+set.to);else delete set.to;
+  if(p.fare!=null&&p.fare>0&&p.fare!==tr.fare){set.fare=p.fare;list.push('料金 ¥'+f(tr.fare)+' → ¥'+f(p.fare))}
+  if(p.pay&&p.pay!==tr.pay){set.pay=p.pay;list.push('支払 '+(PAYNAME[tr.pay]||'現金')+' → '+PAYNAME[p.pay])}
+  if(p.seg&&p.seg!==tr.seg){set.seg=p.seg;list.push('客層 '+(SEGNAME[tr.seg]||'未入力')+' → '+SEGNAME[p.seg])}
+  if(p.src&&p.src!==tr.src){set.src=p.src;list.push('きっかけ '+(SRCNAME[tr.src]||'未入力')+' → '+SRCNAME[p.src])}
+  if(p.paxSet&&p.pax!==(tr.pax||1)){set.pax=p.pax;list.push('人数 '+(tr.pax||1)+'名 → '+p.pax+'名')}
+  if(p.o1!=null){const v=resolveOdo(p.o1,tr.o1);if(v!=null&&v!==tr.o1){set.o1=v;list.push('乗車時メーター → '+v+'km')}}
+  if(p.o2!=null){const v=resolveOdo(p.o2,set.o1!=null?set.o1:tr.o1);if(v!=null&&v!==tr.o2){set.o2=v;list.push('降車時メーター → '+v+'km')}}
+  if(p.km!=null&&p.km!==tr.km){set.km=p.km;list.push('距離 → '+p.km+'km')}
+  if(p.toll&&p.toll!==tr.toll){set.toll=p.toll;list.push('高速代 → '+f(p.toll)+'円')}
+  if(p.mukae&&!tr.mukae){set.mukae=true;list.push('迎車 → あり')}
+  return {set,list};
+}
+/*PARSE-END*/
+
+const $=id=>document.getElementById(id);
+const yen=n=>Math.round(n||0).toLocaleString('ja-JP');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const fromYmd=s=>{const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+const shift=(s,n)=>{const d=fromYmd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+const WD=['日','月','火','水','木','金','土'];
+const mins=t=>{const a=(t||'00:00').split(':');return (+a[0])*60+(+a[1])};
+
+/* ---------- storage ---------- */
+const LS='taxi-nippo-v1',LSX='taxi-nippo-wxsel-v1';const WXS=['晴れ','曇り','雨','雪'];let wxSel='';const LSS='taxi-nippo-set-v1';let settings={dayGoal:null,monthGoal:null,breakGoal:null},settingsDirty=false;
+let days={},col=null,dirty=new Set(),queued={},chains={},firstSync=false,navigated=false;
+/* Days changed here that Claude has not confirmed yet. Kept across reloads: without this, a ride recorded while offline
+   would be replaced by the older server copy the next time the app opens. */
+const LSD='taxi-nippo-dirty-v1';
+try{const j=JSON.parse(localStorage.getItem(LSD)||'[]');if(Array.isArray(j))j.forEach(k=>{if(/^\d{4}-\d\d-\d\d$/.test(k))dirty.add(k)})}catch(e){}
+const saveDirty=()=>{try{localStorage.setItem(LSD,JSON.stringify([...dirty]))}catch(e){}};
+const resend=()=>{if(col)[...dirty].forEach(k=>{if(days[k])persist(k)})};
+const LSU='taxi-nippo-ui-v1';let ui={pays:false,lscope:'day'},autoDate=null,helpTouched=false;
+let textKm=null,textO1=null,textO2=null,textFare=null;
+function parseKm(v){v=String(v==null?'':v).normalize('NFKC').replace(/,/g,'.').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<1000?Math.round(n*10)/10:null}
+const curKm=()=>parseKm($('p-km').value);
+const LSO='taxi-nippo-odo-v1',LST='taxi-nippo-time-v1';
+function renderRide(){
+  const t1=$('p-t1').value,t2=$('p-t2').value,box=$('ride'),b=$('ride-b');
+  const st=t2?'done':t1?'on':'idle';
+  box.classList.toggle('on',st==='on');$('ride-x').hidden=st==='idle';
+  const br=st==='idle'?openBreak():null;$('brk-b').hidden=st!=='idle'||!!br;
+  if(br){box.classList.add('on');$('ride-s').textContent='休憩中';$('ride-d').textContent=br.s+'から '+durTxt(brkLen(br,true));b.textContent='休憩終了';b.className='ride-b drop';odoHint();return}
+  if(st==='idle'){$('ride-s').textContent='空車';$('ride-d').textContent='乗せたら「乗車」を押します';b.textContent='乗車';b.className='ride-b'}
+  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+m+'分';b.textContent='降車';b.className='ride-b drop'}
+  else{$('ride-s').textContent='降車済み';$('ride-d').textContent=(t1||'—')+'→'+t2;b.textContent='料金へ';b.className='ride-b go2'}
+  odoHint();
+}
+function saveTm(){renderRide();try{localStorage.setItem(LST,JSON.stringify({t1:$('p-t1').value,t2:$('p-t2').value}))}catch(e){}}
+function parseOdo(v){v=String(v==null?'':v).normalize('NFKC').replace(/[,\s]/g,'').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<10000000?Math.round(n*10)/10:null}
+const odoDiff=(a,b)=>a!=null&&b!=null&&b>=a?Math.round((b-a)*10)/10:null;
+const fmtO=n=>Number(n).toLocaleString('ja-JP',{maximumFractionDigits:1});
+function dayLastOdo(d){
+  if(!d)return null;let best=null;
+  (d.trips||[]).forEach(t=>{if((t.o1!=null||t.o2!=null)&&(!best||(t.ts||0)>(best.ts||0)))best=t});
+  return best?(best.o2!=null?best.o2:best.o1):null;
+}
+/* The reading the next pickup is measured from: this day's last ride, else 出庫メーター, else where the previous shift ended. */
+function odoBase(){
+  const d=days[cur],v=dayLastOdo(d);if(v!=null)return v;
+  if(d&&d.odoStart!=null)return d.odoStart;
+  const ks=Object.keys(days).filter(k=>k<cur).sort().reverse();
+  for(const k of ks){const p=days[k];if(!p)continue;if(p.odoEnd!=null)return p.odoEnd;const w=dayLastOdo(p);if(w!=null)return w;if(p.odoStart!=null)return p.odoStart}
+  return null;
+}
+const odoBase2=()=>{const a=parseOdo($('p-o1').value);return a!=null?a:odoBase()};
+function odoHint(){
+  const f1=$('r-o1'),f2=$('r-o2'),h=$('r-o1-h'),ae=document.activeElement;
+  if(ae!==f1)f1.value=$('p-o1').value;
+  if(ae!==f2)f2.value=$('p-o2').value;
+  const a=parseOdo($('p-o1').value),from=a!=null?'乗車時':'前回';
+  if(ae===f2||(ae!==f1&&f2.value)){
+    const base=odoBase2(),v=resolveOdo(f2.value,base);
+    if(v==null)h.textContent=base!=null?from+' '+fmtO(base)+' km。降車時も下3桁だけ入れれば、残りの桁を補います':'降車時メーターは全部の桁を入れます';
+    else if(base!=null&&v<base)h.textContent='降車時 '+fmtO(v)+' km は、'+from+'の '+fmtO(base)+' km より小さくなっています';
+    else h.textContent='降車時 '+fmtO(v)+' km'+(a!=null?'　移動距離 '+fmtO(Math.round((v-a)*10)/10)+' km':'');
+    return;
+  }
+  const base=odoBase(),v=resolveOdo(f1.value,base);
+  if(v==null)h.textContent=base!=null?'前回 '+fmtO(base)+' km。下3桁だけ入れれば、残りの桁を補います':'最初は全部の桁を入れます。次からは下3桁だけで入ります';
+  else h.textContent='乗車時 '+fmtO(v)+' km'+(base!=null?'　前回から '+(v>=base?'+':'−')+fmtO(Math.abs(Math.round((v-base)*10)/10))+' km':'');
+}
+let kmFromOdo=false;
+function syncOdo(){
+  const a=parseOdo($('p-o1').value),b=parseOdo($('p-o2').value),m=$('p-odo');
+  try{localStorage.setItem(LSO,JSON.stringify({o1:$('p-o1').value,o2:$('p-o2').value}))}catch(e){}
+  m.hidden=a==null||b==null;
+  if(a!=null&&b!=null){const df=odoDiff(a,b);m.classList.toggle('bad',df==null);
+    if(df==null)m.textContent='降車時メーターが乗車時より小さくなっています。数字を確かめてください。';
+    else{$('p-km').value=String(df);kmFromOdo=true;m.textContent='移動距離 '+df+'km を距離の欄に入れました。'}}
+  if(kmFromOdo&&(a==null||b==null||odoDiff(a,b)==null)){$('p-km').value='';kmFromOdo=false}
+  syncBar();odoHint();
+}
+function saveUi(){try{localStorage.setItem(LSU,JSON.stringify(ui))}catch(e){}}
+function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LS)||'{}');if(j&&typeof j==='object')days=j}catch(e){}try{const w=JSON.parse(localStorage.getItem(LSX)||'null');if(w&&w.d===ymd(new Date())&&WXS.includes(w.w))wxSel=w.w}catch(e){}try{const g=JSON.parse(localStorage.getItem(LSS)||'null');if(g&&typeof g==='object')settings={dayGoal:g.dayGoal||null,monthGoal:g.monthGoal||null,breakGoal:g.breakGoal||null}}catch(e){}try{const u=JSON.parse(localStorage.getItem(LSU)||'null');if(u&&typeof u==='object')ui={pays:!!u.pays,lscope:u.lscope==='month'?'month':'day'}}catch(e){}}
+function saveSettings(){
+  try{localStorage.setItem(LSS,JSON.stringify(settings))}catch(e){}
+  if(!col)return;settingsDirty=true;const body={type:'settings',dayGoal:settings.dayGoal,monthGoal:settings.monthGoal,breakGoal:settings.breakGoal};
+  chains._s=(chains._s||Promise.resolve()).then(()=>col.doc('settings').set(body)).then(()=>{settingsDirty=false}).catch(()=>{});
+}
+function renderWx(){$('wxchips').innerHTML=WXS.map(x=>'<button class="chip" data-wx="'+x+'" aria-pressed="'+(x===wxSel)+'">'+x+'</button>').join('')}
+function setWx(w){wxSel=w;try{localStorage.setItem(LSX,JSON.stringify({d:ymd(new Date()),w:w}))}catch(e){}renderWx();optSum()}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(days))}catch(e){}}
+function day(date){if(!days[date])days[date]={type:'day',date:date,trips:[],startTime:'',endTime:'',odoStart:null,odoEnd:null};if(!Array.isArray(days[date].trips))days[date].trips=[];return days[date]}
+const hasContent=d=>d&&((d.trips&&d.trips.length)||(d.breaks&&d.breaks.length)||d.startTime||d.endTime||d.odoStart!=null||d.odoEnd!=null);
+/* Breaks live on the day's record: {id, s:'HH:MM', e:'HH:MM' or null while the break is running, ts}. */
+const durTxt=m=>m<60?m+'分':Math.floor(m/60)+'時間'+(m%60?(m%60)+'分':'');
+const hmTxt=m=>Math.floor(m/60)+':'+pad(m%60);
+function openBreak(){const d=days[cur];return d&&Array.isArray(d.breaks)?(d.breaks.find(x=>!x.e)||null):null}
+function brkLen(b,live){const e=b.e||(live?nowHM():null);return e&&b.s?(mins(e)-mins(b.s)+1440)%1440:0}
+function brkTotal(k){const d=days[k];if(!d||!Array.isArray(d.breaks))return 0;const live=k===defaultDate();return d.breaks.reduce((a,b)=>a+brkLen(b,live),0)}
+function renderBreaks(){
+  const w=$('brk-list');if(w.contains(document.activeElement))return;
+  const d=days[cur],bs=((d&&d.breaks)||[]).slice().sort((a,b)=>(a.ts||0)-(b.ts||0));
+  w.innerHTML=bs.length?bs.map(b=>'<div class="brow" data-b="'+esc(b.id)+'"><input type="time" data-k="s" value="'+esc(b.s||'')+'" aria-label="休憩の開始時刻"><span>〜</span><input type="time" data-k="e" value="'+esc(b.e||'')+'" aria-label="休憩の終了時刻"><b>'+(b.e?durTxt(brkLen(b)):'休憩中')+'</b><button type="button" data-del>削除</button></div>').join('')
+    :'<div class="hint"><span>この日の休憩はまだありません。空車のときに「休憩」を押して入り、「休憩終了」で終わります。</span></div>';
+}
+/* Distance run empty before each pickup: from the previous drop-off reading (or 出庫メーター for the first ride) to this pickup reading.
+   A ride without readings breaks the chain, so nothing is guessed across it. */
+function emptyKm(d){
+  const m={};if(!d||!d.trips)return m;let prev=d.odoStart!=null?d.odoStart:null;
+  sorted(d).forEach(t=>{
+    if(t.o1!=null&&prev!=null&&t.o1>=prev&&t.o1-prev<300)m[t.id]=Math.round((t.o1-prev)*10)/10;
+    prev=t.o2!=null?t.o2:(t.o1!=null&&t.km!=null?Math.round((t.o1+t.km)*10)/10:null);
+  });
+  return m;
+}
+const sumVals=o=>Math.round(Object.keys(o).reduce((a,k)=>a+o[k],0)*10)/10;
+let shAsk='';
+function shHint(){
+  const base=odoBase(),v=resolveOdo($('sh-odo').value,base),h=$('sh-oh');
+  if(v==null)h.textContent=base!=null?'前回 '+fmtO(base)+' km。下3桁だけ入れれば、残りの桁を補います。入れずに閉じてもかまいません':'全部の桁を入れます。入れずに閉じてもかまいません';
+  else h.textContent=fmtO(v)+' km'+(base!=null?'　前回から '+(v>=base?'+':'−')+fmtO(Math.abs(Math.round((v-base)*10)/10))+' km':'');
+}
+function renderShift(){
+  const d=days[cur]||{},st=d.endTime?'end':d.startTime?'on':'pre',b=$('sh-b');
+  const run=(d.odoStart!=null&&d.odoEnd!=null&&d.odoEnd>=d.odoStart)?Math.round((d.odoEnd-d.odoStart)*10)/10:null;
+  $('sh-s').textContent=st==='pre'?'出庫前':st==='on'?'乗務中':'帰庫済み';
+  $('sh-d').textContent=st==='pre'?'出庫したら「出庫」を押します':st==='on'?'出庫 '+d.startTime+(d.odoStart!=null?'　'+fmtO(d.odoStart)+' km':''):d.startTime+' → '+d.endTime+(run!=null?'　走行 '+fmtO(run)+' km':'');
+  b.hidden=st==='end';b.textContent=st==='pre'?'出庫':'帰庫';b.className=st==='pre'?'ride-b':'ride-k';
+  $('sh-x').hidden=st!=='end';
+  $('sh-o').hidden=!shAsk;
+  if(shAsk){$('sh-ol').textContent=(shAsk==='start'?'出庫':'帰庫')+'メーター km';shHint()}
+}
+function reportData(k){
+  const d=days[k]||{trips:[]},T=totals(d.trips||[]),bm=brkTotal(k),EM=emptyKm(d),es=sumVals(EM);
+  let hours=null;if(d.startTime&&d.endTime){let a=mins(d.startTime),e=mins(d.endTime);if(e<a)e+=1440;hours=(e-a)/60}
+  const run=(d.odoStart!=null&&d.odoEnd!=null&&d.odoEnd>=d.odoStart)?Math.round((d.odoEnd-d.odoStart)*10)/10:null,lk=Math.round(T.km*10)/10;
+  const pairs=[['出庫時刻',d.startTime||''],['帰庫時刻',d.endTime||''],['乗務時間',hours!=null?hours.toFixed(1)+' 時間':''],['休憩 合計',bm?durTxt(bm):''],['休憩を除く乗務',hours!=null&&bm?Math.max(0,hours-bm/60).toFixed(1)+' 時間':''],
+    ['出庫メーター',d.odoStart!=null?fmtO(d.odoStart)+' km':''],['帰庫メーター',d.odoEnd!=null?fmtO(d.odoEnd)+' km':''],['走行距離',run!=null?fmtO(run)+' km':''],['実車距離',lk?fmtO(lk)+' km':''],
+    ['空車距離',run!=null&&lk&&run>=lk?fmtO(Math.round((run-lk)*10)/10)+' km':(es?fmtO(es)+' km（メーターを入れた乗車の分）':'')],['実車率',run&&lk?Math.round(lk/run*100)+' %':''],
+    ['回数',T.n+' 回'],['営収（税込）',yen(T.sum)+' 円'],['営収（税抜）',yen(T.sum/1.1)+' 円'],['単価',yen(T.n?T.sum/T.n:0)+' 円'],['高速代',T.toll?yen(T.toll)+' 円':'']]
+    .concat(PAYS.filter(x=>T.pay[x[0]]).map(x=>[x[1],yen(T.pay[x[0]])+' 円']));
+  const brs=((d.breaks)||[]).slice().sort((a,b)=>(a.ts||0)-(b.ts||0)).filter(b=>b.s);
+  return {d:d,pairs:pairs,brs:brs,EM:EM};
+}
+function renderReport(k){
+  const R=reportData(k),dt=fromYmd(k);
+  $('rv-h').textContent=dt.getFullYear()+'年'+(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）の日報';
+  const tr=sorted(R.d.trips?R.d:{trips:[]});
+  $('rv-body').innerHTML='<table class="rtable"><tbody>'+R.pairs.map(x=>'<tr><th>'+esc(x[0])+'</th><td>'+(x[1]?esc(x[1]):'—')+'</td></tr>').join('')+'</tbody></table>'+
+    '<div class="rcap">休憩</div>'+(R.brs.length?'<table class="rtable"><tbody>'+R.brs.map(b=>'<tr><th>'+esc(b.s)+' 〜 '+esc(b.e||'')+'</th><td>'+(b.e?durTxt(brkLen(b)):'休憩中')+'</td></tr>').join('')+'</tbody></table>':'<div class="hint"><span>休憩の記録はありません。</span></div>')+
+    '<div class="rcap">乗車</div>'+(tr.length?'<table class="rtable"><tbody>'+tr.map(t=>'<tr><td class="tm">'+esc(t.t)+'</td><td class="tx">'+esc(t.from||'—')+(t.to?' → '+esc(t.to):'')+'<br><span style="color:var(--muted);font-size:13px">'+esc(PAYNAME[t.pay]||'現金')+(t.pax>1?'・'+t.pax+'名':'')+(t.km!=null?'・'+esc(t.km)+'km':'')+(R.EM[t.id]!=null?'・空車 '+R.EM[t.id]+'km':'')+(t.toll?'・高速 '+yen(t.toll):'')+'</span></td><td>'+yen(t.fare)+'</td></tr>').join('')+'</tbody></table>':'<div class="hint"><span>乗車の記録はありません。</span></div>');
+  $('rv-csv').hidden=true;
+}
+function reportCsv(k){
+  const q=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v},R=reportData(k),dt=fromYmd(k);
+  const rows=[['乗務日報',k.replace(/-/g,'/'),WD[dt.getDay()]]].concat(R.pairs.map(x=>[x[0],x[1]])).concat([[],['休憩','開始','終了','分']]).concat(R.brs.map(b=>['',b.s,b.e||'',b.e?brkLen(b):''])).concat([[]]);
+  return '﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'+csvFor([k]).text.slice(1);
+}
+function rateTable(ks,order){
+  const g={};ks.forEach(k=>{const d=days[k],EM=emptyKm(d);d.trips.forEach(t=>{if(t.km==null||EM[t.id]==null)return;const hk=(+String(t.t||'0').slice(0,2))+'時台';g[hk]=g[hk]||{l:0,e:0};g[hk].l+=t.km;g[hk].e+=EM[t.id]})});
+  const hs=order.filter(k=>g[k]&&g[k].l+g[k].e>0);if(!hs.length)return '';
+  const rate=k=>g[k].l/(g[k].l+g[k].e);let best=null;if(hs.length>1)hs.forEach(k=>{if(best==null||rate(k)>rate(best))best=k});
+  return '<table class="mtable"><thead><tr><th>時間帯別の実車率</th><th>実車km</th><th>空車km</th><th>実車率</th></tr></thead><tbody>'+hs.map(k=>'<tr><td class="pl">'+k+'</td><td class="n pl">'+fmtO(Math.round(g[k].l*10)/10)+'</td><td class="n pl">'+fmtO(Math.round(g[k].e*10)/10)+'</td><td class="n pl'+(k===best?' best':'')+'">'+Math.round(rate(k)*100)+'%</td></tr>').join('')+'</tbody></table><div class="hint"><span>空車kmは、前の降車時メーターから次の乗車時メーターまでの距離で、乗せた時刻の時間帯に入れています。乗車時・降車時のメーターを入れた乗車だけで計算します。</span></div>';
+}
+/* Backup: every day's record and the goals as one JSON text. Restore replaces the days the backup holds and leaves the others;
+   what it replaced is kept on this device so the restore can be undone once. */
+const LSB='taxi-nippo-bk-v1',LSUNDO='taxi-nippo-undo-v1';
+let bkPending=null;
+const bkMsg=t=>{$('bk-msg').firstElementChild.textContent=t};
+const slash=k=>k.replace(/-/g,'/');
+function backupText(){
+  const ds={};Object.keys(days).sort().forEach(k=>{if(hasContent(days[k]))ds[k]=days[k]});
+  return JSON.stringify({app:'taxi-nippo',version:1,exported:new Date().toISOString(),settings:settings,days:ds});
+}
+function bkCount(ds){const ks=Object.keys(ds).sort();let n=0;ks.forEach(k=>{n+=(ds[k].trips||[]).length});return {ks:ks,n:n,txt:ks.length?slash(ks[0])+'〜'+slash(ks[ks.length-1])+'、'+ks.length+'日・乗車'+n+'件':''}}
+function bkInfo(){
+  const ds={};Object.keys(days).forEach(k=>{if(hasContent(days[k]))ds[k]=days[k]});const c=bkCount(ds);
+  let last='',u=false;try{last=localStorage.getItem(LSB)||'';u=!!localStorage.getItem(LSUNDO)}catch(e){}
+  $('bk-info').textContent=(c.txt?'いまの記録：'+c.txt+'。':'まだ記録がありません。')+(last?'最後にバックアップを取った日：'+slash(last):'バックアップはまだ取っていません。');
+  $('bk-undo').hidden=!u;
+}
+function markBackup(){try{localStorage.setItem(LSB,ymd(new Date()))}catch(e){}bkInfo()}
+function parseBackup(text){
+  let j;try{j=JSON.parse(String(text||'').replace(/^﻿/,'').trim())}catch(e){return null}
+  if(!j||j.app!=='taxi-nippo'||!j.days||typeof j.days!=='object')return null;
+  const ds={};
+  for(const k of Object.keys(j.days)){
+    const d=j.days[k];if(!/^\d{4}-\d\d-\d\d$/.test(k)||!d||typeof d!=='object'||!Array.isArray(d.trips))return null;
+    const c=JSON.parse(JSON.stringify(d));c.type='day';c.date=k;c.trips=c.trips.filter(t=>t&&typeof t==='object'&&t.id!=null&&typeof t.fare==='number');
+    if(c.breaks&&!Array.isArray(c.breaks))delete c.breaks;
+    ds[k]=c;
+  }
+  if(!Object.keys(ds).length)return null;
+  const g=j.settings&&typeof j.settings==='object'?{dayGoal:+j.settings.dayGoal||null,monthGoal:+j.settings.monthGoal||null,breakGoal:+j.settings.breakGoal||null}:null;
+  return {days:ds,settings:g};
+}
+function offerRestore(text){
+  const B=parseBackup(text),box=$('bk-confirm');
+  if(!B){bkPending=null;box.hidden=true;bkMsg('バックアップとして読めませんでした。このアプリで保存したファイルか、内容が途中で切れていないかを確かめてください。');return}
+  const c=bkCount(B.days),over=c.ks.filter(k=>days[k]&&hasContent(days[k])).length;
+  bkPending=B;bkMsg('');
+  box.innerHTML='<span>読み込んだバックアップ</span><b>'+esc(c.txt)+'</b><em>'+(over?'いまの記録のうち、同じ日付の'+over+'日分が、バックアップの内容に置き換わります。':'いまの記録と重なる日はありません。')+'ほかの日は変わりません。'+(B.settings?'目標の設定もバックアップの内容になります。':'')+'</em><div class="btnrow"><button type="button" class="btn" data-bk="no">やめる</button><button type="button" class="btn pri" data-bk="yes">復元する</button></div>';
+  box.hidden=false;box.scrollIntoView({block:'center',behavior:'smooth'});
+}
+/* Save the backup straight into the viewer's Google Drive through their Claude connector.
+   Argument names come from the tool's own schema when the viewer has allowed the connector; the fallback is the shape the platform documents. */
+let mcpNs=null;
+const DRV='Google Drive',DRT='create_file';
+function driveErr(e){
+  const c=e&&e.code;
+  if(c==='server_not_connected'||c==='server_not_found')return 'ClaudeにGoogleドライブが連携されていません。claude.aiの「カスタマイズ」→「コネクタ」でGoogle Driveを連携してから、もう一度押してください。';
+  if(c==='needs_reauth')return 'Googleドライブの連携が切れています。claude.aiの「カスタマイズ」→「コネクタ」でGoogle Driveをつなぎ直してから、もう一度押してください。';
+  if(c==='selection_required')return 'Googleドライブの連携が複数あります。Claudeの画面でどれを使うか選んでから、もう一度押してください。';
+  if(c==='not_in_manifest'||c==='consent_required'||c==='approval_required'||c==='not_granted')return 'このアプリからGoogleドライブに保存する許可が出ていません。もう一度押して、確認の画面で許可してください。';
+  if(c==='blocked_by_policy')return 'この組織の設定で、Googleドライブへの保存が止められています。「バックアップを保存」か「コピー」を使ってください。';
+  if(c==='tool_error')return 'Googleドライブが保存を受け付けませんでした。'+(e.message?'（'+String(e.message).slice(0,120)+'）':'')+'「バックアップを保存」か「コピー」を使ってください。';
+  if(c==='server_unavailable'||c==='upstream_error')return 'Googleドライブから返事がなく、保存できたか分かりません。Googleドライブを確かめて、ファイルが無ければもう一度押してください。';
+  if(c==='cancelled')return '保存を取りやめました。';
+  return 'ここではGoogleドライブに保存できませんでした。「バックアップを保存」か「コピー」を使ってください。';
+}
+async function driveSave(){
+  const btn=$('bk-drive');if(!mcpNs||btn.disabled)return;
+  btn.disabled=true;$('bk-drive-l').hidden=true;bkMsg('Googleドライブに保存しています…');
+  const name='タクシー日報_バックアップ_'+ymd(new Date())+'.json',text=backupText();
+  try{
+    const desc=async()=>{try{const d=await mcpNs.describeTool(DRV,DRT);return (d&&d.inputSchema&&d.inputSchema.properties)||null}catch(e){return null}};
+    let props=await desc();
+    if(!props){try{const pm=await window.claude.use('permissions');if(pm){await pm.request(['mcp:'+DRV]);props=await desc()}}catch(e){}}
+    const pick=(cands,dflt)=>props?(cands.find(k=>k in props)||null):dflt;
+    const nameK=pick(['title','name','fileName','filename','file_name'],'title');
+    const b64K=pick(['base64Content','base64_content','contentBase64','content_base64','fileContent'],'base64Content');
+    const txtK=b64K?null:pick(['content','text','textContent','text_content','body'],null);
+    const mimeK=pick(['contentMimeType','mimeType','mime_type','content_mime_type','contentType'],'contentMimeType');
+    if(!nameK||(!b64K&&!txtK)){bkMsg('Googleドライブの保存の形式が、このアプリの想定と違っていました。保存はしていません。「バックアップを保存」か「コピー」を使ってください。');return}
+    const input={};input[nameK]=name;if(mimeK)input[mimeK]='application/json';
+    if(!props||'disableConversionToGoogleType' in props)input.disableConversionToGoogleType=true;
+    if(txtK)input[txtK]=text;
+    else{
+      const bytes=new TextEncoder().encode(text);let fileArgs=false;
+      try{const l=await mcpNs.listTools();fileArgs=!!(l&&l.fileArgs)}catch(e){}
+      if(fileArgs)input[b64K]={$file:{data:new Blob([bytes],{type:'application/json'}),name:name,type:'application/json'}};
+      else{
+        if(bytes.length>700000){bkMsg('記録が多く、この画面からはGoogleドライブに送れませんでした。「バックアップを保存」でファイルにしてから、Googleドライブに入れてください。');return}
+        let bin='';for(let i=0;i<bytes.length;i+=8192)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));
+        input[b64K]=btoa(bin);
+      }
+    }
+    const r=await mcpNs.callTool(DRV,DRT,input,{cache:false});
+    markBackup();bkMsg('Googleドライブのマイドライブに「'+name+'」を保存しました。');
+    const pl=r&&r.payload,f=pl&&typeof pl==='object'?(pl.file&&typeof pl.file==='object'?pl.file:pl):null,u=f&&(f.webViewLink||f.url||f.link||f.viewUrl);
+    if(typeof u==='string'&&/^https:\/\//.test(u)){$('bk-drive-a').href=u;$('bk-drive-l').hidden=false}
+  }catch(e){bkMsg(driveErr(e))}
+  finally{btn.disabled=false}
+}
+async function pushDays(ks){for(const k of ks){persist(k);if(chains[k]){try{await chains[k]}catch(e){}}}}
+function doRestore(){
+  const B=bkPending;if(!B)return;const ks=Object.keys(B.days).sort(),old={};
+  ks.forEach(k=>{old[k]=days[k]?JSON.parse(JSON.stringify(days[k])):null;days[k]=B.days[k]});
+  let kept=true;try{localStorage.setItem(LSUNDO,JSON.stringify({days:old,settings:settings}))}catch(e){kept=false}
+  if(B.settings){settings=B.settings;saveSettings()}
+  saveLocal();bkPending=null;$('bk-confirm').hidden=true;$('bk-text').value='';render();pushDays(ks);
+  bkMsg(ks.length+'日分を復元しました。'+(kept?'間違えたときは「直前の復元を取り消す」で、復元する前の状態に戻せます。':'この端末の空きが足りず、復元前の状態は残せませんでした。'));
+}
+function undoRestore(){
+  let u=null;try{u=JSON.parse(localStorage.getItem(LSUNDO)||'null')}catch(e){}
+  if(!u||!u.days){bkInfo();return}
+  const ks=Object.keys(u.days).sort();
+  ks.forEach(k=>{days[k]=u.days[k]||{type:'day',date:k,trips:[],startTime:'',endTime:'',odoStart:null,odoEnd:null}});
+  if(u.settings){settings={dayGoal:u.settings.dayGoal||null,monthGoal:u.settings.monthGoal||null,breakGoal:u.settings.breakGoal||null};saveSettings()}
+  try{localStorage.removeItem(LSUNDO)}catch(e){}
+  saveLocal();render();pushDays(ks);bkMsg('復元する前の状態に戻しました。');
+}
+/* ===== Stand-alone build =====
+   The same page opened outside Claude (its own https address) has no Claude runtime. There it may ask the phone for its position,
+   which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
+const SOLO=!(window.claude&&window.claude.use);
+const LSG='taxi-nippo-geo-v1';
+let geo={on:true,from:null,to:null};
+try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
+const saveGeo=()=>{try{localStorage.setItem(LSG,JSON.stringify({on:geo.on,from:geo.from,to:geo.to}))}catch(e){}};
+const gName=k=>geo[k]?(geo[k].n||''):'';
+const gPos=k=>geo[k]?[geo[k].la,geo[k].lo]:undefined;
+const gShow=k=>geo[k]?(geo[k].n||(geo[k].fail?'地名なし（位置は記録）':'地名を取得中…')):'';
+function geoMsg(t){const m=$('geo-msg');m.textContent=t||'';m.hidden=!t}
+function clearGeo(){geo.from=null;geo.to=null;saveGeo();geoMsg('')}
+/* A place name for a ride record, down to the 丁目: municipality (and ward) from OpenStreetMap, town and 丁目 from the
+   Geospatial Information Authority of Japan, whose answer is the official 町丁目 name. Each fills in for the other when one fails. */
+function osmParts(j){
+  const a=(j&&j.address)||{},pref=v=>/^(東京都?|北海道|.{2,3}[府県])$/.test(v),ok=v=>typeof v==='string'&&v&&v!=='日本'&&!pref(v)&&!/^\d{3}-\d{4}$/.test(v);
+  const muni=[],town=[];
+  const put=(arr,v)=>{if(!ok(v)||muni.includes(v)||arr.includes(v))return;for(let i=arr.length-1;i>=0;i--)if(v.includes(arr[i]))arr.splice(i,1);arr.push(v)};
+  [a.city,a.town,a.village,a.municipality].forEach(v=>put(muni,v));
+  if(!muni.length)put(muni,a.county);
+  [a.city_district,a.suburb].forEach(v=>{if(ok(v))put(/区$/.test(v)?muni:town,v)});
+  [a.quarter,a.neighbourhood,a.hamlet].forEach(v=>put(town,v));
+  if(!muni.length&&!town.length&&j&&typeof j.display_name==='string'){
+    const ps=j.display_name.split(/,\s*/).filter(ok).slice(0,4).reverse();
+    ps.forEach((v,i)=>put(i===0||(/区$/.test(v)&&!town.length)?muni:town,v));
+  }
+  return {muni:muni.join(''),town:town.join('')};
+}
+const geoCache={};
+async function placeName(la,lo){
+  const key=la.toFixed(4)+','+lo.toFixed(4);if(geoCache[key])return geoCache[key];
+  const get=async u=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),8000);try{const r=await fetch(u,{signal:c.signal,headers:{Accept:'application/json'}});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}};
+  const [o,g]=await Promise.allSettled([
+    get('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&accept-language=ja&lat='+la+'&lon='+lo),
+    get('https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lat='+la+'&lon='+lo)]);
+  const P=o.status==='fulfilled'?osmParts(o.value):{muni:'',town:''};
+  const gv=g.status==='fulfilled'&&g.value&&g.value.results&&typeof g.value.results.lv01Nm==='string'?g.value.results.lv01Nm.trim():'';
+  const chome=gv&&gv!=='－'&&gv!=='-'?gv:'';
+  const n=(P.muni+(chome||P.town)).slice(0,40);
+  if(n)geoCache[key]=n;return n;
+}
+/* which: 'from' at pickup, 'to' at drop-off. The position is kept even when no name comes back. */
+function capture(which,manual){
+  if(!SOLO||(!geo.on&&!manual))return;
+  if(!navigator.geolocation){if(manual)geoMsg('このブラウザでは位置情報が使えません。');return}
+  geoMsg((which==='from'?'乗車地':'降車地')+'の位置を取得しています…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const g={la:Math.round(pos.coords.latitude*1e5)/1e5,lo:Math.round(pos.coords.longitude*1e5)/1e5,acc:Math.round(pos.coords.accuracy||0),n:''};
+    geo[which]=g;saveGeo();geoMsg('');renderParsed();
+    placeName(g.la,g.lo).then(n=>{
+      g.n=n||'';g.fail=!n;
+      if(geo[which]===g){saveGeo();renderParsed();if(!n)geoMsg('地名を取得できませんでした。位置（緯度・経度）だけ記録します。場所は話すか、あとから直せます。')}
+      else if(n&&g.tid){const d=days[g.day],t=d&&d.trips.find(x=>x.id===g.tid);if(t&&!t[which]){t[which]=n;persist(g.day);render()}}
+    });
+  },err=>{
+    geoMsg(err&&err.code===1?'位置情報が許可されていません。iPhoneの「設定」→「プライバシーとセキュリティ」→「位置情報サービス」でSafariを「使用中のみ」にしてください。':err&&err.code===3?'位置の取得に時間がかかりすぎました。空の見える場所でもう一度お試しください。':'位置を取得できませんでした。場所は話して入れてください。');
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:3000});
+}
+async function soloSave(o){
+  const type=/\.json$/.test(o.filename)?'application/json':'text/csv',blob=new Blob([o.data],{type:type});
+  try{const f=new File([blob],o.filename,{type:type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}
+  catch(e){if(e&&e.name==='AbortError')throw {code:'declined'}}
+  const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);
+}
+const docId=date=>'d'+date.replace(/-/g,'');
+function setSync(t){$('sync').textContent=t}
+function persist(date){
+  saveLocal();
+  dirty.add(date);saveDirty();
+  if(!col)return;
+  if(queued[date])return;
+  queued[date]=true;setSync('保存中…');
+  chains[date]=(chains[date]||Promise.resolve()).then(()=>{
+    queued[date]=false;
+    const body=JSON.parse(JSON.stringify(days[date]));
+    return col.doc(docId(date)).set(body).then(()=>{if(!queued[date]){dirty.delete(date);saveDirty()}if(!dirty.size)setSync('Claudeに保存済み（他の端末でも同じ記録が見られます）')});
+  }).catch(()=>{setSync('通信できません。この端末には保存済みで、つながったときに自動で送り直します')});
+}
+async function initCloud(){
+  if(!(window.claude&&window.claude.use))return;
+  try{
+    const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+    if(!db)return;
+    if(!user)return;
+    const id=await user.id();
+    if(!id)return;
+    col=db.collection('data/users/'+id);
+    setSync('記録を読み込み中…');
+    const timer=setTimeout(()=>setSync('まだ読み込めていません。この端末の記録を表示しています'),10000);
+    col.onSnapshot(snap=>{
+      const remote={};
+      let rs=null;snap.docs.forEach(d=>{const b=d.data();if(b&&b.type==='settings')rs=b;if(b&&b.type==='day'&&/^\d{4}-\d\d-\d\d$/.test(b.date||''))remote[b.date]=JSON.parse(JSON.stringify(b))});
+      if(rs&&!settingsDirty){settings={dayGoal:rs.dayGoal||null,monthGoal:rs.monthGoal||null,breakGoal:rs.breakGoal||null};try{localStorage.setItem(LSS,JSON.stringify(settings))}catch(e){}}
+      for(const k in remote)if(!dirty.has(k))days[k]=remote[k];
+      if(!snap.metadata.fromCache){
+        clearTimeout(timer);
+        if(!firstSync){firstSync=true;if(!rs&&(settings.dayGoal||settings.monthGoal||settings.breakGoal))saveSettings();for(const k in days)if(!(k in remote)&&hasContent(days[k]))persist(k);resend();if(!navigated){cur=defaultDate();autoDate=cur}}
+        if(!dirty.size)setSync('Claudeに保存済み（他の端末でも同じ記録が見られます）');
+      }
+      saveLocal();render();
+    },()=>{clearTimeout(timer);col=null;setSync('この端末に保存しています')});
+  }catch(e){col=null}
+}
+
+/* ---------- state ---------- */
+function defaultDate(){
+  const now=new Date(),t=ymd(now),y=shift(t,-1),dy=days[y];
+  /* A shift that runs past midnight stays on the day it started, but only while its last activity (出庫, a ride, a break) is recent:
+     after a rest of 8 hours or more the next morning opens on its own day even if 帰庫 was never entered. */
+  if(now.getHours()<12&&dy&&!dy.endTime&&!(days[t]&&hasContent(days[t]))){
+    const last=Math.max((dy.trips||[]).reduce((m,x)=>Math.max(m,x.ts||0),0),dy.startTs||0,(Array.isArray(dy.breaks)?dy.breaks:[]).reduce((m,x)=>Math.max(m,x.ts||0),0));
+    if(last&&Date.now()-last<8*3600e3)return y;
+  }
+  return t;
+}
+let listDay,listMonth,listRows=[],cellEd=null,editDate=null,curYear,curQ=0,pendMonth=null,cur,curMonth,payOverride=null,segOverride=null,srcOverride=null,cmd=null,parsed=parseSay(''),editing=null,lastAdded=null,toastTimer=null,dict=null;
+function sortKey(d,tr){let m=mins(tr.t);const base=d.startTime?mins(d.startTime):300;if(m<base)m+=1440;return m*100000+((tr.ts||0)%100000)/1}
+function sorted(d){return d.trips.slice().sort((a,b)=>sortKey(d,a)-sortKey(d,b))}
+function totals(trips){const o={sum:0,n:trips.length,toll:0,km:0,pay:{}};trips.forEach(t=>{o.sum+=t.fare||0;o.toll+=t.toll||0;o.km+=t.km||0;o.pay[t.pay]=(o.pay[t.pay]||0)+(t.fare||0)});return o}
+const paysHtml=p=>PAYS.filter(x=>p[x[0]]).map(x=>'<span>'+x[1]+'<b>'+yen(p[x[0]])+'</b></span>').join('');
+
+/* Shrink a headline figure until it fits its panel: a seven-digit total must not run off a narrow screen. */
+function fitBig(id){
+  const big=$(id).parentElement;big.style.fontSize='';
+  let fs=parseFloat(getComputedStyle(big).fontSize)||48;
+  for(let i=0;i<24&&big.scrollWidth>big.clientWidth+1&&fs>24;i++){fs-=2;big.style.fontSize=fs+'px'}
+}
+function goalUI(pfx,goal,sum){
+  const g=$(pfx+'-goal'),b=$(pfx+'-setgoal');
+  if(!(goal>0)){g.hidden=true;b.hidden=false;return}
+  g.hidden=false;b.hidden=true;
+  const pct=Math.round(sum/goal*100),bar=$(pfx+'-goal-bar');
+  bar.style.width=Math.min(100,pct)+'%';bar.classList.toggle('done',sum>=goal);
+  $(pfx+'-goal-l').textContent='目標 '+yen(goal)+'（'+pct+'%）';
+  $(pfx+'-goal-r').textContent=sum>=goal?'達成　+'+yen(sum-goal):'あと '+yen(goal-sum);
+}
+/* ---------- render ---------- */
+const anyTrip=()=>Object.keys(days).some(k=>days[k]&&days[k].trips&&days[k].trips.length);
+function render(){renderDay();renderMonth();renderYear();renderList();if(!helpTouched)$('help').open=!anyTrip()}
+/* When the page comes back to the front on a new day, move to that day's report, unless the driver is in the middle of something. */
+function followDate(){
+  const dd=defaultDate();
+  /* on a day the driver chose to open: only keep track of what today's sheet would be */
+  if(cur!==autoDate){if(dd!==autoDate){autoDate=dd;render()}return}
+  if(dd===cur)return;
+  /* move to the new day once nothing is half entered; until then stay, and try again on the next check */
+  if(!$('say').value&&!$('p-fare').value&&!$('p-t1').value&&!$('p-o1').value&&!$('p-o2').value&&!shAsk&&!openBreak()&&$('ov').hidden&&$('rv').hidden&&!$('meta').open&&!$('bk').open){cur=dd;curMonth=cur.slice(0,7);autoDate=dd}
+  render();
+}
+/* The 記録 button sits below the chips; when it is off screen and there is something to record, the same button rides at the bottom edge. */
+function syncBar(){
+  const gb=$('go'),bar=$('bar');
+  let on=!gb.disabled&&$('ov').hidden&&$('rv').hidden&&!$('v-day').hidden;
+  if(on){const r=gb.getBoundingClientRect();on=!(r.top>=0&&r.bottom<=window.innerHeight)}
+  bar.hidden=!on;document.body.classList.toggle('hasbar',on);
+  if(!on)return;
+  const cd=fromYmd(cur),other=cur!==defaultDate()?(cd.getMonth()+1)+'/'+cd.getDate()+'分　':'';
+  $('bar-go').textContent=gb.textContent;
+  if(cmd){
+    const t=cmd.target;$('bar-fare').textContent=t?'¥'+yen(t.fare):'';
+    $('bar-sum').textContent=other+(t?t.t+'　':'')+(cmd.cmd==='undo'?'この記録を取り消します':(cmd.ch?cmd.ch.list.join('、'):''));
+  }else{
+    const p=payOverride||parsed.pay||'cash',rt=(parsed.from||parsed.to)?(parsed.from||'—')+(parsed.to?' → '+parsed.to:''):'場所なし';
+    const k=curKm();$('bar-fare').textContent='¥'+yen(curFare());$('bar-sum').textContent=other+rt+'　'+PAYNAME[p]+(k!=null?'　'+k+'km':'');
+  }
+}
+function renderDay(){
+  const d=days[cur]||{trips:[]},dt=fromYmd(cur),T=totals(d.trips||[]);
+  $('dlabel').textContent=(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）';
+  $('today').hidden=cur===ymd(new Date());
+  {const off=cur!==defaultDate();$('daywarn').hidden=!off;if(off)$('daywarn-t').textContent='いま開いているのは'+$('dlabel').textContent+'の日報です。記録はこの日に入ります。'}
+  $('m-total').textContent=yen(T.sum);fitBig('m-total');$('m-count').textContent=T.n;
+  $('m-avg').textContent=yen(T.n?T.sum/T.n:0);$('m-net').textContent=yen(T.sum/1.1);
+  goalUI('m',settings.dayGoal,T.sum);
+  {const g=settings.dayGoal;$('sb-total').textContent='¥'+yen(T.sum);$('sb-sub').textContent=T.n+'回'+(g>0?(T.sum>=g?'　目標達成':'　目標まであと '+yen(g-T.sum)):'')}
+  $('m-pays').innerHTML=paysHtml(T.pay)+(T.toll?'<span>高速代<b>'+yen(T.toll)+'</b></span>':'');
+  {const mb=$('m-more');mb.hidden=!T.n;mb.setAttribute('aria-expanded',String(ui.pays));mb.textContent=ui.pays?'内訳を閉じる':'内訳を見る';$('m-pays').hidden=!T.n||!ui.pays}
+  let hours=null;
+  if(d.startTime){
+    let e=d.endTime?mins(d.endTime):(cur===ymd(new Date())||cur===shift(ymd(new Date()),-1)?mins(nowHM()):null);
+    if(e!=null){let s=mins(d.startTime);if(e<s)e+=1440;hours=(e-s)/60}
+  }
+  $('m-hour-w').hidden=!(hours&&T.sum);if(hours&&T.sum)$('m-hour').textContent=yen(T.sum/hours);
+  $('m-km-w').hidden=!T.km;$('m-km').textContent=Math.round(T.km*10)/10;
+  const bm=brkTotal(cur);$('m-brk-w').hidden=!bm;$('m-brk').textContent=hmTxt(bm);
+  $('l-count').textContent=T.n?T.n+'回':'';$('l-tip').hidden=!T.n;
+  const w=$('listwrap'),EMD=emptyKm(d),ES=sumVals(EMD);
+  if(!T.n){
+    w.innerHTML='<div class="blank"><b>この日の記録はまだありません</b><span>話した内容から料金・乗車地・降車地・支払方法・客層を読み取って記録します。天気は「時刻・客層・きっかけ・天気」を開いて選べます。下の例を押すと、読み取り方を試せます。</span>'+
+      ['新宿駅から渋谷まで 2400円 カード','東京駅から羽田空港 8900円 高速1320円 2名','迎車 六本木から恵比寿 三千円 ペイペイ 観光客'].map(x=>'<button class="ex" data-ex="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>';
+  }else{
+    w.innerHTML='<ul class="list">'+sorted(d).reverse().map(t=>{
+      const route=(t.from||t.to)?esc(t.from||'—')+(t.to?'<i>→</i>'+esc(t.to):''):'<span style="color:var(--muted);font-weight:400">場所なし</span>';
+      return '<li><button class="trip" data-id="'+esc(t.id)+'"><span class="t">'+esc(t.t)+'</span><span class="r">'+route+'</span><span class="f">'+yen(t.fare)+'</span><span class="m">'+(t.tin||t.tout?'<span>'+esc(t.tin||'—')+'→'+esc(t.tout||'—')+'</span>':'')+'<span>'+esc(PAYNAME[t.pay]||'現金')+'</span>'+(t.seg&&SEGNAME[t.seg]?'<span>'+SEGNAME[t.seg]+'</span>':'')+(t.src&&SRCNAME[t.src]?'<span>'+SRCNAME[t.src]+'</span>':'')+(t.pax>1?'<span>'+t.pax+'名</span>':'')+(t.km!=null?'<span>'+esc(t.km)+'km</span>':'')+(EMD[t.id]!=null?'<span>空車 '+EMD[t.id]+'km</span>':'')+(t.wx&&t.wx.w?'<span>'+esc(t.wx.w)+'</span>':'')+(t.mukae?'<span class="tag">迎車</span>':'')+(t.toll?'<span class="tag">高速 '+yen(t.toll)+'</span>':'')+(t.note?'<span>'+esc(t.note)+'</span>':'')+'</span></button></li>';
+    }).join('')+'</ul>';
+  }
+  const set=(id,v)=>{const el=$(id);if(document.activeElement!==el)el.value=v==null?'':v};
+  set('f-start',d.startTime);set('f-end',d.endTime);set('f-odo1',d.odoStart);set('f-odo2',d.odoEnd);set('f-goal-d',settings.dayGoal);set('f-goal-m',settings.monthGoal);set('f-goal-b',settings.breakGoal);
+  const km=(d.odoStart!=null&&d.odoEnd!=null&&d.odoEnd>=d.odoStart)?d.odoEnd-d.odoStart:null;
+  $('meta-kv').innerHTML=(hours?'<span>乗務時間<b>'+hours.toFixed(1)+'</b> 時間</span>':'')+(km!=null?'<span>走行<b>'+yen(km)+'</b> km</span>':'')+(km&&T.sum?'<span>1kmあたり<b>'+yen(T.sum/km)+'</b> 円</span>':'')+(T.km?'<span>実車<b>'+(Math.round(T.km*10)/10)+'</b> km</span>':'')+(km&&T.km?'<span>実車率<b>'+Math.round(T.km/km*100)+'</b> %</span>':'')+(ES?'<span>空車<b>'+fmtO(ES)+'</b> km</span>':'')+(bm?'<span>休憩<b>'+hmTxt(bm)+'</b></span>':'')+(bm&&settings.breakGoal>0?'<span>休憩の目標<b>'+(bm>=settings.breakGoal?'達成':'あと '+hmTxt(settings.breakGoal-bm))+'</b></span>':'')+(hours&&bm?'<span>休憩を除く乗務<b>'+Math.max(0,(hours*60-bm)/60).toFixed(1)+'</b> 時間</span>':'');
+  renderBreaks();renderShift();bkInfo();
+  $('m-rate-w').hidden=!(km&&T.km);if(km&&T.km)$('m-rate').textContent=Math.round(T.km/km*100)+'%';
+  $('meta-sum').textContent=d.startTime?('出庫 '+d.startTime+(d.endTime?' ／ 帰庫 '+d.endTime:'')):'出庫・帰庫・メーター';
+  renderRide();syncBar();
+}
+const topTip=h=>h.indexOf(' best"')>=0?'<div class="hint"><span>緑の数字は、単価がいちばん高い行です。</span></div>':'';
+function group(all,keyf){const g={};all.forEach(t=>{const k=keyf(t);if(!k)return;g[k]=g[k]||{n:0,sum:0};g[k].n++;g[k].sum+=t.fare||0});return g}
+function gtable(title,g,order){const ks=order?order.filter(k=>g[k]):Object.keys(g).sort((a,b)=>g[b].sum-g[a].sum);if(!ks.length)return '';let best=null;if(ks.length>1)ks.forEach(k=>{if(best==null||g[k].sum/g[k].n>g[best].sum/g[best].n)best=k});return '<table class="mtable"><thead><tr><th>'+title+'</th><th>回数</th><th>単価</th><th>営収</th></tr></thead><tbody>'+ks.map(k=>'<tr><td class="pl">'+esc(k)+'</td><td class="n pl">'+g[k].n+'</td><td class="n pl'+(k===best?' best':'')+'">'+yen(g[k].sum/g[k].n)+'</td><td class="n pl">'+yen(g[k].sum)+'</td></tr>').join('')+'</tbody></table>'}
+function monthDays(ym){return Object.keys(days).filter(k=>k.slice(0,ym.length)===ym&&days[k].trips&&days[k].trips.length).sort()}
+/* 1出番の実車率 = その日の乗車距離の合計 ÷ メーターの走行距離（帰庫−出庫）。どちらかが無い日は出さない */
+function dayRate(k){const d=days[k];if(!d)return null;const run=(d.odoStart!=null&&d.odoEnd!=null)?d.odoEnd-d.odoStart:0,tk=totals(d.trips||[]).km;return run>0&&tk>0?Math.round(tk/run*100):null}
+/* Comparison and trend helpers shared by 月集計 and 年集計. */
+const keysIn=(a,b)=>Object.keys(days).filter(k=>k>=a&&k<=b&&days[k].trips&&days[k].trips.length).sort();
+function statOf(ks){let tr=[];ks.forEach(k=>{tr=tr.concat(days[k].trips)});const T=totals(tr);return {sum:T.sum,n:T.n,d:ks.length,km:Math.round(T.km*10)/10}}
+function cmpHtml(title,curL,prevL,A,B,note){
+  if(!A.n&&!B.n)return '';
+  const rows=[['営収',A.sum,B.sum],['出番',A.d,B.d],['回数',A.n,B.n],['単価',A.n?A.sum/A.n:0,B.n?B.sum/B.n:0],['1出番平均',A.d?A.sum/A.d:0,B.d?B.sum/B.d:0]].concat(A.km||B.km?[['実車km',A.km,B.km,1]]:[]);
+  const f=(v,dec)=>dec?fmtO(Math.round(v*10)/10):yen(v);
+  return '<table class="mtable cmp"><thead><tr><th>'+esc(title)+'</th><th>'+esc(curL)+'</th><th>'+esc(prevL)+'</th><th>増減</th></tr></thead><tbody>'+rows.map(r=>{
+    const d=Math.round((r[1]-r[2])*10)/10,pc=r[2]?Math.round((r[1]-r[2])/r[2]*100):null,sg=d>0?'+':d<0?'−':'±';
+    return '<tr><td class="pl">'+r[0]+'</td><td class="n pl">'+f(r[1],r[3])+'</td><td class="n pl">'+(B.n?f(r[2],r[3]):'—')+'</td><td class="n pl '+(B.n?(d>0?'up':d<0?'down':''):'')+'">'+(B.n?sg+f(Math.abs(d),r[3])+(pc!=null&&d!==0?'<small>'+(pc>0?'+':pc<0?'−':'±')+Math.abs(pc)+'%</small>':''):'—')+'</td></tr>';
+  }).join('')+'</tbody></table><div class="hint"><span>'+(B.n?(note||''):esc(prevL)+'の記録がないため、増減は出していません。')+'</span></div>';
+}
+/* items: [{l: axis label, a: this period, b: the period before (or null), t: full name}] — one scale for both series, bars start at zero */
+function barChart(items,two,desc){
+  const W=340,H=176,L=36,R=4,T=10,B=22,n=items.length;if(!n)return '';
+  let max=1;items.forEach(x=>{max=Math.max(max,x.a||0,two?(x.b||0):0)});
+  const raw=max/3,pw=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/pw,step=Math.max(1000,(m<=1?1:m<=2?2:m<=5?5:10)*pw),top=step*Math.ceil(max/step);
+  const y=v=>T+(H-T-B)*(1-v/top),band=(W-L-R)/n,ax=v=>v>=10000?(Math.round(v/1000)/10)+'万':yen(v);
+  let g='';for(let v=0;v<=top+1;v+=step)g+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/><text x="'+(L-5)+'" y="'+(y(v)+3.5).toFixed(1)+'" text-anchor="end">'+ax(v)+'</text>';
+  const bw=two?Math.max(2,Math.min(13,band*0.36)):Math.max(3,Math.min(22,band*0.62)),every=Math.ceil(n/12);
+  const bar=(x,v,cls,tt)=>v>0?'<rect class="'+cls+'" x="'+x.toFixed(1)+'" y="'+y(v).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,y(0)-y(v)).toFixed(1)+'" rx="2"><title>'+esc(tt)+' '+yen(v)+'円</title></rect>':'';
+  items.forEach((it,i)=>{
+    const cx=L+band*(i+.5);
+    g+=two?bar(cx-bw-0.5,it.b||0,'bb',(it.t||it.l)+' 前回')+bar(cx+0.5,it.a||0,'ba',(it.t||it.l)+' 今回'):bar(cx-bw/2,it.a||0,'ba',it.t||it.l);
+    if(i%every===0)g+='<text x="'+cx.toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle">'+esc(it.l)+'</text>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(desc)+'">'+g+'</svg>';
+}
+function renderMonth(){
+  const a=curMonth.split('-');$('mlabel').textContent=a[0]+'年'+(+a[1])+'月';
+  const ks=monthDays(curMonth);let all=[];ks.forEach(k=>all=all.concat(days[k].trips));
+  const T=totals(all);
+  $('mm-total').textContent=yen(T.sum);fitBig('mm-total');$('mm-days').textContent=ks.length;$('mm-count').textContent=T.n;
+  $('mm-avg').textContent=yen(ks.length?T.sum/ks.length:0);$('mm-net').textContent=yen(T.sum/1.1);
+  $('mm-pays').innerHTML=paysHtml(T.pay);
+  goalUI('mm',settings.monthGoal,T.sum);
+  {/* this month against the month before; while the month is still running, the month before is cut at the same day */
+   const t=ymd(new Date()),live=t.slice(0,7)===curMonth,pd=new Date(+a[0],+a[1]-2,1),pym=pd.getFullYear()+'-'+pad(pd.getMonth()+1);
+   const A=statOf(keysIn(curMonth+'-01',live?t:curMonth+'-31')),B=statOf(keysIn(pym+'-01',live?pym+'-'+t.slice(8):pym+'-31'));
+   const ch=cmpHtml('前月との比較',(+a[1])+'月',(+pym.slice(5))+'月',A,B,live?'今月はまだ途中のため、前月も'+(+t.slice(8))+'日までの分で比べています。':'');
+   $('m-cmp').innerHTML=ch;$('m-cmp').hidden=!ch;
+   const items=ks.map(k=>({l:String(+k.slice(8)),t:(+k.slice(5,7))+'月'+(+k.slice(8))+'日',a:totals(days[k].trips).sum}));
+   $('m-trend').hidden=items.length<2;
+   $('m-trend').innerHTML=items.length<2?'':'<div class="ctitle">出番ごとの営収の推移</div>'+barChart(items,false,(+a[1])+'月の出番ごとの営収')+'<div class="hint"><span>横は日付、縦は営収（税込）です。出番のあった日だけを並べています。</span></div>';
+  }
+  $('mm-km-w').hidden=!T.km;$('mm-km').textContent=Math.round(T.km*10)/10;
+  {let bm=0;ks.forEach(k=>{bm+=brkTotal(k)});$('mm-brk-w').hidden=!bm;$('mm-brk').textContent=hmTxt(bm)}
+  {let rk=0,rd=0;ks.forEach(k=>{const d=days[k],km=(d.odoStart!=null&&d.odoEnd!=null)?d.odoEnd-d.odoStart:0,tk=totals(d.trips).km;if(km>0&&tk>0){rk+=tk;rd+=km}});$('mm-rate-w').hidden=!rd;if(rd)$('mm-rate').textContent=Math.round(rk/rd*100)+'%'}
+  {const gh={},gw={};ks.forEach(k=>{const wk=WD[fromYmd(k).getDay()]+'曜';days[k].trips.forEach(t=>{const hk=(+String(t.t||'0').slice(0,2))+'時台';[[gh,hk],[gw,wk]].forEach(([g,key])=>{g[key]=g[key]||{n:0,sum:0};g[key].n++;g[key].sum+=t.fare||0})})});
+   const ho=[];for(let i=5;i<29;i++)ho.push((i%24)+'時台');
+   const h=gtable('時間帯別',gh,ho)+gtable('曜日別',gw,['月曜','火曜','水曜','木曜','金曜','土曜','日曜']);const rt=rateTable(ks,ho);$('timecard').innerHTML=h+topTip(h)+rt;$('timecard').hidden=!(h||rt)}
+  {const h=gtable('客層別',group(all,t=>SEGNAME[t.seg]))+gtable('きっかけ別',group(all,t=>SRCNAME[t.src]))+gtable('天気別',group(all,t=>t.wx&&t.wx.w));$('segcard').innerHTML=h+topTip(h);$('segcard').hidden=!h}
+  $('mcard').innerHTML=ks.length?'<table class="mtable c6"><thead><tr><th>日付</th><th>回数</th><th>距離km</th><th>単価</th><th>営収</th><th>実車率</th></tr></thead><tbody>'+ks.map(k=>{
+    const t=totals(days[k].trips),dt=fromYmd(k),r=dayRate(k);
+    return '<tr class="'+(dt.getDay()===0?'sun':'')+'"><td><button data-go="'+k+'">'+dt.getDate()+'日('+WD[dt.getDay()]+')</button></td><td class="n"><button data-go="'+k+'">'+t.n+'</button></td><td class="n"><button data-go="'+k+'">'+(t.km?Math.round(t.km*10)/10:'')+'</button></td><td class="n"><button data-go="'+k+'">'+yen(t.sum/t.n)+'</button></td><td class="n"><button data-go="'+k+'">'+yen(t.sum)+'</button></td><td class="n"><button data-go="'+k+'">'+(r==null?'':r+'%')+'</button></td></tr>';
+  }).join('')+'</tbody></table><div class="hint"><span>日付を押すと、その日の日報を開きます。距離は、乗車ごとに記録した距離のその日の合計です。実車率は、その距離をメーターの走行距離（帰庫−出庫）で割ったもので、出庫・帰庫メーターを入れた日だけ出ます。</span></div>':'<div class="hint"><span>この月の記録はまだありません。日報で乗車を記録すると、ここに日ごとの営収が並びます。</span></div>';
+}
+const QN=['年間','1〜3月','4〜6月','7〜9月','10〜12月'];
+const qMonths=q=>q?[q*3-2,q*3-1,q*3]:[1,2,3,4,5,6,7,8,9,10,11,12];
+/* 年集計 works on one of three kinds of period: a calendar year (1〜12月), a fiscal year (4月〜翌3月), or any two dates. */
+const LSY='taxi-nippo-yr-v1',YMODES=[['cal','年（1〜12月）'],['fy','年度（4〜翌3月）'],['range','期間を指定']],QNF=['年度','4〜6月','7〜9月','10〜12月','翌1〜3月'];
+let yMode='cal',yFrom='',yTo='';
+try{const j=JSON.parse(localStorage.getItem(LSY)||'null');if(j&&typeof j==='object'){if(YMODES.some(x=>x[0]===j.mode))yMode=j.mode;if(/^\d{4}-\d\d-\d\d$/.test(j.from||''))yFrom=j.from;if(/^\d{4}-\d\d-\d\d$/.test(j.to||''))yTo=j.to}}catch(e){}
+const saveY=()=>{try{localStorage.setItem(LSY,JSON.stringify({mode:yMode,from:yFrom,to:yTo}))}catch(e){}};
+const fyOf=ym=>String(+ym.slice(0,4)-(+ym.slice(5,7)<4?1:0));
+const yRangeOk=()=>!!yFrom&&!!yTo&&yFrom<=yTo;
+const qName=q=>(yMode==='fy'?QNF:QN)[q];
+/* the months (YYYY-MM) of the chosen period, in order; q picks one quarter of a year or fiscal year */
+function yMonths(q){
+  if(yMode==='range'){
+    const out=[];if(!yRangeOk())return out;
+    let y=+yFrom.slice(0,4),m=+yFrom.slice(5,7);const end=yTo.slice(0,7);
+    for(let i=0;i<600;i++){const ym=y+'-'+pad(m);if(ym>end)break;out.push(ym);m++;if(m>12){m=1;y++}}
+    return out;
+  }
+  if(yMode==='fy'){const f=[4,5,6,7,8,9,10,11,12].map(i=>curYear+'-'+pad(i)).concat([1,2,3].map(i=>(+curYear+1)+'-'+pad(i)));return q?f.slice(q*3-3,q*3):f}
+  return qMonths(q).map(i=>curYear+'-'+pad(i));
+}
+const yDaysOf=ym=>{const ks=monthDays(ym);return yMode==='range'?ks.filter(k=>k>=yFrom&&k<=yTo):ks};
+const yKeys=()=>{let ks=[];yMonths(yMode==='range'?0:curQ).forEach(ym=>{ks=ks.concat(yDaysOf(ym))});return ks};
+const yName=()=>yMode==='range'?slash(yFrom).replace(/\//g,'')+'-'+slash(yTo).replace(/\//g,''):curYear+(yMode==='fy'?'年度':'年')+(curQ?'_'+qName(curQ):'');
+function renderYear(){
+  const rg=yMode==='range',q=rg?0:curQ;
+  $('ymode').innerHTML=YMODES.map(x=>'<button type="button" class="chip" data-ym="'+x[0]+'" aria-pressed="'+(x[0]===yMode)+'">'+x[1]+'</button>').join('');
+  $('yrange').hidden=!rg;$('ybar').hidden=rg;$('yq').hidden=rg;$('yqcard').hidden=rg;
+  if(rg){
+    if(!yFrom||!yTo){const t=ymd(new Date());yFrom=yFrom||t.slice(0,8)+'01';yTo=yTo||t}
+    if(document.activeElement!==$('y-from'))$('y-from').value=yFrom;
+    if(document.activeElement!==$('y-to'))$('y-to').value=yTo;
+    $('yrange-h').textContent=yRangeOk()?slash(yFrom)+' 〜 '+slash(yTo)+' の '+(Math.round((fromYmd(yTo)-fromYmd(yFrom))/86400000)+1)+'日間を集計しています。':'開始日が終了日よりあとになっています。日付を直してください。';
+  }
+  $('ylabel').textContent=curYear+(yMode==='fy'?'年度':'年');
+  $('yprev').setAttribute('aria-label',yMode==='fy'?'前の年度':'前の年');$('ynext').setAttribute('aria-label',yMode==='fy'?'次の年度':'次の年');
+  $('yq').innerHTML=(yMode==='fy'?QNF:QN).map((x,i)=>'<button class="chip" data-q="'+i+'" aria-pressed="'+(i===q)+'">'+x+'</button>').join('');
+  $('y-lab').textContent=(rg?'期間の営収':q?qName(q)+'の営収':yMode==='fy'?'年度の営収':'年間営収')+'（税込）';
+  const sum=ms=>{const o={d:0,tr:[]};ms.forEach(ym=>{const ks=yDaysOf(ym);o.d+=ks.length;ks.forEach(k=>{o.tr=o.tr.concat(days[k].trips)})});o.t=totals(o.tr);return o};
+  if(!rg){const qs=[1,2,3,4].map(i=>({q:i,o:sum(yMonths(i))})).filter(x=>x.o.d);
+   $('yqcard').innerHTML=qs.length?'<table class="mtable"><thead><tr><th>四半期</th><th>出番</th><th>回数</th><th>営収</th></tr></thead><tbody>'+qs.map(x=>{
+     const b='<button data-q="'+x.q+'">';
+     return '<tr class="'+(x.q===q?'sel':'')+'"><td>'+b+qName(x.q)+'</button></td><td class="n">'+b+x.o.d+'</button></td><td class="n">'+b+x.o.t.n+'</button></td><td class="n">'+b+yen(x.o.t.sum)+'</button></td></tr>';
+   }).join('')+'</tbody></table><div class="hint"><span>四半期を押すと、その3か月だけの集計に切り替わります。もう一度押すと'+(yMode==='fy'?'年度':'年間')+'に戻ります。</span></div>':'<div class="hint"><span>この'+(yMode==='fy'?'年度':'年')+'の記録はまだありません。</span></div>'}
+  const ms=[],gw={};let all=[],nd=0;const yms=yMonths(q),multi=yms.length&&yms[0].slice(0,4)!==yms[yms.length-1].slice(0,4);
+  yms.forEach(ym=>{
+    const ks=yDaysOf(ym);if(!ks.length)return;
+    let tr=[];ks.forEach(k=>{tr=tr.concat(days[k].trips);const wk=WD[fromYmd(k).getDay()]+'曜';days[k].trips.forEach(t=>{gw[wk]=gw[wk]||{n:0,sum:0};gw[wk].n++;gw[wk].sum+=t.fare||0})});
+    const t=totals(tr);ms.push({ym:ym,l:(multi?ym.slice(0,4)+'年':'')+(+ym.slice(5))+'月',d:ks.length,n:t.n,sum:t.sum});all=all.concat(tr);nd+=ks.length;
+  });
+  const T=totals(all);
+  $('y-total').textContent=yen(T.sum);fitBig('y-total');$('y-days').textContent=nd;$('y-count').textContent=T.n;
+  $('y-mavg').textContent=yen(ms.length?T.sum/ms.length:0);$('y-avg').textContent=yen(nd?T.sum/nd:0);$('y-net').textContent=yen(T.sum/1.1);
+  $('y-pays').innerHTML=paysHtml(T.pay);
+  $('y-km-w').hidden=!T.km;$('y-km').textContent=Math.round(T.km*10)/10;
+  $('ycard').innerHTML=ms.length?'<table class="mtable"><thead><tr><th>月</th><th>出番</th><th>回数</th><th>営収</th></tr></thead><tbody>'+ms.map(m=>{
+    const b='<button data-ym="'+m.ym+'">';
+    return '<tr><td>'+b+m.l+'</button></td><td class="n">'+b+m.d+'</button></td><td class="n">'+b+m.n+'</button></td><td class="n">'+b+yen(m.sum)+'</button></td></tr>';
+  }).join('')+'</tbody></table><div class="hint"><span>月を押すと、その月の集計を開きます。'+(rg?'期間の途中から始まる月・途中で終わる月は、期間に入る日だけを数えています。':'')+'</span></div>':'<div class="hint"><span>'+(rg?'この期間':q?'この四半期':yMode==='fy'?'この年度':'この年')+'の記録はまだありません。</span></div>';
+  const h=gtable('曜日別',gw,['月曜','火曜','水曜','木曜','金曜','土曜','日曜'])+gtable('客層別',group(all,t=>SEGNAME[t.seg]))+gtable('きっかけ別',group(all,t=>SRCNAME[t.src]))+gtable('天気別',group(all,t=>t.wx&&t.wx.w));
+  {/* the chosen period against the one before it: the year or fiscal year before (cut at the same day while this one is running), or the same number of days just before a chosen range */
+   const t=ymd(new Date());let from='',to='',pF='',pT='',curL='',prevL='',note='';
+   if(rg){if(yRangeOk()){const len=Math.round((fromYmd(yTo)-fromYmd(yFrom))/86400000)+1;from=yFrom;to=yTo;pT=shift(yFrom,-1);pF=shift(pT,-(len-1));curL='この期間';prevL='直前の'+len+'日';note='比べているのは '+slash(pF)+' 〜 '+slash(pT)+' です。'}}
+   else if(yms.length){
+     from=yms[0]+'-01';to=yms[yms.length-1]+'-31';const live=t>=from&&t<=to;if(live)to=t;
+     const py=k=>(+k.slice(0,4)-1)+k.slice(4);pF=py(from);pT=py(to);
+     curL=q?qName(q):curYear+(yMode==='fy'?'年度':'年');prevL=(yMode==='fy'?'前年度':'前年')+(q?'の同期':'');
+     note=live?'この期間はまだ途中のため、'+prevL+'も同じ日（'+(+t.slice(5,7))+'月'+(+t.slice(8))+'日）までの分で比べています。':'';
+   }
+   const ch=from?cmpHtml('前の期間との比較',curL,prevL,statOf(keysIn(from,to)),statOf(keysIn(pF,pT)),note):'';
+   $('y-cmp').innerHTML=ch;$('y-cmp').hidden=!ch;
+   const mSum=ks=>{let v=0;ks.forEach(k=>{days[k].trips.forEach(x=>{v+=x.fare||0})});return v};
+   const items=yms.map(ym=>({l:String(+ym.slice(5)),t:ym.slice(0,4)+'年'+(+ym.slice(5))+'月',a:mSum(yDaysOf(ym)),b:rg?null:mSum(monthDays((+ym.slice(0,4)-1)+ym.slice(4)))}));
+   const two=!rg&&items.some(x=>x.b>0),show=items.length>1&&items.some(x=>x.a>0||x.b>0),pl=yMode==='fy'?'前年度':'前年';
+   $('y-trend').hidden=!show;
+   $('y-trend').innerHTML=!show?'':'<div class="ctitle">月ごとの営収の推移</div>'+(two?'<div class="lg"><span><i class="a"></i>'+(rg?'この期間':curYear+(yMode==='fy'?'年度':'年'))+'</span><span><i class="b"></i>'+pl+'の同じ月</span></div>':'')+barChart(items,two,'月ごとの営収'+(two?'と'+pl+'の同じ月':''))+'<div class="hint"><span>横は月、縦は営収（税込）です。'+(two?'薄い棒が'+pl+'の同じ月で、月全体の金額です。':'')+'</span></div>';
+  }
+  $('ygcard').innerHTML=h+topTip(h);$('ygcard').hidden=!h;
+}
+const LCOLS=[['tin','乗車時刻','n'],['tout','降車時刻','n'],['from','乗車地','pl'],['to','降車地','pl'],['fare','料金','n'],['pay','支払',''],['pax','人数','n'],['o1','乗車時km','n'],['o2','降車時km','n'],['empty','空車km','n'],['km','距離km','n'],['toll','高速代','n'],['mukae','迎車',''],['seg','客層',''],['src','きっかけ',''],['wx','天気',''],['note','メモ','pl']];
+function renderList(){
+  if($('v-list').hidden)return; /* built when the tab is opened, so recording on 日報 never pays for a long table */
+  const sc=ui.lscope;
+  $('lscope').innerHTML=[['day','1日分'],['month','1か月分']].map(x=>'<button class="chip" data-ls="'+x[0]+'" aria-pressed="'+(x[0]===sc)+'">'+x[1]+'</button>').join('');
+  let keys;
+  if(sc==='day'){const dt=fromYmd(listDay);$('llabel').textContent=(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）';keys=days[listDay]&&days[listDay].trips&&days[listDay].trips.length?[listDay]:[]}
+  else{const a=listMonth.split('-');$('llabel').textContent=a[0]+'年'+(+a[1])+'月';keys=monthDays(listMonth)}
+  const rows=[];keys.forEach(k=>sorted(days[k]).forEach((t,i)=>rows.push({k:k,t:t,first:i===0})));
+  listRows=rows.map(r=>({k:r.k,id:r.t.id}));
+  if(!rows.length){$('lcard').innerHTML='<div class="hint"><span>'+(sc==='day'?'この日':'この月')+'の乗車記録はまだありません。</span></div>';return}
+  const all=rows.map(r=>r.t),T=totals(all),cols=LCOLS;
+  const EM={};keys.forEach(k=>Object.assign(EM,emptyKm(days[k])));
+  const cell=(c,t)=>c==='empty'?(EM[t.id]!=null?EM[t.id]:''):c==='tin'||c==='tout'?esc(t[c]||''):c==='o1'||c==='o2'?(t[c]!=null?esc(t[c]):''):c==='from'?esc(t.from||'—'):c==='to'?esc(t.to||'—'):c==='fare'?yen(t.fare):c==='pay'?esc(PAYNAME[t.pay]||'現金'):c==='pax'?(t.pax||1):c==='km'?(t.km!=null?esc(t.km):''):c==='toll'?(t.toll?yen(t.toll):''):c==='mukae'?(t.mukae?'あり':''):c==='seg'?(SEGNAME[t.seg]||''):c==='src'?(SRCNAME[t.src]||''):c==='wx'?esc((t.wx&&t.wx.w)||''):esc(t.note||'');
+  const body=rows.map((r,i)=>{
+    const dt=fromYmd(r.k),lead=sc==='day'?String(i+1):(r.first?dt.getDate()+'日('+WD[dt.getDay()]+')':'');
+    return '<tr tabindex="0" data-id="'+esc(r.t.id)+'" data-date="'+r.k+'"'+(sc==='month'&&r.first?' class="dsep"':'')+'><td class="st" data-f="t"><small>'+lead+'</small><b>'+esc(r.t.t)+'</b></td>'+cols.map(c=>'<td class="'+c[2]+'" data-f="'+c[0]+'">'+cell(c[0],r.t)+'</td>').join('')+'</tr>';
+  }).join('');
+  const foot='<tr><td class="st">合計</td>'+cols.map(c=>'<td class="'+c[2]+'">'+(c[0]==='from'?T.n+'回':c[0]==='fare'?yen(T.sum):c[0]==='km'&&T.km?Math.round(T.km*10)/10:c[0]==='toll'&&T.toll?yen(T.toll):'')+'</td>').join('')+'</tr>';
+  $('lcard').innerHTML='<div class="kv"><span>回数<b>'+T.n+'</b></span><span>営収<b>'+yen(T.sum)+'</b></span>'+(T.km?'<span>実車<b>'+Math.round(T.km*10)/10+'</b> km</span>':'')+'</div>'+
+    '<div class="tscroll"><table class="ltable '+sc+'"><thead><tr><th class="st">'+(sc==='day'?'時刻':'日付・時刻')+'</th>'+cols.map(c=>'<th class="'+(c[2]==='n'?'n':'')+'">'+c[1]+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'+
+    '<div class="hint"><span>直したいマスを押すと、その項目だけ修正できます。空欄のマスも押せます。表は横に動かせます。</span></div>';
+  markCell();
+}
+/* ----- one-field editor for a table cell ----- */
+const LF={
+  t:{label:'時刻',kind:'time',get:t=>t.t||''},
+  tin:{label:'乗車時刻',kind:'time',get:t=>t.tin||''},
+  tout:{label:'降車時刻',kind:'time',get:t=>t.tout||''},
+  from:{label:'乗車地',kind:'text',get:t=>t.from||''},
+  to:{label:'降車地',kind:'text',get:t=>t.to||''},
+  fare:{label:'料金（円）',kind:'text',im:'numeric',get:t=>String(t.fare||'')},
+  pay:{label:'支払方法',kind:'choice',get:t=>t.pay||'cash',opts:()=>PAYS},
+  pax:{label:'人数',kind:'choice',get:t=>String(t.pax||1),opts:()=>[1,2,3,4,5,6,7,8,9].map(n=>[String(n),n+'名'])},
+  o1:{label:'乗車時メーター（km）',kind:'text',im:'decimal',get:t=>t.o1!=null?String(t.o1):''},
+  o2:{label:'降車時メーター（km）',kind:'text',im:'decimal',get:t=>t.o2!=null?String(t.o2):''},
+  km:{label:'距離（km）',kind:'text',im:'decimal',get:t=>t.km!=null?String(t.km):''},
+  toll:{label:'高速代（円）',kind:'text',im:'numeric',get:t=>t.toll?String(t.toll):''},
+  mukae:{label:'迎車',kind:'choice',get:t=>t.mukae?'1':'0',opts:()=>[['0','なし'],['1','あり']]},
+  seg:{label:'客層',kind:'choice',get:t=>t.seg||'',opts:()=>[['','未入力']].concat(SEGS)},
+  src:{label:'乗車のきっかけ',kind:'choice',get:t=>t.src||'',opts:()=>[['','未入力']].concat(SRCS)},
+  wx:{label:'天気',kind:'choice',get:t=>(t.wx&&t.wx.w)||'',opts:t=>{const w=(t.wx&&t.wx.w)||'';return [['','未入力']].concat((w&&!WXS.includes(w)?[w]:[]).concat(WXS).map(x=>[x,x]))}},
+  note:{label:'メモ',kind:'text',get:t=>t.note||''}
+};
+const digits=v=>{v=String(v==null?'':v).normalize('NFKC').replace(/[^\d]/g,'');return v===''?null:parseInt(v,10)};
+const curFare=()=>{const n=digits($('p-fare').value);return n!=null&&n>0?n:null};
+const cellTrip=c=>{const d=c&&days[c.date];return d&&d.trips?d.trips.find(x=>x.id===c.id):null};
+function applyCell(t,f,v){
+  if(f==='t'){if(!/^\d\d:\d\d/.test(v))return '時刻を入れてください';t.t=v.slice(0,5)}
+  else if(f==='tin'||f==='tout'){if(v&&!/^\d\d:\d\d/.test(v))return '時刻を入れてください';t[f]=v?v.slice(0,5):null;if(f==='tin'&&t.tin)t.t=t.tin}
+  else if(f==='from'||f==='to'||f==='note')t[f]=String(v).trim();
+  else if(f==='fare'){const n=digits(v);if(!(n>0))return '料金は1円以上の数字で入れてください';t.fare=n}
+  else if(f==='pay')t.pay=v;
+  else if(f==='pax')t.pax=Math.min(9,Math.max(1,digits(v)||1));
+  else if(f==='km'){if(String(v).trim()==='')t.km=null;else{const k=parseKm(v);if(k==null)return '距離は数字で入れてください（例：4.2）';t.km=k}}
+  else if(f==='o1'||f==='o2'){if(String(v).trim()==='')t[f]=null;else{const n=parseOdo(v);if(n==null)return 'メーターは数字で入れてください';t[f]=n}const df=odoDiff(t.o1,t.o2);if(df!=null)t.km=df}
+  else if(f==='toll')t.toll=digits(v)||0;
+  else if(f==='mukae')t.mukae=v==='1';
+  else if(f==='seg')t.seg=v;
+  else if(f==='src')t.src=v;
+  else if(f==='wx')t.wx=v?{w:v,t:(t.wx&&t.wx.w===v&&t.wx.t!=null)?t.wx.t:null}:null;
+  return '';
+}
+function markCell(){
+  document.querySelectorAll('.ltable td.sel').forEach(x=>x.classList.remove('sel'));
+  if(!cellEd)return null;
+  let td=null;document.querySelectorAll('.ltable tbody tr').forEach(r=>{if(r.dataset.id===cellEd.id&&r.dataset.date===cellEd.date)td=r.querySelector('td[data-f="'+cellEd.f+'"]')});
+  if(td)td.classList.add('sel');return td;
+}
+function openCell(date,id,f){
+  const F=LF[f],t=cellTrip({date:date,id:id});if(!F||!t)return;
+  cellEd={date:date,id:id,f:f};$('toast').hidden=true;
+  const dt=fromYmd(date),typed=F.kind!=='choice',inp=$('c-in'),i=listRows.findIndex(r=>r.k===date&&r.id===id);
+  $('c-h').textContent=F.label;
+  $('c-sub').textContent=(ui.lscope==='month'||date!==cur?(dt.getMonth()+1)+'月'+dt.getDate()+'日　':'')+t.t+'　'+((t.from||t.to)?(t.from||'—')+(t.to?' → '+t.to:''):'場所なし')+'　¥'+yen(t.fare);
+  $('c-err').hidden=true;inp.hidden=!typed;$('c-chips').hidden=typed;$('c-save').hidden=!typed;$('c-next').hidden=!typed||i<0||i>=listRows.length-1;
+  if(typed){inp.type=F.kind==='time'?'time':'text';inp.inputMode=F.im||'text';inp.value=F.get(t)}
+  else $('c-chips').innerHTML=F.opts(t).map(o=>'<button class="chip" data-v="'+esc(o[0])+'" aria-pressed="'+(String(o[0])===F.get(t))+'">'+esc(o[1])+'</button>').join('');
+  $('cv').classList.toggle('top',typed);$('cv').hidden=false;
+  const td=markCell();if(td)try{td.scrollIntoView({block:'center',inline:'center'})}catch(e){}
+  if(typed){inp.focus();try{inp.select()}catch(e){}}
+}
+function closeCell(){cellEd=null;$('cv').hidden=true;markCell()}
+function commitCell(v,next){
+  const c=cellEd,t=cellTrip(c);if(!c)return;if(!t){closeCell();return}
+  const err=applyCell(t,c.f,v);
+  if(err){const e=$('c-err');e.textContent=err;e.hidden=false;$('c-in').focus();return}
+  persist(c.date);cellEd=null;render();
+  if(next){const i=listRows.findIndex(r=>r.k===c.date&&r.id===c.id),n=i>=0?listRows[i+1]:null;if(n){openCell(n.k,n.id,c.f);return}}
+  closeCell();toast('修正しました',false);
+}
+/* What is chosen inside the folded 時刻・客層・きっかけ・天気 block, shown on its closed line. */
+function optSum(){
+  const sg=segOverride!=null?segOverride:(parsed.seg||''),sr=srcOverride!=null?srcOverride:(parsed.src||''),a=[];
+  if(SEGNAME[sg])a.push(SEGNAME[sg]);if(SRCNAME[sr])a.push(SRCNAME[sr]);if(wxSel)a.push(wxSel);
+  $('opt-sum').textContent=a.join('・');
+}
+function renderParsed(){renderParsed0();optSum();syncBar()}
+function renderParsed0(){
+  parsed=parseSay($('say').value);
+  if(parsed.pay)payOverride=null;
+  const put=(id,v)=>{const el=$(id);el.textContent=v||'—';el.classList.toggle('empty',!v)};
+  /* A fare heard in the sentence fills the field; a fare typed into the field stays until the spoken one changes. */
+  if(parsed.fare!==textFare){const f=$('p-fare');if(parsed.fare!=null)f.value=String(parsed.fare);else if(curFare()===textFare)f.value='';textFare=parsed.fare}
+  {const f=parsed.from||gShow('from'),t=parsed.to||gShow('to');put('p-from',f);put('p-to',t);$('routeline').hidden=!(f||t)}
+  const ex=[];if(parsed.t)ex.push(parsed.t);if(parsed.pax>1)ex.push(parsed.pax+'名');if(parsed.mukae)ex.push('迎車');if(parsed.toll)ex.push('高速 '+yen(parsed.toll)+'円');
+  {const pe=$('p-extra');pe.textContent=ex.join('・');pe.hidden=!ex.length}
+  /* A distance heard in the sentence fills the field; a number typed into the field stays until the spoken one changes. */
+  if(parsed.km!==textKm){const f=$('p-km');if(parsed.km!=null)f.value=String(parsed.km);else if(curKm()===textKm)f.value='';textKm=parsed.km}
+  /* A meter reading heard in the sentence goes to its field, unless the sentence is a correction of the last ride. */
+  if(!parseCmd($('say').value)){let od=false;
+    if(parsed.o1!==textO1&&parsed.o1!=null){const v=resolveOdo(parsed.o1,odoBase());if(v!=null){$('p-o1').value=String(v);od=true}}
+    if(parsed.o2!==textO2&&parsed.o2!=null){const v=resolveOdo(parsed.o2,odoBase2());if(v!=null){$('p-o2').value=String(v);od=true}}
+    if(od)syncOdo()}
+  textO1=parsed.o1;textO2=parsed.o2;
+  const p=payOverride||parsed.pay||'cash';
+  $('paychips').innerHTML=PAYS.map(x=>'<button class="chip" data-pay="'+x[0]+'" aria-pressed="'+(x[0]===p)+'">'+x[1]+'</button>').join('');
+  if(parsed.seg)segOverride=null;
+  const sg=segOverride!=null?segOverride:(parsed.seg||'');
+  $('segchips').innerHTML=SEGS.map(x=>'<button class="chip" data-seg="'+x[0]+'" aria-pressed="'+(x[0]===sg)+'">'+x[1]+'</button>').join('');
+  if(parsed.src)srcOverride=null;
+  {const sr=srcOverride!=null?srcOverride:(parsed.src||'');$('srcchips').innerHTML=SRCS.map(x=>'<button class="chip" data-src="'+x[0]+'" aria-pressed="'+(x[0]===sr)+'">'+x[1]+'</button>').join('')}
+  cmd=parseCmd($('say').value);
+  const nb=$('nbox'),cb=$('cmdbox'),gb=$('go'),why=$('why');
+  if(cmd){
+    const d=days[cur],last=d&&d.trips&&d.trips.length?d.trips.reduce((a,b)=>(b.ts||0)>(a.ts||0)?b:a):null;
+    cmd.target=last;nb.hidden=true;$('nbox0').hidden=true;cb.hidden=false;why.hidden=true;gb.textContent=cmd.cmd==='undo'?'取り消す':'修正する';
+    if(!last){cb.innerHTML='<b>この日には直せる記録がありません</b>';gb.disabled=true;return}
+    const head='<span>直前の記録</span><b>'+esc(last.t)+'　'+esc(last.from||'—')+(last.to?' → '+esc(last.to):'')+'　¥'+yen(last.fare)+'</b>';
+    if(cmd.cmd==='undo'){cb.innerHTML=head+'<em>この記録を取り消します</em>';gb.disabled=false;return}
+    cmd.ch=changes(last,cmd.rest);
+    cb.innerHTML=head+(cmd.ch.list.length?cmd.ch.list.map(x=>'<em>'+esc(x)+'</em>').join(''):'<em>変える内容を続けて話してください（例：カード、3000円）</em>');
+    gb.disabled=!cmd.ch.list.length;return;
+  }
+  nb.hidden=false;$('nbox0').hidden=false;cb.hidden=true;gb.textContent='記録';
+  const ok=curFare()!=null;
+  gb.disabled=!ok;why.hidden=ok;
+}
+function applyCmd(){
+  const d=days[cur],t=cmd&&cmd.target;if(!d||!t)return;
+  if(cmd.cmd==='undo'){d.trips=d.trips.filter(x=>x.id!==t.id);persist(cur);toast('直前の記録を取り消しました　¥'+yen(t.fare),false)}
+  else{if(!cmd.ch||!cmd.ch.list.length)return;Object.assign(t,cmd.ch.set);if(cmd.ch.set.o1!=null||cmd.ch.set.o2!=null){const df=odoDiff(t.o1,t.o2);if(df!=null)t.km=df}persist(cur);toast('修正しました　'+cmd.ch.list[0],false)}
+  lastAdded=null;$('say').value='';$('p-km').value='';textKm=null;kmFromOdo=false;$('p-fare').value='';textFare=null;payOverride=null;segOverride=null;srcOverride=null;$('partial').hidden=true;
+  renderParsed();render();$('say').blur();
+}
+
+/* ---------- actions ---------- */
+function record(){
+  if(cmd){applyCmd();return}
+  const fare=curFare();if(fare==null)return;
+  const d=day(cur);
+  const tr={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),t:parsed.t||$('p-t1').value||nowHM(),tin:$('p-t1').value||null,tout:$('p-t2').value||null,from:parsed.from||gName('from'),to:parsed.to||gName('to'),g1:gPos('from'),g2:gPos('to'),fare:fare,toll:parsed.toll||0,pay:payOverride||parsed.pay||'cash',pax:parsed.pax||1,mukae:!!parsed.mukae,km:curKm(),o1:parseOdo($('p-o1').value),o2:parseOdo($('p-o2').value),seg:segOverride!=null?segOverride:(parsed.seg||''),src:srcOverride!=null?srcOverride:(parsed.src||''),wx:wxSel?{w:wxSel,t:null}:null,note:''};
+  ['from','to'].forEach(k=>{const g=geo[k];if(g&&!g.n&&!parsed[k]){g.tid=tr.id;g.day=cur}});
+  d.trips.push(tr);
+  if(geo.from||geo.to){geo.from=null;geo.to=null;saveGeo();geoMsg('')}
+  $('p-o1').value='';$('p-o2').value='';$('r-o1').value='';$('r-o2').value='';$('p-odo').hidden=true;$('p-t1').value='';$('p-t2').value='';try{localStorage.removeItem(LSO);localStorage.removeItem(LST)}catch(e){}
+  if(!d.startTime&&d.trips.length===1&&cur===ymd(new Date())){/* leave 出庫 for the driver to set */}
+  persist(cur);lastAdded={date:cur,id:tr.id};
+  $('say').value='';$('p-km').value='';textKm=null;kmFromOdo=false;$('p-fare').value='';textFare=null;payOverride=null;segOverride=null;srcOverride=null;$('partial').hidden=true;
+  renderParsed();render();
+  toast('記録しました　¥'+yen(tr.fare),true);
+  $('say').blur();$('p-fare').blur();
+}
+function toast(text,undo){
+  $('toast-t').textContent=text;$('toast-b').hidden=!undo;$('toast').hidden=false;
+  clearTimeout(toastTimer);/* a toast that offers 取り消す stays until the next thing is typed (or 90 s), so a slip can still be undone */
+  toastTimer=setTimeout(()=>{$('toast').hidden=true},undo?90000:6000);
+}
+function openEdit(id,date){
+  const ed=date||cur,d=day(ed),t=d.trips.find(x=>x.id===id);if(!t)return;
+  editDate=ed;{const dt=fromYmd(ed);$('sh-h').textContent='乗車記録を修正'+(ed!==cur?'（'+(dt.getMonth()+1)+'月'+dt.getDate()+'日）':'')}
+  editing=id;$('e-t').value=t.t||'';$('e-fare').value=t.fare;$('e-from').value=t.from||'';$('e-to').value=t.to||'';
+  $('e-pay').value=t.pay||'cash';$('e-pax').value=t.pax||1;$('e-toll').value=t.toll||'';$('e-mukae').value=t.mukae?'1':'0';$('e-note').value=t.note||'';$('e-seg').value=t.seg||'';$('e-src').value=t.src||'';$('e-km').value=t.km!=null?t.km:'';$('e-o1').value=t.o1!=null?t.o1:'';$('e-o2').value=t.o2!=null?t.o2:'';$('e-t1').value=t.tin||'';$('e-t2').value=t.tout||'';{const w=(t.wx&&t.wx.w)||'';$('e-w').innerHTML='<option value="">未入力</option>'+(w&&!WXS.includes(w)?[w]:[]).concat(WXS).map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('');$('e-w').value=w}
+  $('e-del').textContent='削除';$('e-del').dataset.armed='';$('ov').hidden=false;syncBar();
+}
+function closeEdit(){editing=null;$('ov').hidden=true;syncBar()}
+function csvFor(ym){
+  const q=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const rows=[['日付','曜日','時刻','乗車時刻','降車時刻','乗車地','降車地','人数','料金','高速代','乗車時メーター','降車時メーター','空車km','実車km','支払方法','客層','きっかけ','天気','迎車','メモ','乗車緯度','乗車経度','降車緯度','降車経度']];
+  (Array.isArray(ym)?ym:monthDays(ym)).forEach(k=>{const dt=fromYmd(k),EM=emptyKm(days[k]);sorted(days[k]).forEach(t=>rows.push([k.replace(/-/g,'/'),WD[dt.getDay()],t.t,t.tin||'',t.tout||'',t.from,t.to,t.pax||1,t.fare||0,t.toll||0,t.o1!=null?t.o1:'',t.o2!=null?t.o2:'',EM[t.id]!=null?EM[t.id]:'',t.km!=null?t.km:'',PAYNAME[t.pay]||'現金',SEGNAME[t.seg]||'',SRCNAME[t.src]||'',(t.wx&&t.wx.w)||'',t.mukae?'あり':'',t.note||'',t.g1?t.g1[0]:'',t.g1?t.g1[1]:'',t.g2?t.g2[0]:'',t.g2?t.g2[1]:'']))});
+  return {n:rows.length-1,text:'﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'};
+}
+function route(){
+  const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':'day';
+  [['day','v-day','tab-day'],['list','v-list','tab-list'],['month','v-month','tab-month'],['year','v-year','tab-year']].forEach(([k,v,t])=>{
+    const on=k===h;$(v).hidden=!on;$(v).style.display=on?'contents':'none';
+    if(on)$(t).setAttribute('aria-current','page');else $(t).removeAttribute('aria-current');
+  });
+  if(h==='month'){curMonth=pendMonth||cur.slice(0,7);pendMonth=null;$('csvbox').hidden=true;renderMonth()}
+  if(h==='list'){listDay=cur;listMonth=cur.slice(0,7);renderList()}
+  if(h==='year'){curYear=yMode==='fy'?fyOf(curMonth):curMonth.slice(0,4);$('y-csvbox').hidden=true;renderYear()}
+  syncBar();
+}
+
+/* ---------- wiring ---------- */
+loadLocal();cur=defaultDate();listDay=cur;listMonth=cur.slice(0,7);curMonth=cur.slice(0,7);curYear=cur.slice(0,4);autoDate=cur;
+$('e-pay').innerHTML=PAYS.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+$('e-seg').innerHTML='<option value="">未入力</option>'+SEGS.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+$('e-src').innerHTML='<option value="">未入力</option>'+SRCS.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('');
+$('srcchips').addEventListener('click',e=>{const b=e.target.closest('[data-src]');if(!b)return;const c=srcOverride!=null?srcOverride:(parsed.src||'');srcOverride=c===b.dataset.src?'':b.dataset.src;[...$('srcchips').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.src===srcOverride));optSum()});
+$('segchips').addEventListener('click',e=>{const b=e.target.closest('[data-seg]');if(!b)return;const c=segOverride!=null?segOverride:(parsed.seg||'');segOverride=c===b.dataset.seg?'':b.dataset.seg;[...$('segchips').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.seg===segOverride));optSum()});
+$('wxchips').addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(b)setWx(wxSel===b.dataset.wx?'':b.dataset.wx)});renderWx();
+$('say').addEventListener('input',renderParsed);
+$('p-km').addEventListener('input',()=>{kmFromOdo=false;syncBar()});
+$('p-fare').addEventListener('input',renderParsed);
+/* no re-render here: rebuilding the chips while a tap on one is in progress would swallow the tap */
+$('p-fare').addEventListener('blur',()=>{const v=curFare();$('p-fare').value=v==null?'':String(v)});
+$('p-fare').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();if(!$('go').disabled)record();else $('p-fare').blur()}});
+$('r-o2').addEventListener('input',()=>{$('p-o2').value=$('r-o2').value;syncOdo()});
+$('r-o2').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('r-o2').blur()}});
+$('r-o2').addEventListener('blur',()=>{const v=resolveOdo($('r-o2').value,odoBase2()),x=v==null?'':String(v);$('r-o2').value=x;$('p-o2').value=x;syncOdo()});
+['r-o1','r-o2'].forEach(id=>$(id).addEventListener('focus',odoHint));
+/* The mic beside a meter field writes 「メーター 」 into the sentence box, so only the number has to be spoken. */
+document.querySelectorAll('[data-say]').forEach(b=>b.addEventListener('click',()=>{
+  const f=$('say'),v=f.value.replace(/\s+$/,'');
+  f.value=(v?v+' ':'')+b.dataset.say;renderParsed();
+  if(dict&&!$('mic').hidden){if(!dict.active())dict.start().catch(()=>{});f.scrollIntoView({block:'center',behavior:'smooth'})}
+  else{f.focus();try{f.setSelectionRange(f.value.length,f.value.length)}catch(e){}f.scrollIntoView({block:'center',behavior:'smooth'})}
+  toast(dict&&!$('mic').hidden?'数字を話してください（例：230）':'キーボードのマイクを押して、数字を話してください（例：230）',false);
+}));
+['p-t1','p-t2'].forEach(id=>$(id).addEventListener('input',saveTm));
+$('ride-b').addEventListener('click',()=>{
+  const t1=$('p-t1').value,t2=$('p-t2').value;
+  {const br=!t1&&!t2?openBreak():null;if(br){br.e=nowHM();const len=brkLen(br);if(len<1){const d=days[cur];d.breaks=d.breaks.filter(x=>x!==br)}persist(cur);render();toast(len<1?'1分未満だったので、休憩は残しませんでした':'休憩終了　'+durTxt(len),false);return}}
+  if(!t1&&!t2){$('p-t1').value=nowHM();saveTm();capture('from');toast('乗車 '+$('p-t1').value,false);if(!$('p-o1').value)$('r-o1').focus();return}
+  if(t1&&!t2){$('p-t2').value=nowHM();saveTm();capture('to');
+    /* a pickup reading asks for the drop-off one; otherwise go on to the sentence box as before */
+    if($('p-o1').value&&!$('p-o2').value){$('r-o2').focus();return}
+    const f=$('say');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});return}
+  const f=$('p-fare');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});
+});
+$('ride-x').addEventListener('click',()=>{$('p-t1').value='';$('p-t2').value='';clearGeo();saveTm();renderParsed()});
+$('nbox').addEventListener('click',e=>{const b=e.target.closest('[data-now]');if(!b)return;$(b.dataset.now).value=nowHM();saveTm()});
+$('e-t1').addEventListener('input',()=>{if($('e-t1').value)$('e-t').value=$('e-t1').value});
+try{const o=JSON.parse(localStorage.getItem(LST)||'null');if(o&&typeof o==='object'){$('p-t1').value=String(o.t1||'');$('p-t2').value=String(o.t2||'')}}catch(e){}
+['p-o1','p-o2'].forEach(id=>{$(id).addEventListener('input',syncOdo);$(id).addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$(id).blur()}});$(id).addEventListener('blur',()=>{const v=resolveOdo($(id).value,id==='p-o1'?odoBase():odoBase2());$(id).value=v==null?'':String(v);syncOdo()})});
+$('r-o1').addEventListener('input',()=>{$('p-o1').value=$('r-o1').value;syncOdo()});
+$('r-o1').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('r-o1').blur()}});
+$('r-o1').addEventListener('blur',()=>{const v=resolveOdo($('r-o1').value,odoBase()),x=v==null?'':String(v);$('r-o1').value=x;$('p-o1').value=x;syncOdo()});
+['e-o1','e-o2'].forEach(id=>$(id).addEventListener('input',()=>{const df=odoDiff(parseOdo($('e-o1').value),parseOdo($('e-o2').value));if(df!=null)$('e-km').value=df}));
+try{const o=JSON.parse(localStorage.getItem(LSO)||'null');if(o&&typeof o==='object'){$('p-o1').value=String(o.o1||'');$('p-o2').value=String(o.o2||'');syncOdo()}}catch(e){}
+$('p-km').addEventListener('blur',()=>{const f=$('p-km'),v=curKm();f.value=v==null?'':String(v);syncBar()});
+$('p-km').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();if(!$('go').disabled)record();else $('p-km').blur()}});
+$('say').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();if(!$('go').disabled)record();else $('say').blur()}});
+$('go').addEventListener('click',record);
+{let rz=0;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{['m-total','mm-total','y-total'].forEach(fitBig)},150)})}
+$('bk-copy').addEventListener('click',()=>{
+  const c=backupText();
+  const fallback=()=>{const b=$('bk-text');b.value=c;b.focus();b.select();bkMsg('下の枠に出した内容を全選択してコピーし、メモやメールに貼り付けて保管してください。')};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(c).then(()=>{markBackup();bkMsg('バックアップをコピーしました。メモやメールに貼り付けて保管してください。')}).catch(fallback);else fallback();
+});
+$('bk-file').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>offerRestore(r.result);r.onerror=()=>bkMsg('ファイルを読めませんでした。もう一度選んでください。');r.readAsText(f);e.target.value='';
+});
+$('bk-read').addEventListener('click',()=>{if(!$('bk-text').value.trim()){bkMsg('枠にバックアップの内容を貼り付けてから押してください。');return}offerRestore($('bk-text').value)});
+$('bk-confirm').addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(!b)return;if(b.dataset.bk==='yes')doRestore();else{bkPending=null;$('bk-confirm').hidden=true;bkMsg('復元をやめました。記録は変わっていません。')}});
+$('bk-undo').addEventListener('click',undoRestore);
+$('bk-drive').addEventListener('click',driveSave);
+document.addEventListener('input',e=>{if(!$('toast').hidden&&!$('toast-b').hidden&&!$('toast').contains(e.target))$('toast').hidden=true},true);
+$('sh-b').addEventListener('click',()=>{
+  const d=day(cur);
+  if(!d.startTime){d.startTime=nowHM();d.startTs=Date.now();shAsk=d.odoStart==null?'start':'';persist(cur);render();toast('出庫 '+d.startTime,false)}
+  else if(!d.endTime){const br=openBreak();if(br)br.e=nowHM();d.endTime=nowHM();shAsk=d.odoEnd==null?'end':'';persist(cur);render();toast('帰庫 '+d.endTime,false)}
+  if(shAsk){$('sh-odo').value='';shHint();$('sh-odo').focus()}
+});
+$('sh-x').addEventListener('click',()=>{const d=day(cur);d.endTime='';shAsk='';persist(cur);render();toast('帰庫を取り消しました',false)});
+$('sh-odo').addEventListener('input',shHint);
+$('sh-odo').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('sh-odo').blur()}});
+$('sh-odo').addEventListener('blur',()=>{
+  if(!shAsk)return;const v=resolveOdo($('sh-odo').value,odoBase()),d=day(cur);
+  if(v!=null){d[shAsk==='start'?'odoStart':'odoEnd']=v;persist(cur)}
+  shAsk='';$('sh-odo').value='';render();
+});
+$('rv-open').addEventListener('click',()=>{renderReport(cur);$('rv').hidden=false;$('toast').hidden=true;syncBar()});
+$('rv-close').addEventListener('click',()=>{$('rv').hidden=true;syncBar()});
+$('rv').addEventListener('click',e=>{if(e.target===$('rv')){$('rv').hidden=true;syncBar()}});
+$('rv-copy').addEventListener('click',()=>{
+  const c=reportCsv(cur).slice(1),msg=$('rv-msg').firstElementChild;
+  const fallback=()=>{const b=$('rv-csv');b.hidden=false;b.value=c;b.focus();b.select();msg.textContent='下の枠を全選択してコピーし、Excelに貼り付けてください。'};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(c).then(()=>{msg.textContent='コピーしました。Excelやメモに貼り付けできます。'}).catch(fallback);else fallback();
+});
+$('brk-b').addEventListener('click',()=>{
+  const d=day(cur);if(!Array.isArray(d.breaks))d.breaks=[];
+  d.breaks.push({id:'b'+Date.now().toString(36),s:nowHM(),e:null,ts:Date.now()});persist(cur);render();toast('休憩に入りました　'+nowHM(),false);
+});
+$('brk-add').addEventListener('click',()=>{
+  const d=day(cur);if(!Array.isArray(d.breaks))d.breaks=[];
+  d.breaks.push({id:'b'+Date.now().toString(36),s:nowHM(),e:nowHM(),ts:Date.now()});persist(cur);render();toast('休憩を1件足しました。開始と終了の時刻を直してください',false);
+});
+$('brk-list').addEventListener('change',e=>{
+  const row=e.target.closest('[data-b]'),k=e.target.dataset.k,d=days[cur];if(!row||!k||!d||!d.breaks)return;
+  const b=d.breaks.find(x=>x.id===row.dataset.b);if(!b)return;
+  if(k==='s'&&!e.target.value){e.target.value=b.s;return}
+  b[k]=e.target.value||null;persist(cur);
+  row.querySelector('b').textContent=b.e?durTxt(brkLen(b)):'休憩中';
+  if(b.e&&brkLen(b)>=720)toast('この休憩は'+durTxt(brkLen(b))+'になっています。開始と終了の時刻を確かめてください',false);
+  renderRide();
+});
+$('brk-list').addEventListener('focusout',()=>setTimeout(()=>{if(!$('brk-list').contains(document.activeElement))render()},0));
+$('brk-list').addEventListener('click',e=>{
+  const x=e.target.closest('[data-del]'),row=x&&x.closest('[data-b]'),d=days[cur];if(!row||!d||!d.breaks)return;
+  if(!x.dataset.armed){x.dataset.armed='1';x.textContent='もう一度';return}
+  d.breaks=d.breaks.filter(b=>b.id!==row.dataset.b);persist(cur);x.blur();render();toast('休憩を削除しました',false);
+});
+$('sumbar').addEventListener('click',()=>$('meterp').scrollIntoView({block:'start',behavior:'smooth'}));
+$('reset').addEventListener('click',()=>{
+  if(dict&&dict.active())dict.stop().catch(()=>{});
+  ['say','p-fare','p-km','p-t1','p-t2','p-o1','p-o2','r-o1','r-o2'].forEach(id=>{$(id).value=''});
+  textKm=null;kmFromOdo=false;textFare=null;textO1=null;textO2=null;payOverride=null;segOverride=null;srcOverride=null;$('partial').hidden=true;$('p-odo').hidden=true;
+  try{localStorage.removeItem(LSO);localStorage.removeItem(LST)}catch(e){}
+  clearGeo();renderParsed();renderRide();toast('入力を空にしました',false);
+});
+$('paychips').addEventListener('click',e=>{const b=e.target.closest('[data-pay]');if(!b)return;payOverride=b.dataset.pay;const p=payOverride;[...$('paychips').children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.pay===p));syncBar()});
+$('listwrap').addEventListener('click',e=>{
+  const ex=e.target.closest('[data-ex]');if(ex){$('say').value=ex.dataset.ex;renderParsed();$('composer').scrollIntoView({block:'center',behavior:'smooth'});return}
+  const b=e.target.closest('[data-id]');if(b)openEdit(b.dataset.id);
+});
+const go=d=>{navigated=true;cur=d;renderDay()};
+$('bar-go').addEventListener('click',record);
+$('m-more').addEventListener('click',()=>{ui.pays=!ui.pays;saveUi();renderDay()});
+$('daywarn-b').addEventListener('click',()=>go(defaultDate()));
+$('help-s').addEventListener('click',()=>{helpTouched=true});
+{let raf=0;const tick=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;syncBar()})};window.addEventListener('scroll',tick,{passive:true});window.addEventListener('resize',tick)}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){followDate();if(firstSync)resend()}});
+window.addEventListener('online',()=>{if(firstSync)resend()});
+window.addEventListener('pageshow',followDate);
+$('prev').addEventListener('click',()=>go(shift(cur,-1)));
+$('next').addEventListener('click',()=>go(shift(cur,1)));
+$('today').addEventListener('click',()=>go(ymd(new Date())));
+const mshift=n=>{const a=curMonth.split('-').map(Number);const d=new Date(a[0],a[1]-1+n,1);curMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);$('csvbox').hidden=true;renderMonth()};
+$('mprev').addEventListener('click',()=>mshift(-1));$('mnext').addEventListener('click',()=>mshift(1));
+$('mcard').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;navigated=true;cur=b.dataset.go;location.hash='#day';renderDay()});
+[['f-start','startTime',0],['f-end','endTime',0],['f-odo1','odoStart',1],['f-odo2','odoEnd',1]].forEach(([id,key,num])=>{
+  $(id).addEventListener('change',()=>{const v=$(id).value;day(cur)[key]=num?(v===''?null:Math.max(0,Math.round(+v))):v;persist(cur);render()});
+});
+[['f-goal-d','dayGoal'],['f-goal-m','monthGoal'],['f-goal-b','breakGoal']].forEach(([id,key])=>{
+  $(id).addEventListener('change',()=>{const v=$(id).value;settings[key]=v===''?null:Math.max(0,Math.round(+v));saveSettings();render()});
+});
+[['m-setgoal','f-goal-d'],['mm-setgoal','f-goal-m']].forEach(([b,f])=>{
+  $(b).addEventListener('click',()=>{if($('v-day').hidden){location.hash='#day';route()}$('meta').open=true;$(f).scrollIntoView({block:'center'});$(f).focus()});
+});
+$('e-cancel').addEventListener('click',closeEdit);
+$('ov').addEventListener('click',e=>{if(e.target===$('ov'))closeEdit()});
+$('e-save').addEventListener('click',()=>{
+  const d=day(editDate||cur),t=d.trips.find(x=>x.id===editing);if(!t)return closeEdit();
+  const fare=Math.round(+$('e-fare').value);
+  if(!(fare>0)){$('e-fare').focus();return}
+  t.t=$('e-t').value||t.t;t.fare=fare;t.from=$('e-from').value.trim();t.to=$('e-to').value.trim();t.pay=$('e-pay').value;
+  t.pax=Math.max(1,Math.round(+$('e-pax').value)||1);t.toll=Math.max(0,Math.round(+$('e-toll').value)||0);t.mukae=$('e-mukae').value==='1';t.note=$('e-note').value.trim();t.seg=$('e-seg').value;t.src=$('e-src').value;{const k=$('e-km').value;t.km=k===''?null:Math.max(0,Math.round(+k*10)/10)}t.o1=parseOdo($('e-o1').value);t.o2=parseOdo($('e-o2').value);t.tin=$('e-t1').value||null;t.tout=$('e-t2').value||null;
+  {const w=$('e-w').value;t.wx=w?{w:w,t:(t.wx&&t.wx.w===w&&t.wx.t!=null)?t.wx.t:null}:null}
+  persist(editDate||cur);closeEdit();render();toast('修正しました',false);
+});
+$('e-del').addEventListener('click',()=>{
+  const b=$('e-del');
+  if(!b.dataset.armed){b.dataset.armed='1';b.textContent='もう一度押すと削除';return}
+  const ed=editDate||cur,d=day(ed);d.trips=d.trips.filter(x=>x.id!==editing);persist(ed);closeEdit();render();toast('削除しました',false);
+});
+$('toast-b').addEventListener('click',()=>{
+  if(lastAdded&&days[lastAdded.date]){const d=days[lastAdded.date];d.trips=d.trips.filter(x=>x.id!==lastAdded.id);persist(lastAdded.date);lastAdded=null;render()}
+  $('toast').hidden=true;
+});
+$('csv-copy').addEventListener('click',()=>{
+  const c=csvFor(curMonth),msg=$('csv-msg').firstElementChild;
+  if(!c.n){msg.textContent='この月は書き出す記録がありません。';return}
+  const fallback=()=>{const b=$('csvbox');b.hidden=false;b.value=c.text.slice(1);b.focus();b.select();msg.textContent='下の枠を全選択してコピーし、Excelに貼り付けてください。'};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(c.text.slice(1)).then(()=>{msg.textContent=c.n+'件をコピーしました。Excelやメモに貼り付けできます。'}).catch(fallback);else fallback();
+});
+const yshift=n=>{curYear=String(+curYear+n);$('y-csvbox').hidden=true;renderYear()};
+$('yprev').addEventListener('click',()=>yshift(-1));$('ynext').addEventListener('click',()=>yshift(1));
+const setQ=q=>{curQ=q===curQ?0:q;$('y-csvbox').hidden=true;renderYear()};
+$('yq').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(b)setQ(+b.dataset.q)});
+$('ymode').addEventListener('click',e=>{
+  const b=e.target.closest('[data-ym]');if(!b||b.dataset.ym===yMode)return;
+  yMode=b.dataset.ym;curQ=0;
+  /* open the year, or the fiscal year, that holds the month last looked at */
+  if(yMode!=='range')curYear=yMode==='fy'?fyOf(curMonth):curMonth.slice(0,4);
+  saveY();$('y-csvbox').hidden=true;renderYear();
+});
+['y-from','y-to'].forEach(id=>$(id).addEventListener('change',()=>{
+  const v=$(id).value;if(!/^\d{4}-\d\d-\d\d$/.test(v))return;
+  if(id==='y-from')yFrom=v;else yTo=v;saveY();$('y-csvbox').hidden=true;renderYear();
+}));
+$('ypre').addEventListener('click',e=>{
+  const b=e.target.closest('[data-pre]');if(!b)return;const now=new Date(),t=ymd(now),k=b.dataset.pre;
+  if(k==='thismonth'){yFrom=t.slice(0,8)+'01';yTo=t}
+  else if(k==='lastmonth'){const a=new Date(now.getFullYear(),now.getMonth()-1,1),z=new Date(now.getFullYear(),now.getMonth(),0);yFrom=ymd(a);yTo=ymd(z)}
+  else if(k==='d90'){yFrom=shift(t,-89);yTo=t}
+  else{const ks=Object.keys(days).filter(x=>days[x].trips&&days[x].trips.length).sort();if(!ks.length)return;yFrom=ks[0];yTo=ks[ks.length-1]}
+  saveY();$('y-csvbox').hidden=true;renderYear();
+});
+$('yqcard').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(b)setQ(+b.dataset.q)});
+$('ycard').addEventListener('click',e=>{const b=e.target.closest('[data-ym]');if(!b)return;pendMonth=b.dataset.ym;location.hash='#month'});
+$('y-csv-copy').addEventListener('click',()=>{
+  const c=csvFor(yKeys()),msg=$('y-csv-msg').firstElementChild;
+  if(!c.n){msg.textContent='この期間は書き出す記録がありません。';return}
+  const fallback=()=>{const b=$('y-csvbox');b.hidden=false;b.value=c.text.slice(1);b.focus();b.select();msg.textContent='下の枠を全選択してコピーし、Excelに貼り付けてください。'};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(c.text.slice(1)).then(()=>{msg.textContent=c.n+'件をコピーしました。Excelやメモに貼り付けできます。'}).catch(fallback);else fallback();
+});
+$('lscope').addEventListener('click',e=>{
+  const b=e.target.closest('[data-ls]');if(!b||b.dataset.ls===ui.lscope)return;
+  if(b.dataset.ls==='month')listMonth=listDay.slice(0,7);
+  else if(listDay.slice(0,7)!==listMonth)listDay=monthDays(listMonth).pop()||listMonth+'-01';
+  ui.lscope=b.dataset.ls;saveUi();renderList();
+});
+const lshift=n=>{
+  if(ui.lscope==='day')listDay=shift(listDay,n);
+  else{const a=listMonth.split('-').map(Number),d=new Date(a[0],a[1]-1+n,1);listMonth=d.getFullYear()+'-'+pad(d.getMonth()+1)}
+  renderList();
+};
+$('lprev').addEventListener('click',()=>lshift(-1));$('lnext').addEventListener('click',()=>lshift(1));
+$('lcard').addEventListener('click',e=>{const td=e.target.closest('td[data-f]'),r=td&&td.closest('tr[data-id]');if(r)openCell(r.dataset.date,r.dataset.id,td.dataset.f)});
+$('c-save').addEventListener('click',()=>commitCell($('c-in').value,false));
+$('c-next').addEventListener('click',()=>commitCell($('c-in').value,true));
+$('c-in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();commitCell($('c-in').value,false)}});
+$('c-chips').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)commitCell(b.dataset.v,false)});
+$('c-cancel').addEventListener('click',closeCell);
+$('cv').addEventListener('click',e=>{if(e.target===$('cv'))closeCell()});
+$('c-all').addEventListener('click',()=>{const c=cellEd;closeCell();if(c)openEdit(c.id,c.date)});
+$('lcard').addEventListener('keydown',e=>{if(e.key==='Enter'){const r=e.target.closest('tr[data-id]');if(r)openEdit(r.dataset.id,r.dataset.date)}});
+window.addEventListener('hashchange',route);
+renderParsed();render();route();
+setInterval(()=>{if(document.visibilityState!=='visible')return;followDate();if(!$('v-day').hidden)renderDay()},60000);
+setInterval(()=>{if(document.visibilityState==='visible'&&!$('v-day').hidden&&(($('p-t1').value&&!$('p-t2').value)||openBreak()))renderRide()},15000);
+renderRide();
+initCloud();
+
+/* dl.save({filename,data}) hands the viewer a file: Claude's own saver on Claude, the browser's share sheet or download in the stand-alone build */
+function wireDownloads(dl){
+   const b=$('csv-save');b.hidden=false;
+    const yb=$('y-csv-save');yb.hidden=false;
+    const kb=$('bk-save');kb.hidden=false;
+    kb.addEventListener('click',()=>{
+      dl.save({filename:'タクシー日報_バックアップ_'+ymd(new Date())+'.json',data:backupText()}).then(()=>{markBackup();bkMsg('バックアップを保存しました。ファイルはそのまま保管してください。')}).catch(e=>{
+        if(e&&e.code==='declined')bkMsg('保存を取りやめました。');
+        else{kb.hidden=true;bkMsg('ここではファイル保存が使えません。「バックアップをコピー」を使ってください。')}
+      });
+    });
+    const rb=$('rv-save');rb.hidden=false;
+    rb.addEventListener('click',()=>{
+      const msg=$('rv-msg').firstElementChild;
+      dl.save({filename:'タクシー日報_'+cur+'.csv',data:reportCsv(cur)}).then(()=>{msg.textContent='この日の日報をCSVで書き出しました。'}).catch(e=>{
+        if(e&&e.code==='declined')msg.textContent='保存を取りやめました。';
+        else{rb.hidden=true;msg.textContent='ここではファイル保存が使えません。「CSVをコピー」を使ってください。'}
+      });
+    });
+    yb.addEventListener('click',()=>{
+      const c=csvFor(yKeys()),msg=$('y-csv-msg').firstElementChild;
+      if(!c.n){msg.textContent='この期間は書き出す記録がありません。';return}
+      dl.save({filename:'タクシー日報_'+yName()+'.csv',data:c.text}).then(()=>{msg.textContent=c.n+'件をCSVで書き出しました。'}).catch(e=>{
+        if(e&&e.code==='declined')msg.textContent='保存を取りやめました。';
+        else{yb.hidden=true;msg.textContent='ここではファイル保存が使えません。「この期間のCSVをコピー」を使ってください。'}
+      });
+    });
+    b.addEventListener('click',()=>{
+      const c=csvFor(curMonth),msg=$('csv-msg').firstElementChild;
+      if(!c.n){msg.textContent='この月は書き出す記録がありません。';return}
+      dl.save({filename:'タクシー日報_'+curMonth+'.csv',data:c.text}).then(()=>{msg.textContent=c.n+'件をCSVで書き出しました。'}).catch(e=>{
+        if(e&&e.code==='declined')msg.textContent='保存を取りやめました。';
+        else{b.hidden=true;msg.textContent='ここではファイル保存が使えません。「CSVをコピー」を使ってください。'}
+      });
+    });
+}
+if(window.claude&&window.claude.use){
+  window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false}).catch(()=>{});
+  window.claude.use('downloads').then(dl=>{if(dl)wireDownloads(dl)}).catch(()=>{});
+  window.claude.use('dictation').then(d=>{
+    if(!d)return;dict=d;
+    const mic=$('mic');mic.hidden=false;$('tawrap').classList.add('hasmic');
+    $('hint-t').textContent='マイクボタンを押して話してください。キーボードのマイクでも入力できます。';
+    d.onPartial(({text})=>{const p=$('partial');p.textContent=text;p.hidden=!text});
+    d.onFinal(({text})=>{const ta=$('say');ta.value=ta.value?ta.value+text:text.replace(/^\s+/,'');$('partial').hidden=true;renderParsed()});
+    d.onState(({state,reason})=>{
+      mic.classList.toggle('on',state!=='idle');mic.setAttribute('aria-label',state==='idle'?'音声入力を開始':'音声入力を止める');
+      if(state==='idle'&&(reason==='not_granted'||reason==='unavailable')){mic.hidden=true;$('tawrap').classList.remove('hasmic');$('hint-t').textContent='上の枠をタップし、キーボードのマイクボタンを押して話してください。'}
+    });
+    mic.addEventListener('click',()=>{
+      if(d.active())d.stop().catch(()=>{});
+      else d.start().catch(e=>{if(e&&(e.code==='rate_limited'||e.code==='upstream_error'))toast('音声入力を開始できませんでした。少し待ってもう一度お試しください',false)});
+    });
+  }).catch(()=>{});
+}
+if(SOLO){
+  wireDownloads({save:soloSave});
+  $('geo-box').hidden=false;$('geo-credit').hidden=false;$('geo-toggle').setAttribute('aria-pressed',String(geo.on));
+  setSync('この端末に保存しています（Claudeには保存されません。ときどきバックアップを取ってください）');
+  $('geochips').addEventListener('click',e=>{
+    const b=e.target.closest('[data-geo]');if(!b)return;
+    if(b.dataset.geo==='toggle'){geo.on=!geo.on;saveGeo();b.setAttribute('aria-pressed',String(geo.on));geoMsg(geo.on?'':'「乗車」「降車」を押しても、位置は取りません。');return}
+    capture(b.dataset.geo,true);
+  });
+  if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body></html>
