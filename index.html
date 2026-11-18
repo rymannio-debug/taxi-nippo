@@ -336,12 +336,59 @@ details.card summary{min-height:44px}
 .mtable.cmp td.n.pl{font-size:clamp(14px,4.2vw,17px)}
 .pf.km input{font-size:clamp(17px,5.2vw,22px);padding:0 5px}
 @media (max-width:359px){.ride-o{grid-template-columns:minmax(0,1fr)}}
+/* v34: the day's pickup and drop-off points on a map (stand-alone build only) */
+.seg a{padding:8px 8px}
+.mapbox{position:relative}
+#map{height:min(58vh,440px);border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--field);z-index:0}
+.mapnote{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-size:14px;color:var(--muted);background:var(--field);border-radius:14px;border:1px solid var(--line)}
+.pin{display:grid;place-items:center;box-sizing:border-box;width:30px;height:30px;font-family:var(--num);font-weight:600;font-size:15px;font-style:normal;line-height:1;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.pin-from{border-radius:50%;background:var(--accent);color:var(--accent-ink)}
+.pin-to{border-radius:7px;background:var(--danger);color:#fff}
+.pin.on{transform:scale(1.25);z-index:1000!important}
+.pin.mini{display:inline-grid;width:20px;height:20px;font-size:11px;margin-right:6px;vertical-align:-5px;box-shadow:none}
+.mplg{flex-wrap:wrap;gap:6px 16px}
+.mplg{align-items:center}
+.mplg>span{display:inline-flex;align-items:center}
+.mplg .ln{display:inline-block;width:22px;border-top:2px dashed var(--muted);margin-right:6px;vertical-align:3px}
+.mplg .ln-on{border-top:3px solid var(--accent)}
+.mplg.noroute .rt{display:none}
+.arw{pointer-events:none}
+.arw svg{display:block}
+.no{font-family:var(--num);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.trip .t .no{display:block;font-size:clamp(11.5px,3.6vw,14px);line-height:1.2;white-space:nowrap}
+.ltable td.st .cn{display:block;font-family:var(--num);font-weight:600;font-size:13px;color:var(--ink);letter-spacing:.02em}
+.rtable td.tm .no{display:block;font-size:13px}
+#mp-list .trip .t{grid-row:1 / 3}
+#mp-list .nos{opacity:.55}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--ink)}
+.leaflet-popup-content{font-family:var(--body);font-size:14px;line-height:1.5;margin:10px 14px}
+.leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+.leaflet-control-attribution{font-size:10px}
+/* v35: easier map — pale Japanese base map, outlined route lines, one case at a time, full-screen view */
+.mapwrap{position:relative}
+.mstep{display:flex;align-items:center;gap:6px;margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px}
+.mstep button{flex:none;min-width:48px;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:22px;line-height:1;color:var(--ink)}
+.mstep button:disabled{opacity:.3;cursor:default}
+.mstep #ms-all{font-size:14px;font-weight:700;padding:0 12px}
+.mstep .mt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;font-size:13px;color:var(--muted);line-height:1.35}
+.mstep .mt b{font-family:var(--num);font-size:clamp(13px,4.2vw,17px);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:359px){.mstep{gap:4px;padding:5px}.mstep button{min-width:42px}.mstep #ms-all{padding:0 8px}}
+.mstep .mt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mctl{display:flex;flex-direction:column;gap:6px}
+.mctl button{min-height:40px;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:13px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.mapbox.big{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;background:var(--bg);padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.mapbox.big .mapwrap{flex:1;display:flex}
+.mapbox.big #map{flex:1;height:auto;border:none;border-radius:0}
+.mapbox.big .mapnote{border-radius:0}
+.mapbox.big .mstep{margin:0;border-radius:0;border-width:1px 0 0}
+html.mapopen,html.mapopen body{overflow:hidden}
+.leaflet-marker-icon.pin{transition:opacity .15s}
 </style>
 
 <div class="app">
   <header class="top">
     <h1>売上日報</h1>
-    <nav class="seg" aria-label="表示切替"><a href="#day" id="tab-day">日報</a><a href="#list" id="tab-list">一覧</a><a href="#month" id="tab-month">月集計</a><a href="#year" id="tab-year">年集計</a></nav>
+    <nav class="seg" aria-label="表示切替"><a href="#day" id="tab-day">日報</a><a href="#list" id="tab-list">一覧</a><a href="#month" id="tab-month">月集計</a><a href="#year" id="tab-year">年集計</a><a href="#map" id="tab-map" hidden>地図</a></nav>
   </header>
 
   <section id="v-day" style="display:contents">
@@ -422,6 +469,7 @@ details.card summary{min-height:44px}
     <h2><span>乗車記録<small id="l-tip" hidden>押すと修正</small></span><span id="l-count"></span></h2>
     <div id="listwrap"></div>
     <button type="button" class="btn" id="rv-open">この日の日報を1枚で見る</button>
+    <button type="button" class="btn" id="mp-open" hidden>この日の乗車・降車を地図で見る</button>
 
     <details class="card" id="meta">
       <summary>乗務情報・目標 <span id="meta-sum">出庫・帰庫・メーター</span></summary>
@@ -527,6 +575,31 @@ details.card summary{min-height:44px}
       <button class="ib" id="lnext" aria-label="次へ">›</button>
     </div>
     <div class="card" id="lcard"></div>
+  </section>
+
+  <section id="v-map" hidden style="display:contents">
+    <div class="datebar">
+      <button class="ib" id="mpprev" aria-label="前の日">‹</button>
+      <div class="d" id="mplabel"></div>
+      <button class="ib" id="mpnext" aria-label="次の日">›</button>
+      <button class="ib txt" id="mptoday">今日</button>
+    </div>
+    <div class="chips" id="mpf" role="group" aria-label="地図に出す地点"></div>
+    <div class="mapbox" id="mapbox">
+      <div class="mapwrap">
+        <div id="map" role="region" aria-label="乗車・降車の地点の地図"></div>
+        <div class="mapnote" id="map-note" hidden></div>
+      </div>
+      <div class="mstep" id="mstep" aria-live="polite">
+        <button type="button" id="ms-prev" aria-label="前の案件">‹</button>
+        <div class="mt" id="ms-t"></div>
+        <button type="button" id="ms-next" aria-label="次の案件">›</button>
+        <button type="button" id="ms-all" hidden>全体</button>
+      </div>
+    </div>
+    <div class="lg mplg" id="mp-lg"><span><b class="pin pin-from mini">1</b>乗車地</span><span><b class="pin pin-to mini">1</b>降車地</span><span class="rt"><b class="ln ln-on"></b>お客様を乗せていた区間</span><span class="rt"><b class="ln"></b>空車で次の乗車地へ</span></div>
+    <div class="hint"><span id="mp-sum"></span></div>
+    <ul class="list" id="mp-list"></ul>
   </section>
 
   <div class="sync" id="sync">この端末に保存しています</div>
@@ -861,7 +934,7 @@ function renderReport(k){
   const tr=sorted(R.d.trips?R.d:{trips:[]});
   $('rv-body').innerHTML='<table class="rtable"><tbody>'+R.pairs.map(x=>'<tr><th>'+esc(x[0])+'</th><td>'+(x[1]?esc(x[1]):'—')+'</td></tr>').join('')+'</tbody></table>'+
     '<div class="rcap">休憩</div>'+(R.brs.length?'<table class="rtable"><tbody>'+R.brs.map(b=>'<tr><th>'+esc(b.s)+' 〜 '+esc(b.e||'')+'</th><td>'+(b.e?durTxt(brkLen(b)):'休憩中')+'</td></tr>').join('')+'</tbody></table>':'<div class="hint"><span>休憩の記録はありません。</span></div>')+
-    '<div class="rcap">乗車</div>'+(tr.length?'<table class="rtable"><tbody>'+tr.map(t=>'<tr><td class="tm">'+esc(t.t)+'</td><td class="tx">'+esc(t.from||'—')+(t.to?' → '+esc(t.to):'')+'<br><span style="color:var(--muted);font-size:13px">'+esc(PAYNAME[t.pay]||'現金')+(t.pax>1?'・'+t.pax+'名':'')+(t.km!=null?'・'+esc(t.km)+'km':'')+(R.EM[t.id]!=null?'・空車 '+R.EM[t.id]+'km':'')+(t.toll?'・高速 '+yen(t.toll):'')+'</span></td><td>'+yen(t.fare)+'</td></tr>').join('')+'</tbody></table>':'<div class="hint"><span>乗車の記録はありません。</span></div>');
+    '<div class="rcap">乗車</div>'+(tr.length?'<table class="rtable"><tbody>'+tr.map((t,i)=>'<tr><td class="tm"><span class="no">'+caseNo(k,i+1)+'</span>'+esc(t.t)+'</td><td class="tx">'+esc(t.from||'—')+(t.to?' → '+esc(t.to):'')+'<br><span style="color:var(--muted);font-size:13px">'+esc(PAYNAME[t.pay]||'現金')+(t.pax>1?'・'+t.pax+'名':'')+(t.km!=null?'・'+esc(t.km)+'km':'')+(R.EM[t.id]!=null?'・空車 '+R.EM[t.id]+'km':'')+(t.toll?'・高速 '+yen(t.toll):'')+'</span></td><td>'+yen(t.fare)+'</td></tr>').join('')+'</tbody></table>':'<div class="hint"><span>乗車の記録はありません。</span></div>');
   $('rv-csv').hidden=true;
 }
 function reportCsv(k){
@@ -1048,6 +1121,159 @@ async function soloSave(o){
   catch(e){if(e&&e.name==='AbortError')throw {code:'declined'}}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);
 }
+/* ===== Map of the day's points (stand-alone build) =====
+   Leaflet ships with the app (leaflet.js / leaflet.css next to index.html); tiles come from OpenStreetMap and need a signal.
+   Pickup = round green pin, drop-off = square red pin, both numbered in ride order; a dashed line joins the two ends of one ride. */
+let mapRoute=true;try{mapRoute=localStorage.getItem('taxi-nippo-route-v1')!=='0'}catch(e){}
+let mapDay=null,mapF='both',lmap=null,lLayer=null,leafletP=null,mapPins={};
+function loadLeaflet(){
+  if(window.L&&window.L.map)return Promise.resolve();
+  if(leafletP)return leafletP;
+  leafletP=new Promise((res,rej)=>{
+    const l=document.createElement('link');l.rel='stylesheet';l.href='leaflet.css';document.head.appendChild(l);
+    const sc=document.createElement('script');sc.src='leaflet.js';sc.onload=()=>res();sc.onerror=()=>{leafletP=null;sc.remove();rej()};document.head.appendChild(sc);
+  });
+  return leafletP;
+}
+const okLL=g=>Array.isArray(g)&&g.length===2&&isFinite(g[0])&&isFinite(g[1])&&Math.abs(g[0])<=90&&Math.abs(g[1])<=180;
+function mapNote(t){const n=$('map-note');n.textContent=t||'';n.hidden=!t}
+function renderMap(){
+  const k=mapDay||cur,dt=fromYmd(k),d=days[k],tr=d&&d.trips?sorted(d):[];
+  $('mplabel').textContent=(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）';
+  $('mptoday').hidden=k===defaultDate();
+  $('mpf').innerHTML=[['both','乗車と降車'],['from','乗車だけ'],['to','降車だけ']].map(x=>'<button type="button" class="chip" data-mpf="'+x[0]+'" aria-pressed="'+(x[0]===mapF)+'">'+x[1]+'</button>').join('')+(mapF==='both'?'<button type="button" class="chip" data-mpr aria-pressed="'+mapRoute+'">順路の線</button>':'');
+  $('mp-lg').classList.toggle('noroute',!(mapRoute&&mapF==='both'));
+  const rides=tr.map((t,i)=>({t:t,n:i+1,a:okLL(t.g1)?t.g1:null,b:okLL(t.g2)?t.g2:null}));
+  const withPos=rides.filter(r=>r.a||r.b),na=rides.filter(r=>r.a).length,nb=rides.filter(r=>r.b).length,none=rides.length-withPos.length;
+  $('mp-sum').textContent=!rides.length?'この日の乗車の記録はありません。':!withPos.length?'この日の乗車'+rides.length+'件には、位置の記録がありません。':
+    '乗車 '+na+'地点・降車 '+nb+'地点。ピンの数字は案件番号の末尾（その日に乗せた順番）です。'+(mapRoute&&mapF==='both'?'線は地点を順番に直線で結んだもので、実際に走った道ではありません。':'')+(none?'位置のない乗車が'+none+'件あり、地図には出ていません。':'')+'› で1件ずつ順番に見られます。下の一覧を押すと、その案件に移ります。';
+  $('mp-list').innerHTML=rides.map(r=>{const t=r.t,has=r.a||r.b;
+    return '<li><button type="button" class="trip'+(has?'':' nos')+'" data-mpt="'+esc(t.id)+'"'+(has?'':' disabled')+'><span class="t"><span class="no">'+caseNo(k,r.n)+'</span>'+esc(t.t)+'</span><span class="r">'+esc(t.from||'—')+'<i>→</i>'+esc(t.to||'—')+'</span><span class="f">'+yen(t.fare)+'</span><span class="m"><span>'+(r.a?'乗車地あり':'乗車地なし')+'</span><span>'+(r.b?'降車地あり':'降車地なし')+'</span><span>'+esc(PAYNAME[t.pay]||'現金')+'</span></span></button></li>'}).join('');
+  $('mp-list').hidden=!rides.length;
+  $('mapbox').hidden=!withPos.length;$('mp-lg').hidden=!withPos.length;
+  if(!withPos.length)return;
+  mapNote('地図を読み込んでいます…');
+  loadLeaflet().then(()=>{mapNote('');drawMap(rides,k)}).catch(()=>mapNote('地図を読み込めませんでした。電波のあるところで、アプリを開き直してください。'));
+}
+/* Base maps: 国土地理院の淡色地図 (Japanese labels, quiet colours, so pins and lines stand out) or OpenStreetMap. */
+const BASES={
+  pale:{u:'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',o:{minNativeZoom:5,maxNativeZoom:18,maxZoom:19,attribution:'出典：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院</a>'}},
+  osm:{u:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'}}};
+let mapBase='osm';try{if(localStorage.getItem('taxi-nippo-base-v1')==='pale')mapBase='pale'}catch(e){}
+let baseLayer=null,mapFocus=null,mapRides=[],mapLegs=[],mapBig=false,mapDrawnDay=null,ctlBig=null,ctlBase=null;
+function setBase(bk,auto){
+  mapBase=bk;if(!auto){try{localStorage.setItem('taxi-nippo-base-v1',bk)}catch(e){}}
+  if(baseLayer)lmap.removeLayer(baseLayer);
+  let ok=0,bad=0;baseLayer=L.tileLayer(BASES[bk].u,BASES[bk].o);
+  baseLayer.on('tileload',()=>{ok++});
+  baseLayer.on('tileerror',()=>{bad++;if(bk==='pale'&&!ok&&bad===6&&navigator.onLine!==false){setBase('osm',true);toast('淡色の地図を読み込めなかったので、標準の地図に切り替えました',false)}});
+  baseLayer.addTo(lmap);baseLayer.bringToBack();
+  if(ctlBase)ctlBase.textContent=bk==='pale'?'標準の地図':'淡色の地図';
+}
+function mapBounds(ids){const lls=[];ids.forEach(id=>(mapPins[id]||[]).forEach(m=>lls.push(m.getLatLng())));return lls}
+function fitAll(){
+  const lls=mapBounds(Object.keys(mapPins));
+  if(!lls.length){lmap.setView([35.6812,139.7671],11);return}
+  if(lls.length===1)lmap.setView(lls[0],16);else lmap.fitBounds(L.latLngBounds(lls),{padding:[34,34],maxZoom:16});
+}
+/* one case in view: its pickup and drop-off, plus where the car came from (the drop-off before) */
+function fitFocus(){
+  const i=mapRides.findIndex(r=>r.t.id===mapFocus);if(i<0)return fitAll();
+  const r=mapRides[i],lls=[r.a,r.b].filter(Boolean),pv=rideBefore(r);if(pv&&pv.b&&r.a)lls.push(pv.b);
+  if(lls.length===1)lmap.setView(lls[0],Math.max(lmap.getZoom(),16));else lmap.fitBounds(L.latLngBounds(lls),{padding:[48,48],maxZoom:17});
+}
+let allRides=[];
+const rideBefore=r=>{const i=allRides.indexOf(r);return i>0?allRides[i-1]:null};
+function applyFocus(){
+  Object.keys(mapPins).forEach(id=>mapPins[id].forEach(m=>{
+    const on=!mapFocus||id===mapFocus;m.setOpacity(on?1:.25);m.setZIndexOffset((id===mapFocus?3000:0)+(m.options.kind==='from'?100:0));
+    const el=m.getElement();if(el)el.classList.toggle('on',id===mapFocus);
+  }));
+  mapLegs.forEach(g=>{
+    const on=!mapFocus||g.to===mapFocus;
+    g.line.setStyle({opacity:on?g.op:.12});g.casing.setStyle({opacity:on?.95:0});if(g.arrow)g.arrow.setOpacity(on?1:.12);
+  });
+  renderStep();
+}
+function renderStep(){
+  const n=mapRides.length,i=mapRides.findIndex(r=>r.t.id===mapFocus),t=$('ms-t');
+  $('mstep').hidden=!n;
+  if(i<0){t.innerHTML='<b>全体（'+n+'件）</b><span>› を押すと、1件目から順番に見られます</span>'}
+  else{const r=mapRides[i],c=caseNos(mapDrawnDay)[r.t.id]||'';
+    t.innerHTML='<b>'+c+' '+esc(r.t.t)+'</b><span>'+(i+1)+'/'+n+'件目　'+esc(r.t.from||'—')+' → '+esc(r.t.to||'—')+'　¥'+yen(r.t.fare)+'</span>'}
+  $('ms-prev').disabled=i===0;$('ms-next').disabled=i===n-1;$('ms-all').hidden=i<0;
+}
+function setFocus(id,fit){mapFocus=id;applyFocus();if(fit){if(id)fitFocus();else fitAll()}}
+function stepFocus(d){
+  const n=mapRides.length;if(!n)return;let i=mapRides.findIndex(r=>r.t.id===mapFocus);
+  i=i<0?(d>0?0:n-1):Math.max(0,Math.min(n-1,i+d));setFocus(mapRides[i].t.id,true);
+}
+function toggleBig(force){
+  mapBig=typeof force==='boolean'?force:!mapBig;
+  $('mapbox').classList.toggle('big',mapBig);document.documentElement.classList.toggle('mapopen',mapBig);
+  if(ctlBig)ctlBig.textContent=mapBig?'元に戻す':'大きく';
+  if(lmap)setTimeout(()=>{lmap.invalidateSize();if(mapFocus)fitFocus();else fitAll()},60);
+}
+function drawMap(rides,k){
+  if(!lmap){
+    lmap=L.map('map',{zoomControl:true,attributionControl:true,tap:false});
+    lmap.attributionControl.setPrefix(false);
+    const C=L.Control.extend({options:{position:'topright'},onAdd(){
+      const box=L.DomUtil.create('div','mctl');
+      ctlBig=L.DomUtil.create('button','',box);ctlBig.type='button';ctlBig.textContent='大きく';
+      ctlBase=L.DomUtil.create('button','',box);ctlBase.type='button';
+      L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);
+      L.DomEvent.on(ctlBig,'click',()=>toggleBig());L.DomEvent.on(ctlBase,'click',()=>setBase(mapBase==='pale'?'osm':'pale'));
+      return box}});
+    new C().addTo(lmap);
+    setBase(mapBase,true);
+    lLayer=L.layerGroup().addTo(lmap);
+  }
+  if(mapDrawnDay!==k)mapFocus=null;mapDrawnDay=k;
+  lLayer.clearLayers();mapPins={};mapLegs=[];allRides=rides;mapRides=rides.filter(r=>r.a||r.b);
+  if(mapFocus&&!mapRides.some(r=>r.t.id===mapFocus))mapFocus=null;
+  const css=getComputedStyle(document.documentElement),tok=(n,f)=>(css.getPropertyValue(n)||f).trim(),lc=tok('--muted','#5a6375'),ac=tok('--accent','#0b7a5c');
+  const EM=emptyKm(days[k]),CN=caseNos(k);
+  const pop=(r,kind)=>'<b>'+CN[r.t.id]+'　'+esc(r.t.t)+'</b><br>'+(kind==='from'?'乗車':'降車')+'：'+esc((kind==='from'?r.t.from:r.t.to)||'地名なし')+'<br>'+(kind==='from'?'降車：'+esc(r.t.to||'—'):'乗車：'+esc(r.t.from||'—'))+'<br>¥'+yen(r.t.fare)+'　'+esc(PAYNAME[r.t.pay]||'現金')+((r.t.km!=null||EM[r.t.id]!=null)?'<br>'+(EM[r.t.id]!=null?'その前の空車 '+EM[r.t.id]+'km':'')+(r.t.km!=null&&EM[r.t.id]!=null?'・':'')+(r.t.km!=null?'実車 '+r.t.km+'km':''):'');
+  /* a leg of the route: a white outline under the line so it reads on any map, and an arrow halfway along */
+  const P=L.Projection.SphericalMercator;
+  const leg=(p,q,occ,toId)=>{
+    const casing=L.polyline([p,q],{color:'#ffffff',weight:occ?8:6,opacity:.95,interactive:false,lineCap:'round'}).addTo(lLayer);
+    const op=occ?.95:.9,line=L.polyline([p,q],occ?{color:ac,weight:4.5,opacity:op,interactive:false,lineCap:'round'}:{color:lc,weight:3,opacity:op,dashArray:'7 8',interactive:false}).addTo(lLayer);
+    const A=P.project(L.latLng(p)),B=P.project(L.latLng(q)),dx=B.x-A.x,dy=B.y-A.y;let arrow=null;
+    if(Math.abs(dx)+Math.abs(dy)>=1){const deg=Math.atan2(-dy,dx)*180/Math.PI,mid=P.unproject(L.point((A.x+B.x)/2,(A.y+B.y)/2));
+      arrow=L.marker(mid,{interactive:false,keyboard:false,zIndexOffset:-1000,icon:L.divIcon({className:'arw',iconSize:[18,18],iconAnchor:[9,9],
+        html:'<svg width="18" height="18" viewBox="0 0 18 18" style="transform:rotate('+deg.toFixed(1)+'deg)"><path d="M3 2.5 L16 9 L3 15.5 Z" fill="'+(occ?ac:lc)+'" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>'})}).addTo(lLayer)}
+    mapLegs.push({to:toId,occ:occ,op:op,line:line,casing:casing,arrow:arrow});
+  };
+  if(mapRoute&&mapF==='both')rides.forEach((r,i)=>{
+    if(r.a&&r.b)leg(r.a,r.b,true,r.t.id);
+    const nx=rides[i+1];if(nx&&r.b&&nx.a)leg(r.b,nx.a,false,nx.t.id);
+  });
+  rides.forEach(r=>{
+    const show={from:mapF!=='to'&&r.a,to:mapF!=='from'&&r.b};
+    ['from','to'].forEach(kind=>{
+      const ll=kind==='from'?r.a:r.b;if(!show[kind])return;
+      const m=L.marker(ll,{kind:kind,icon:L.divIcon({className:'pin pin-'+kind,html:String(r.n),iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-15]}),title:CN[r.t.id]+' '+(kind==='from'?'乗車':'降車'),keyboard:true,riseOnHover:true}).bindPopup(pop(r,kind)).addTo(lLayer);
+      m.on('click',()=>setFocus(r.t.id,false));
+      (mapPins[r.t.id]=mapPins[r.t.id]||[]).push(m);
+    });
+  });
+  setTimeout(()=>{
+    lmap.invalidateSize();applyFocus();
+    if(!Object.keys(mapPins).length){lmap.setView([35.6812,139.7671],11);mapNote('この表示では出す地点がありません。上のボタンで「乗車と降車」を選んでください。');return}
+    if(mapFocus)fitFocus();else fitAll();
+  },0);
+}
+function focusRide(id){
+  if(!lmap||!mapPins[id])return;
+  if(!mapBig)$('mapbox').scrollIntoView({block:'start',behavior:'smooth'});
+  setFocus(id,true);
+}
+/* Case number: the 日報's date (YYMMDD) and the ride's place in that day's time order, e.g. 261118-03.
+   The same number shows on the day screen, the table, the one-page report, the map and in CSV. */
+const caseNo=(k,n)=>k.slice(2,4)+k.slice(5,7)+k.slice(8,10)+'-'+(n<10?'0':'')+n;
+function caseNos(k){const m={},d=days[k];if(d&&Array.isArray(d.trips))sorted(d).forEach((t,i)=>{m[t.id]=caseNo(k,i+1)});return m}
 const docId=date=>'d'+date.replace(/-/g,'');
 function setSync(t){$('sync').textContent=t}
 function persist(date){
@@ -1175,9 +1401,10 @@ function renderDay(){
     w.innerHTML='<div class="blank"><b>この日の記録はまだありません</b><span>話した内容から料金・乗車地・降車地・支払方法・客層を読み取って記録します。天気は「時刻・客層・きっかけ・天気」を開いて選べます。下の例を押すと、読み取り方を試せます。</span>'+
       ['新宿駅から渋谷まで 2400円 カード','東京駅から羽田空港 8900円 高速1320円 2名','迎車 六本木から恵比寿 三千円 ペイペイ 観光客'].map(x=>'<button class="ex" data-ex="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div>';
   }else{
+    const CN=caseNos(cur);
     w.innerHTML='<ul class="list">'+sorted(d).reverse().map(t=>{
       const route=(t.from||t.to)?esc(t.from||'—')+(t.to?'<i>→</i>'+esc(t.to):''):'<span style="color:var(--muted);font-weight:400">場所なし</span>';
-      return '<li><button class="trip" data-id="'+esc(t.id)+'"><span class="t">'+esc(t.t)+'</span><span class="r">'+route+'</span><span class="f">'+yen(t.fare)+'</span><span class="m">'+(t.tin||t.tout?'<span>'+esc(t.tin||'—')+'→'+esc(t.tout||'—')+'</span>':'')+'<span>'+esc(PAYNAME[t.pay]||'現金')+'</span>'+(t.seg&&SEGNAME[t.seg]?'<span>'+SEGNAME[t.seg]+'</span>':'')+(t.src&&SRCNAME[t.src]?'<span>'+SRCNAME[t.src]+'</span>':'')+(t.pax>1?'<span>'+t.pax+'名</span>':'')+(t.km!=null?'<span>'+esc(t.km)+'km</span>':'')+(EMD[t.id]!=null?'<span>空車 '+EMD[t.id]+'km</span>':'')+(t.wx&&t.wx.w?'<span>'+esc(t.wx.w)+'</span>':'')+(t.mukae?'<span class="tag">迎車</span>':'')+(t.toll?'<span class="tag">高速 '+yen(t.toll)+'</span>':'')+(t.note?'<span>'+esc(t.note)+'</span>':'')+'</span></button></li>';
+      return '<li><button class="trip" data-id="'+esc(t.id)+'"><span class="t"><span class="no">'+(CN[t.id]||'')+'</span>'+esc(t.t)+'</span><span class="r">'+route+'</span><span class="f">'+yen(t.fare)+'</span><span class="m">'+(t.tin||t.tout?'<span>'+esc(t.tin||'—')+'→'+esc(t.tout||'—')+'</span>':'')+'<span>'+esc(PAYNAME[t.pay]||'現金')+'</span>'+(t.seg&&SEGNAME[t.seg]?'<span>'+SEGNAME[t.seg]+'</span>':'')+(t.src&&SRCNAME[t.src]?'<span>'+SRCNAME[t.src]+'</span>':'')+(t.pax>1?'<span>'+t.pax+'名</span>':'')+(t.km!=null?'<span>'+esc(t.km)+'km</span>':'')+(EMD[t.id]!=null?'<span>空車 '+EMD[t.id]+'km</span>':'')+(t.wx&&t.wx.w?'<span>'+esc(t.wx.w)+'</span>':'')+(t.mukae?'<span class="tag">迎車</span>':'')+(t.toll?'<span class="tag">高速 '+yen(t.toll)+'</span>':'')+(t.note?'<span>'+esc(t.note)+'</span>':'')+'</span></button></li>';
     }).join('')+'</ul>';
   }
   const set=(id,v)=>{const el=$(id);if(document.activeElement!==el)el.value=v==null?'':v};
@@ -1339,19 +1566,19 @@ function renderList(){
   let keys;
   if(sc==='day'){const dt=fromYmd(listDay);$('llabel').textContent=(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）';keys=days[listDay]&&days[listDay].trips&&days[listDay].trips.length?[listDay]:[]}
   else{const a=listMonth.split('-');$('llabel').textContent=a[0]+'年'+(+a[1])+'月';keys=monthDays(listMonth)}
-  const rows=[];keys.forEach(k=>sorted(days[k]).forEach((t,i)=>rows.push({k:k,t:t,first:i===0})));
+  const rows=[];keys.forEach(k=>sorted(days[k]).forEach((t,i)=>rows.push({k:k,t:t,n:i+1,first:i===0})));
   listRows=rows.map(r=>({k:r.k,id:r.t.id}));
   if(!rows.length){$('lcard').innerHTML='<div class="hint"><span>'+(sc==='day'?'この日':'この月')+'の乗車記録はまだありません。</span></div>';return}
   const all=rows.map(r=>r.t),T=totals(all),cols=LCOLS;
   const EM={};keys.forEach(k=>Object.assign(EM,emptyKm(days[k])));
   const cell=(c,t)=>c==='empty'?(EM[t.id]!=null?EM[t.id]:''):c==='tin'||c==='tout'?esc(t[c]||''):c==='o1'||c==='o2'?(t[c]!=null?esc(t[c]):''):c==='from'?esc(t.from||'—'):c==='to'?esc(t.to||'—'):c==='fare'?yen(t.fare):c==='pay'?esc(PAYNAME[t.pay]||'現金'):c==='pax'?(t.pax||1):c==='km'?(t.km!=null?esc(t.km):''):c==='toll'?(t.toll?yen(t.toll):''):c==='mukae'?(t.mukae?'あり':''):c==='seg'?(SEGNAME[t.seg]||''):c==='src'?(SRCNAME[t.src]||''):c==='wx'?esc((t.wx&&t.wx.w)||''):esc(t.note||'');
   const body=rows.map((r,i)=>{
-    const dt=fromYmd(r.k),lead=sc==='day'?String(i+1):(r.first?dt.getDate()+'日('+WD[dt.getDay()]+')':'');
+    const dt=fromYmd(r.k),lead=(sc!=='day'&&r.first?dt.getDate()+'日('+WD[dt.getDay()]+')':'')+'<span class="cn">'+caseNo(r.k,r.n)+'</span>';
     return '<tr tabindex="0" data-id="'+esc(r.t.id)+'" data-date="'+r.k+'"'+(sc==='month'&&r.first?' class="dsep"':'')+'><td class="st" data-f="t"><small>'+lead+'</small><b>'+esc(r.t.t)+'</b></td>'+cols.map(c=>'<td class="'+c[2]+'" data-f="'+c[0]+'">'+cell(c[0],r.t)+'</td>').join('')+'</tr>';
   }).join('');
   const foot='<tr><td class="st">合計</td>'+cols.map(c=>'<td class="'+c[2]+'">'+(c[0]==='from'?T.n+'回':c[0]==='fare'?yen(T.sum):c[0]==='km'&&T.km?Math.round(T.km*10)/10:c[0]==='toll'&&T.toll?yen(T.toll):'')+'</td>').join('')+'</tr>';
   $('lcard').innerHTML='<div class="kv"><span>回数<b>'+T.n+'</b></span><span>営収<b>'+yen(T.sum)+'</b></span>'+(T.km?'<span>実車<b>'+Math.round(T.km*10)/10+'</b> km</span>':'')+'</div>'+
-    '<div class="tscroll"><table class="ltable '+sc+'"><thead><tr><th class="st">'+(sc==='day'?'時刻':'日付・時刻')+'</th>'+cols.map(c=>'<th class="'+(c[2]==='n'?'n':'')+'">'+c[1]+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'+
+    '<div class="tscroll"><table class="ltable '+sc+'"><thead><tr><th class="st">'+(sc==='day'?'No.・時刻':'日付・No.・時刻')+'</th>'+cols.map(c=>'<th class="'+(c[2]==='n'?'n':'')+'">'+c[1]+'</th>').join('')+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'+
     '<div class="hint"><span>直したいマスを押すと、その項目だけ修正できます。空欄のマスも押せます。表は横に動かせます。</span></div>';
   markCell();
 }
@@ -1501,7 +1728,7 @@ function toast(text,undo){
 }
 function openEdit(id,date){
   const ed=date||cur,d=day(ed),t=d.trips.find(x=>x.id===id);if(!t)return;
-  editDate=ed;{const dt=fromYmd(ed);$('sh-h').textContent='乗車記録を修正'+(ed!==cur?'（'+(dt.getMonth()+1)+'月'+dt.getDate()+'日）':'')}
+  editDate=ed;{const dt=fromYmd(ed);$('sh-h').textContent='乗車記録を修正　'+(caseNos(ed)[id]||'')+(ed!==cur?'（'+(dt.getMonth()+1)+'月'+dt.getDate()+'日）':'')}
   editing=id;$('e-t').value=t.t||'';$('e-fare').value=t.fare;$('e-from').value=t.from||'';$('e-to').value=t.to||'';
   $('e-pay').value=t.pay||'cash';$('e-pax').value=t.pax||1;$('e-toll').value=t.toll||'';$('e-mukae').value=t.mukae?'1':'0';$('e-note').value=t.note||'';$('e-seg').value=t.seg||'';$('e-src').value=t.src||'';$('e-km').value=t.km!=null?t.km:'';$('e-o1').value=t.o1!=null?t.o1:'';$('e-o2').value=t.o2!=null?t.o2:'';$('e-t1').value=t.tin||'';$('e-t2').value=t.tout||'';{const w=(t.wx&&t.wx.w)||'';$('e-w').innerHTML='<option value="">未入力</option>'+(w&&!WXS.includes(w)?[w]:[]).concat(WXS).map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('');$('e-w').value=w}
   $('e-del').textContent='削除';$('e-del').dataset.armed='';$('ov').hidden=false;syncBar();
@@ -1509,18 +1736,20 @@ function openEdit(id,date){
 function closeEdit(){editing=null;$('ov').hidden=true;syncBar()}
 function csvFor(ym){
   const q=v=>{v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-  const rows=[['日付','曜日','時刻','乗車時刻','降車時刻','乗車地','降車地','人数','料金','高速代','乗車時メーター','降車時メーター','空車km','実車km','支払方法','客層','きっかけ','天気','迎車','メモ','乗車緯度','乗車経度','降車緯度','降車経度']];
-  (Array.isArray(ym)?ym:monthDays(ym)).forEach(k=>{const dt=fromYmd(k),EM=emptyKm(days[k]);sorted(days[k]).forEach(t=>rows.push([k.replace(/-/g,'/'),WD[dt.getDay()],t.t,t.tin||'',t.tout||'',t.from,t.to,t.pax||1,t.fare||0,t.toll||0,t.o1!=null?t.o1:'',t.o2!=null?t.o2:'',EM[t.id]!=null?EM[t.id]:'',t.km!=null?t.km:'',PAYNAME[t.pay]||'現金',SEGNAME[t.seg]||'',SRCNAME[t.src]||'',(t.wx&&t.wx.w)||'',t.mukae?'あり':'',t.note||'',t.g1?t.g1[0]:'',t.g1?t.g1[1]:'',t.g2?t.g2[0]:'',t.g2?t.g2[1]:'']))});
+  const rows=[['日付','曜日','案件No','時刻','乗車時刻','降車時刻','乗車地','降車地','人数','料金','高速代','乗車時メーター','降車時メーター','空車km','実車km','支払方法','客層','きっかけ','天気','迎車','メモ','乗車緯度','乗車経度','降車緯度','降車経度']];
+  (Array.isArray(ym)?ym:monthDays(ym)).forEach(k=>{const dt=fromYmd(k),EM=emptyKm(days[k]);sorted(days[k]).forEach((t,i)=>rows.push([k.replace(/-/g,'/'),WD[dt.getDay()],caseNo(k,i+1),t.t,t.tin||'',t.tout||'',t.from,t.to,t.pax||1,t.fare||0,t.toll||0,t.o1!=null?t.o1:'',t.o2!=null?t.o2:'',EM[t.id]!=null?EM[t.id]:'',t.km!=null?t.km:'',PAYNAME[t.pay]||'現金',SEGNAME[t.seg]||'',SRCNAME[t.src]||'',(t.wx&&t.wx.w)||'',t.mukae?'あり':'',t.note||'',t.g1?t.g1[0]:'',t.g1?t.g1[1]:'',t.g2?t.g2[0]:'',t.g2?t.g2[1]:'']))});
   return {n:rows.length-1,text:'﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'};
 }
 function route(){
-  const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':'day';
-  [['day','v-day','tab-day'],['list','v-list','tab-list'],['month','v-month','tab-month'],['year','v-year','tab-year']].forEach(([k,v,t])=>{
+  const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
+  [['day','v-day','tab-day'],['list','v-list','tab-list'],['month','v-month','tab-month'],['year','v-year','tab-year'],['map','v-map','tab-map']].forEach(([k,v,t])=>{
     const on=k===h;$(v).hidden=!on;$(v).style.display=on?'contents':'none';
     if(on)$(t).setAttribute('aria-current','page');else $(t).removeAttribute('aria-current');
   });
   if(h==='month'){curMonth=pendMonth||cur.slice(0,7);pendMonth=null;$('csvbox').hidden=true;renderMonth()}
   if(h==='list'){listDay=cur;listMonth=cur.slice(0,7);renderList()}
+  if(h==='map'){mapDay=mapDay||cur;renderMap()}
+  else if(mapBig)toggleBig(false);
   if(h==='year'){curYear=yMode==='fy'?fyOf(curMonth):curMonth.slice(0,4);$('y-csvbox').hidden=true;renderYear()}
   syncBar();
 }
@@ -1605,6 +1834,18 @@ $('sh-odo').addEventListener('blur',()=>{
   if(v!=null){d[shAsk==='start'?'odoStart':'odoEnd']=v;persist(cur)}
   shAsk='';$('sh-odo').value='';render();
 });
+$('mp-open').addEventListener('click',()=>{mapDay=cur;location.hash='#map'});
+$('mpprev').addEventListener('click',()=>{mapDay=shift(mapDay||cur,-1);mapFocus=null;renderMap()});
+$('mpnext').addEventListener('click',()=>{mapDay=shift(mapDay||cur,1);mapFocus=null;renderMap()});
+$('mptoday').addEventListener('click',()=>{mapDay=defaultDate();renderMap()});
+$('mpf').addEventListener('click',e=>{
+  if(e.target.closest('[data-mpr]')){mapRoute=!mapRoute;try{localStorage.setItem('taxi-nippo-route-v1',mapRoute?'1':'0')}catch(x){}renderMap();return}
+  const b=e.target.closest('[data-mpf]');if(!b||b.dataset.mpf===mapF)return;mapF=b.dataset.mpf;renderMap()});
+$('mp-list').addEventListener('click',e=>{const b=e.target.closest('[data-mpt]');if(b)focusRide(b.dataset.mpt)});
+$('ms-prev').addEventListener('click',()=>stepFocus(-1));
+$('ms-next').addEventListener('click',()=>stepFocus(1));
+$('ms-all').addEventListener('click',()=>setFocus(null,true));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mapBig)toggleBig(false)});
 $('rv-open').addEventListener('click',()=>{renderReport(cur);$('rv').hidden=false;$('toast').hidden=true;syncBar()});
 $('rv-close').addEventListener('click',()=>{$('rv').hidden=true;syncBar()});
 $('rv').addEventListener('click',e=>{if(e.target===$('rv')){$('rv').hidden=true;syncBar()}});
@@ -1815,6 +2056,7 @@ if(window.claude&&window.claude.use){
 }
 if(SOLO){
   wireDownloads({save:soloSave});
+  $('tab-map').hidden=false;$('mp-open').hidden=false;
   $('geo-box').hidden=false;$('geo-credit').hidden=false;$('geo-toggle').setAttribute('aria-pressed',String(geo.on));
   setSync('この端末に保存しています（Claudeには保存されません。ときどきバックアップを取ってください）');
   $('geochips').addEventListener('click',e=>{
