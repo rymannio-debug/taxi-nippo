@@ -1348,7 +1348,7 @@ function goalUI(pfx,goal,sum){
 }
 /* ---------- render ---------- */
 const anyTrip=()=>Object.keys(days).some(k=>days[k]&&days[k].trips&&days[k].trips.length);
-function render(){renderDay();renderMonth();renderYear();renderList();if(!helpTouched)$('help').open=!anyTrip()}
+function render(){renderDay();renderMonth();renderYear();renderList()}
 /* When the page comes back to the front on a new day, move to that day's report, unless the driver is in the middle of something. */
 function followDate(){
   const dd=defaultDate();
