@@ -301,13 +301,22 @@ body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
 .rtable td.tx{font-family:var(--body);font-size:15px;text-align:left;overflow-wrap:anywhere}
 .rtable td.tm{text-align:left;white-space:nowrap;color:var(--muted)}
 .rcap{font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:-8px}
+#rv-note{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-weight:700;line-height:1.45}
+#rv-note span{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
+#rv-map img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--field)}
+#rv-map .mnote{font-size:13px;color:var(--muted);margin-top:4px}
+#rv-imgrow .btn{flex:1 1 0}
+#mp-img{width:100%;margin-top:4px}
 #rv-csv{width:100%;height:120px;font-size:12px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px}
 /* v26: backup and restore of every record */
 #bk>*+*{margin-top:10px}
 #bk .cap{margin:16px 0 0}
 #bk label.btn{display:flex;align-items:center;justify-content:center;cursor:pointer}
 #bk-text{width:100%;height:92px;font-size:12px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px;color:var(--ink)}
-#bk-confirm .btnrow{margin-top:6px}
+#bk-confirm .btnrow,#del-confirm .btnrow{margin-top:6px}
+#del-go{color:var(--danger);font-weight:700}
+#del-dates[hidden],#del-tow[hidden],#del-allopt[hidden]{display:none}
+#del-undo{width:100%}
 #bk-drive{width:100%}
 #geo-box{display:flex;flex-direction:column;gap:12px}
 #geo-msg{padding:0}
@@ -489,7 +498,7 @@ html.mapopen,html.mapopen body{overflow:hidden}
     </details>
 
     <details class="card" id="bk">
-      <summary>バックアップ <span>全記録の保存と復元</span></summary>
+      <summary>バックアップ <span>記録の保存・復元・消去</span></summary>
       <div class="hint"><span id="bk-info"></span></div>
       <div class="btnrow"><button type="button" class="btn pri" id="bk-save" hidden>バックアップを保存</button><button type="button" class="btn" id="bk-copy">バックアップをコピー</button></div>
       <button type="button" class="btn" id="bk-drive" hidden>Googleドライブに保存</button>
@@ -504,6 +513,18 @@ html.mapopen,html.mapopen body{overflow:hidden}
       <div class="cmdbox" id="bk-confirm" hidden></div>
       <button type="button" class="btn" id="bk-undo" hidden>直前の復元を取り消す</button>
       <div class="hint" id="bk-msg"><span></span></div>
+      <div class="cap">記録を消す</div>
+      <div class="hint"><span>消す範囲を選び、「消す記録を確かめる」を押します。消したすぐあとなら「消した記録を戻す」で戻せますが、念のため先に「バックアップを保存」をしてください。</span></div>
+      <div class="chips" id="del-mode" role="group" aria-label="消す範囲"><button type="button" class="chip" data-del="day" aria-pressed="true">1日分</button><button type="button" class="chip" data-del="range" aria-pressed="false">期間</button><button type="button" class="chip" data-del="all" aria-pressed="false">全部</button></div>
+      <div class="grid2" id="del-dates">
+        <label class="f" id="del-fromw"><span id="del-froml">消す日</span><input type="date" id="del-from"></label>
+        <label class="f" id="del-tow" hidden>終了日<input type="date" id="del-to"></label>
+      </div>
+      <div id="del-allopt" hidden><button type="button" class="chip" id="del-goals" aria-pressed="false">目標の設定も消す</button></div>
+      <button type="button" class="btn" id="del-check">消す記録を確かめる</button>
+      <div class="cmdbox" id="del-confirm" hidden></div>
+      <button type="button" class="btn" id="del-undo" hidden>消した記録を戻す</button>
+      <div class="hint" id="del-msg"><span></span></div>
     </details>
   </section>
 
@@ -600,6 +621,8 @@ html.mapopen,html.mapopen body{overflow:hidden}
     <div class="lg mplg" id="mp-lg"><span><b class="pin pin-from mini">1</b>乗車地</span><span><b class="pin pin-to mini">1</b>降車地</span><span class="rt"><b class="ln ln-on"></b>お客様を乗せていた区間</span><span class="rt"><b class="ln"></b>空車で次の乗車地へ</span></div>
     <div class="hint"><span id="mp-sum"></span></div>
     <ul class="list" id="mp-list"></ul>
+    <button type="button" class="btn" id="mp-img" hidden>この日の地図とまとめを画像で保存</button>
+    <div class="hint" id="mp-img-msg" hidden><span></span></div>
   </section>
 
   <div class="sync" id="sync">この端末に保存しています</div>
@@ -643,6 +666,9 @@ html.mapopen,html.mapopen body{overflow:hidden}
 <div class="ov" id="rv" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rv-h">
     <h3 id="rv-h"></h3>
+    <div id="rv-note" hidden></div>
+    <div id="rv-map" hidden><img id="rv-mapimg" alt="この日の順路の地図"><div class="mnote" id="rv-mapnote"></div></div>
+    <div class="btnrow" id="rv-imgrow" hidden><button type="button" class="btn" id="rv-tomap" hidden>地図で詳しく見る</button><button type="button" class="btn pri" id="rv-img" hidden>画像で保存</button></div>
     <div id="rv-body"></div>
     <textarea id="rv-csv" hidden readonly aria-label="日報のCSVデータ"></textarea>
     <div class="hint" id="rv-msg"><span>会社の日報に写すときは、この画面を上から読みます。CSVにも同じ内容が入ります。</span></div>
@@ -1056,6 +1082,59 @@ function undoRestore(){
   try{localStorage.removeItem(LSUNDO)}catch(e){}
   saveLocal();render();pushDays(ks);bkMsg('復元する前の状態に戻しました。');
 }
+/* ===== Deleting records =====
+   One day, a period, or everything. The days are emptied (not removed), so the empty copy also reaches Claude and other devices.
+   What was there is kept on this device until the next deletion, so 「消した記録を戻す」 can put it back. Goals stay. */
+const LSDEL='taxi-nippo-del-v1';
+let delMode='day',delPending=null,delGoals=false;
+const hasGoals=()=>!!(settings.dayGoal||settings.monthGoal||settings.breakGoal);
+const delMsg=t=>{$('del-msg').firstElementChild.textContent=t};
+const emptyDay=k=>({type:'day',date:k,trips:[],breaks:[],startTime:'',endTime:'',odoStart:null,odoEnd:null});
+function delUi(){
+  $('del-mode').querySelectorAll('[data-del]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.del===delMode)));
+  $('del-dates').hidden=delMode==='all';$('del-allopt').hidden=delMode!=='all';$('del-goals').setAttribute('aria-pressed',String(delGoals));$('del-tow').hidden=delMode!=='range';
+  $('del-froml').textContent=delMode==='range'?'開始日':'消す日';
+  if(!$('del-from').value)$('del-from').value=cur;
+  if(!$('del-to').value)$('del-to').value=cur;
+  let u=false;try{u=!!localStorage.getItem(LSDEL)}catch(e){}$('del-undo').hidden=!u;
+}
+function delTargets(){
+  const all=Object.keys(days).filter(k=>hasContent(days[k])).sort();
+  if(delMode==='all')return {ks:all};
+  const a=$('del-from').value,b=delMode==='range'?$('del-to').value:a;
+  if(!/^\d{4}-\d\d-\d\d$/.test(a)||!/^\d{4}-\d\d-\d\d$/.test(b))return {err:'日付を入れてください。'};
+  if(a>b)return {err:'開始日が終了日よりあとになっています。'};
+  return {ks:all.filter(k=>k>=a&&k<=b),a:a,b:b};
+}
+function delCheck(){
+  const T=delTargets(),box=$('del-confirm');
+  if(T.err){delPending=null;box.hidden=true;delMsg(T.err);return}
+  const g=delMode==='all'&&delGoals&&hasGoals();
+  if(!T.ks.length&&!g){delPending=null;box.hidden=true;delMsg(delMode==='all'?'消す記録はありません。':'その日付には記録がありません。');return}
+  const c=bkCount(Object.fromEntries(T.ks.map(k=>[k,days[k]])));
+  delPending={ks:T.ks,goals:g};delMsg('');
+  const what=c.ks.length?'乗車記録、出庫・帰庫、休憩'+(g?'と、目標の設定':'')+'が消えます。':'目標の設定が消えます。';
+  box.innerHTML='<span>'+(delMode==='all'?'全部の記録':'消す記録')+'</span><b>'+(c.txt?esc(c.txt):'記録はありません')+(g?'＋目標の設定':'')+'</b><em>'+what+(g?'':'目標の設定は残ります。')+(col?'Claudeに保存した分と、ほかの端末の記録も消えます。':'')+'</em><div class="btnrow"><button type="button" class="btn" data-dl="no">やめる</button><button type="button" class="btn" id="del-go" data-dl="yes">'+(delMode==='all'?'全部消す':c.ks.length+'日分を消す')+'</button></div>';
+  box.hidden=false;box.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function doDelete(){
+  if(!delPending)return;const ks=delPending.ks,g=delPending.goals,old={};
+  ks.forEach(k=>{old[k]=JSON.parse(JSON.stringify(days[k]))});
+  let kept=true;try{localStorage.setItem(LSDEL,JSON.stringify(g?{days:old,settings:settings}:{days:old}))}catch(e){kept=false}
+  ks.forEach(k=>{days[k]=emptyDay(k)});
+  if(g){settings={dayGoal:null,monthGoal:null,breakGoal:null};saveSettings();delGoals=false}
+  saveLocal();delPending=null;$('del-confirm').hidden=true;render();pushDays(ks);delUi();bkInfo();
+  delMsg((ks.length?ks.length+'日分の記録'+(g?'と目標の設定':''):'目標の設定')+'を消しました。'+(kept?'間違えたときは「消した記録を戻す」で戻せます。':'この端末の空きが足りず、消す前の記録は残せませんでした。'));
+}
+function undoDelete(){
+  let u=null;try{u=JSON.parse(localStorage.getItem(LSDEL)||'null')}catch(e){}
+  if(!u||!u.days){delUi();return}
+  const ks=Object.keys(u.days).sort();
+  ks.forEach(k=>{if(u.days[k])days[k]=u.days[k]});
+  if(u.settings){settings={dayGoal:u.settings.dayGoal||null,monthGoal:u.settings.monthGoal||null,breakGoal:u.settings.breakGoal||null};saveSettings()}
+  try{localStorage.removeItem(LSDEL)}catch(e){}
+  saveLocal();render();pushDays(ks);delUi();bkInfo();delMsg('消した記録'+(u.settings?'と目標の設定':'')+'を戻しました。');
+}
 /* ===== Stand-alone build =====
    The same page opened outside Claude (its own https address) has no Claude runtime. There it may ask the phone for its position,
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
@@ -1116,9 +1195,9 @@ function capture(which,manual){
   },{enableHighAccuracy:true,timeout:12000,maximumAge:3000});
 }
 async function soloSave(o){
-  const type=/\.json$/.test(o.filename)?'application/json':'text/csv',blob=new Blob([o.data],{type:type});
+  const type=/\.json$/.test(o.filename)?'application/json':/\.png$/.test(o.filename)?'image/png':'text/csv',blob=o.data instanceof Blob?o.data:new Blob([o.data],{type:type});
   try{const f=new File([blob],o.filename,{type:type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f]});return}}
-  catch(e){if(e&&e.name==='AbortError')throw {code:'declined'}}
+  catch(e){if(e&&e.name==='AbortError')throw {code:'declined'};if(e&&e.name==='NotAllowedError')throw {code:'again'}}
   const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=o.filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);
 }
 /* ===== Map of the day's points (stand-alone build) =====
@@ -1149,7 +1228,7 @@ function renderMap(){
     '乗車 '+na+'地点・降車 '+nb+'地点。ピンの数字は案件番号の末尾（その日に乗せた順番）です。'+(mapRoute&&mapF==='both'?'線は地点を順番に直線で結んだもので、実際に走った道ではありません。':'')+(none?'位置のない乗車が'+none+'件あり、地図には出ていません。':'')+'› で1件ずつ順番に見られます。下の一覧を押すと、その案件に移ります。';
   $('mp-list').innerHTML=rides.map(r=>{const t=r.t,has=r.a||r.b;
     return '<li><button type="button" class="trip'+(has?'':' nos')+'" data-mpt="'+esc(t.id)+'"'+(has?'':' disabled')+'><span class="t"><span class="no">'+caseNo(k,r.n)+'</span>'+esc(t.t)+'</span><span class="r">'+esc(t.from||'—')+'<i>→</i>'+esc(t.to||'—')+'</span><span class="f">'+yen(t.fare)+'</span><span class="m"><span>'+(r.a?'乗車地あり':'乗車地なし')+'</span><span>'+(r.b?'降車地あり':'降車地なし')+'</span><span>'+esc(PAYNAME[t.pay]||'現金')+'</span></span></button></li>'}).join('');
-  $('mp-list').hidden=!rides.length;
+  $('mp-list').hidden=!rides.length;$('mp-img').hidden=!dlNs||!rides.length;$('mp-img-msg').hidden=true;
   $('mapbox').hidden=!withPos.length;$('mp-lg').hidden=!withPos.length;
   if(!withPos.length)return;
   mapNote('地図を読み込んでいます…');
@@ -1269,6 +1348,132 @@ function focusRide(id){
   if(!lmap||!mapPins[id])return;
   if(!mapBig)$('mapbox').scrollIntoView({block:'start',behavior:'smooth'});
   setFocus(id,true);
+}
+/* ===== The day in one picture =====
+   After 帰庫 the day's report opens by itself. In the stand-alone build it shows the day's route on a map, and 「画像で保存」 turns the
+   numbers, the route and the rides into one PNG to keep (on an iPhone: 共有 →「画像を保存」 puts it in Photos).
+   The map is drawn here from map tiles (OpenStreetMap or 国土地理院), fetched with CORS so the picture can be saved;
+   a tile that does not come leaves a plain background, and the lines and pins are still drawn. */
+let dlNs=null,rvDay=null,imgJob=null;
+const TILES={osm:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',pale:'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'};
+const TILE_CREDIT={osm:'© OpenStreetMap contributors',pale:'出典：国土地理院'};
+const IMGF='-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif';
+function dayRides(k){const d=days[k],tr=d&&d.trips?sorted(d):[];return tr.map((t,i)=>({t:t,n:i+1,a:okLL(t.g1)?t.g1:null,b:okLL(t.g2)?t.g2:null}))}
+const hasPos=k=>dayRides(k).some(r=>r.a||r.b);
+const wx=(lo,z)=>(lo+180)/360*256*Math.pow(2,z);
+const wy=(la,z)=>{const s=Math.sin(Math.max(-85,Math.min(85,la))*Math.PI/180);return (0.5-Math.log((1+s)/(1-s))/(4*Math.PI))*256*Math.pow(2,z)};
+function tileImg(u){return new Promise(res=>{const im=new Image();im.crossOrigin='anonymous';const tm=setTimeout(()=>{im.src='';res(null)},9000);im.onload=()=>{clearTimeout(tm);res(im)};im.onerror=()=>{clearTimeout(tm);res(null)};im.src=u})}
+/* draws the route into the box X,Y,W,H of ctx. S = image pixels per map pixel (2 = sharp like a phone screen) */
+async function drawRoute(ctx,rides,X,Y,W,H,S){
+  const pts=[];rides.forEach(r=>{if(r.a)pts.push(r.a);if(r.b)pts.push(r.b)});if(!pts.length)return null;
+  const w=W/S,h=H/S,pad=34;let z=16;
+  for(;z>4;z--){const xs=pts.map(p=>wx(p[1],z)),ys=pts.map(p=>wy(p[0],z));if(Math.max(...xs)-Math.min(...xs)<=w-2*pad&&Math.max(...ys)-Math.min(...ys)<=h-2*pad)break}
+  const xs=pts.map(p=>wx(p[1],z)),ys=pts.map(p=>wy(p[0],z)),ox=(Math.max(...xs)+Math.min(...xs))/2-w/2,oy=(Math.max(...ys)+Math.min(...ys))/2-h/2;
+  ctx.save();ctx.beginPath();ctx.rect(X,Y,W,H);ctx.clip();ctx.fillStyle='#ecebe7';ctx.fillRect(X,Y,W,H);
+  const base=TILES[mapBase]?mapBase:'osm',n=Math.pow(2,z),jobs=[];
+  for(let tx=Math.floor(ox/256);tx<=Math.floor((ox+w)/256);tx++)for(let ty=Math.floor(oy/256);ty<=Math.floor((oy+h)/256);ty++){
+    if(ty<0||ty>=n)continue;const u=TILES[base].replace('{z}',z).replace('{x}',((tx%n)+n)%n).replace('{y}',ty),dx=X+(tx*256-ox)*S,dy=Y+(ty*256-oy)*S;
+    jobs.push(tileImg(u).then(im=>{if(!im)return false;try{ctx.drawImage(im,dx,dy,256*S+.5,256*S+.5);return true}catch(e){return false}}));
+  }
+  const got=await Promise.all(jobs),ok=got.filter(Boolean).length;
+  const P=g=>[X+(wx(g[1],z)-ox)*S,Y+(wy(g[0],z)-oy)*S],AC='#0b7a5c',GR='#5a6375',RD='#b93426';
+  const leg=(p,q,occ)=>{
+    const A=P(p),B=P(q);
+    ctx.lineCap='round';ctx.setLineDash([]);ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=(occ?8:6)*S;ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();
+    ctx.strokeStyle=occ?AC:GR;ctx.lineWidth=(occ?4.5:3)*S;ctx.setLineDash(occ?[]:[7*S,8*S]);ctx.lineCap=occ?'round':'butt';ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();ctx.setLineDash([]);
+    const dx=B[0]-A[0],dy=B[1]-A[1];if(Math.hypot(dx,dy)<24*S)return;
+    ctx.save();ctx.translate((A[0]+B[0])/2,(A[1]+B[1])/2);ctx.rotate(Math.atan2(dy,dx));ctx.beginPath();ctx.moveTo(-6.5*S,-6.5*S);ctx.lineTo(6.5*S,0);ctx.lineTo(-6.5*S,6.5*S);ctx.closePath();
+    ctx.fillStyle=occ?AC:GR;ctx.strokeStyle='#fff';ctx.lineWidth=1.8*S;ctx.lineJoin='round';ctx.fill();ctx.stroke();ctx.restore();
+  };
+  if(mapRoute)rides.forEach((r,i)=>{if(r.a&&r.b)leg(r.a,r.b,true);const nx=rides[i+1];if(nx&&r.b&&nx.a)leg(r.b,nx.a,false)});
+  const pin=(g,num,kind)=>{const c=P(g),R=14*S;ctx.save();ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=4*S;ctx.shadowOffsetY=1*S;ctx.fillStyle=kind==='from'?AC:RD;ctx.beginPath();
+    if(kind==='from')ctx.arc(c[0],c[1],R,0,Math.PI*2);else{const r=6*S,x=c[0]-R,y=c[1]-R,d=2*R;ctx.moveTo(x+r,y);ctx.arcTo(x+d,y,x+d,y+d,r);ctx.arcTo(x+d,y+d,x,y+d,r);ctx.arcTo(x,y+d,x,y,r);ctx.arcTo(x,y,x+d,y,r);ctx.closePath()}
+    ctx.fill();ctx.restore();ctx.strokeStyle='#fff';ctx.lineWidth=2*S;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='700 '+(num>9?13:15)*S+'px '+IMGF;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(num),c[0],c[1]+.5*S)};
+  rides.forEach(r=>{if(r.b)pin(r.b,r.n,'to')});rides.forEach(r=>{if(r.a)pin(r.a,r.n,'from')});
+  const cr=TILE_CREDIT[base];ctx.font='400 '+11*S+'px '+IMGF;const cw=ctx.measureText(cr).width+10*S;
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(X+W-cw,Y+H-18*S,cw,18*S);ctx.fillStyle='#333';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(cr,X+W-5*S,Y+H-9*S);
+  ctx.restore();
+  return {ok:ok,total:jobs.length};
+}
+function clip(ctx,t,max){t=String(t||'');if(ctx.measureText(t).width<=max)return t;while(t.length>1&&ctx.measureText(t+'…').width>max)t=t.slice(0,-1);return t+'…'}
+/* the whole picture: date, numbers, the map (stand-alone build), and the rides */
+async function dayImage(k){
+  const d=days[k]||{trips:[]},dt=fromYmd(k),rides=dayRides(k),T=totals(d.trips||[]),bm=brkTotal(k),EM=emptyKm(d),map=SOLO&&rides.some(r=>r.a||r.b);
+  let hours=null;if(d.startTime&&d.endTime){let a=mins(d.startTime),e=mins(d.endTime);if(e<a)e+=1440;hours=(e-a)/60}
+  const run=(d.odoStart!=null&&d.odoEnd!=null&&d.odoEnd>=d.odoStart)?Math.round((d.odoEnd-d.odoStart)*10)/10:null,lk=Math.round(T.km*10)/10;
+  const stats=[['営収（税込）',yen(T.sum)+'円'],['回数',T.n+'回'],['単価',T.n?yen(T.sum/T.n)+'円':''],['乗務時間',hours!=null?hours.toFixed(1)+'時間':''],['走行距離',run!=null?fmtO(run)+'km':''],
+    ['実車率',run&&lk?Math.round(lk/run*100)+'%':''],['実車距離',lk?fmtO(lk)+'km':''],['休憩',bm?durTxt(bm):''],['高速代',T.toll?yen(T.toll)+'円':'']].filter(x=>x[1]);
+  const Wd=1080,M=48,CW=Wd-2*M,cols=3,tileH=128,gap=14,rowsS=Math.ceil(stats.length/cols),MAPH=map?900:0,RH=86;
+  const Hd=M+64+44+30+rowsS*(tileH+gap)+(map?24+MAPH+80:0)+40+52+Math.max(1,rides.length)*RH+40+M;
+  const cv=document.createElement('canvas');cv.width=Wd;cv.height=Hd;const c=cv.getContext('2d');
+  c.fillStyle='#f3f5f8';c.fillRect(0,0,Wd,Hd);c.textBaseline='alphabetic';c.textAlign='left';
+  let y=M+52;c.fillStyle='#131a2a';c.font='800 48px '+IMGF;c.fillText(dt.getFullYear()+'年'+(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）',M,y);
+  y+=44;c.font='500 28px '+IMGF;c.fillStyle='#5a6375';c.fillText('乗務日報'+(d.startTime?'　出庫 '+d.startTime:'')+(d.endTime?' → 帰庫 '+d.endTime:''),M,y);
+  y+=30;const tw=(CW-gap*(cols-1))/cols;
+  stats.forEach((x,i)=>{const cx=M+(i%cols)*(tw+gap),cy=y+Math.floor(i/cols)*(tileH+gap);
+    c.fillStyle='#ffffff';c.beginPath();c.roundRect?c.roundRect(cx,cy,tw,tileH,18):c.rect(cx,cy,tw,tileH);c.fill();
+    c.fillStyle='#5a6375';c.font='500 25px '+IMGF;c.fillText(x[0],cx+22,cy+44);
+    c.fillStyle=i===0?'#0b7a5c':'#131a2a';c.font='800 '+(x[1].length>8?40:46)+'px '+IMGF;c.fillText(clip(c,x[1],tw-40),cx+22,cy+102)});
+  y+=rowsS*(tileH+gap);
+  let info=null;
+  if(map){y+=24-gap;c.save();c.beginPath();c.roundRect?c.roundRect(M,y,CW,MAPH,18):c.rect(M,y,CW,MAPH);c.clip();info=await drawRoute(c,rides,M,y,CW,MAPH,2);c.restore();
+    y+=MAPH+40;c.font='500 24px '+IMGF;let lx=M;
+    const lg=(draw,label)=>{draw(lx,y-9);lx+=44;c.fillStyle='#5a6375';c.textAlign='left';c.fillText(label,lx,y);lx+=c.measureText(label).width+34};
+    lg((x,yy)=>{c.fillStyle='#0b7a5c';c.beginPath();c.arc(x+14,yy,13,0,Math.PI*2);c.fill()},'乗車地');
+    lg((x,yy)=>{c.fillStyle='#b93426';c.fillRect(x+1,yy-13,26,26)},'降車地');
+    lg((x,yy)=>{c.strokeStyle='#0b7a5c';c.lineWidth=7;c.setLineDash([]);c.beginPath();c.moveTo(x,yy);c.lineTo(x+34,yy);c.stroke()},'実車');
+    lg((x,yy)=>{c.strokeStyle='#5a6375';c.lineWidth=5;c.setLineDash([9,8]);c.beginPath();c.moveTo(x,yy);c.lineTo(x+34,yy);c.stroke();c.setLineDash([])},'空車');
+    y+=34;
+  }
+  y+=36;c.textAlign='left';c.fillStyle='#131a2a';c.font='800 32px '+IMGF;c.fillText('乗車 '+rides.length+'件',M,y);y+=24;
+  if(!rides.length){c.font='500 26px '+IMGF;c.fillStyle='#5a6375';c.fillText('乗車の記録はありません。',M,y+48)}
+  rides.forEach((r,i)=>{const t=r.t,ty=y+i*RH;
+    c.fillStyle=i%2?'#f3f5f8':'#ffffff';c.fillRect(M,ty,CW,RH);
+    c.textAlign='left';c.fillStyle='#0b7a5c';c.font='700 22px '+IMGF;c.fillText(caseNo(k,r.n),M+16,ty+34);
+    c.fillStyle='#131a2a';c.font='700 26px '+IMGF;c.fillText(t.t||'',M+16,ty+68);
+    c.textAlign='right';c.font='800 32px '+IMGF;const fr=yen(t.fare)+'円';c.fillText(fr,M+CW-16,ty+52);const fw=c.measureText(fr).width;
+    c.textAlign='left';c.font='600 26px '+IMGF;c.fillStyle='#131a2a';c.fillText(clip(c,(t.from||'—')+' → '+(t.to||'—'),CW-200-fw-40),M+200,ty+38);
+    c.font='400 22px '+IMGF;c.fillStyle='#5a6375';c.fillText(clip(c,[PAYNAME[t.pay]||'現金',t.pax>1?t.pax+'名':'',t.km!=null?t.km+'km':'',EM[t.id]!=null?'空車 '+EM[t.id]+'km':'',t.toll?'高速 '+yen(t.toll)+'円':''].filter(Boolean).join('・'),CW-200-fw-40),M+200,ty+70)});
+  y+=Math.max(1,rides.length)*RH+40;c.textAlign='right';c.font='400 20px '+IMGF;c.fillStyle='#8a92a3';c.fillText('タクシー売上日報',Wd-M,y);
+  const out=document.createElement('canvas');out.width=Wd;out.height=Math.min(Hd,Math.ceil(y+M*.75));out.getContext('2d').drawImage(cv,0,0);
+  return {canvas:out,info:info};
+}
+/* the picture is made once per day and state, as soon as the report opens, so 「画像で保存」 can hand it over at once */
+function dayImageJob(k){
+  const sig=k+'|'+mapBase+'|'+mapRoute+'|'+JSON.stringify(days[k]||null);
+  if(imgJob&&imgJob.sig===sig)return imgJob.p;
+  const p=dayImage(k).then(r=>new Promise((res,rej)=>{try{r.canvas.toBlob(b=>b?res({blob:b,info:r.info,canvas:r.canvas}):rej(new Error('blob')),'image/png')}catch(e){rej(e)}}));
+  imgJob={sig:sig,p:p};p.catch(()=>{if(imgJob&&imgJob.p===p)imgJob=null});return p;
+}
+async function saveDayImage(k,btn,say){
+  if(!dlNs){say('ここでは画像の保存が使えません。');return}
+  btn.disabled=true;say('画像を作っています…');
+  try{
+    const r=await dayImageJob(k);
+    await dlNs.save({filename:'タクシー日報_'+k+'.png',data:r.blob});
+    say('画像を保存しました。'+(SOLO?'iPhoneでは、共有の画面で「画像を保存」を選ぶと写真に入ります。':'')+(r.info&&r.info.ok<r.info.total?(r.info.ok?'電波が弱く、背景の地図が一部欠けています。':'背景の地図を読み込めず、線とピンだけの地図になっています。電波のあるところで、もう一度保存してください。'):''));
+  }catch(e){
+    if(e&&e.code==='declined')say('保存を取りやめました。');
+    else if(e&&e.code==='again')say('画像ができました。もう一度「画像で保存」を押してください。');
+    else say('画像を保存できませんでした。');
+  }finally{btn.disabled=false}
+}
+function openReport(k,closing){
+  rvDay=k;renderReport(k);
+  const d=days[k]||{},T=totals(d.trips||[]);
+  $('rv-note').hidden=!closing;
+  if(closing)$('rv-note').innerHTML='帰庫しました。お疲れさまでした。<span>今日は '+T.n+'回・'+yen(T.sum)+'円でした。'+(dlNs?'「画像で保存」で、'+(SOLO&&hasPos(k)?'今日の地図と':'')+'まとめを1枚の画像にして残せます。':'')+'</span>';
+  const pos=SOLO&&hasPos(k),mp=$('rv-map');mp.hidden=!pos;$('rv-tomap').hidden=!pos;$('rv-img').hidden=!dlNs||!(d.trips&&d.trips.length);
+  $('rv-imgrow').hidden=$('rv-tomap').hidden&&$('rv-img').hidden;
+  const msg=$('rv-msg').firstElementChild;msg.textContent='会社の日報に写すときは、この画面を上から読みます。CSVにも同じ内容が入ります。';
+  $('rv').hidden=false;$('toast').hidden=true;syncBar();
+  if(pos){const im=$('rv-mapimg'),note=$('rv-mapnote');im.removeAttribute('src');note.textContent='地図を作っています…';
+    const cv=document.createElement('canvas'),Wm=984,Hm=720;cv.width=Wm;cv.height=Hm;
+    drawRoute(cv.getContext('2d'),dayRides(k),0,0,Wm,Hm,2).then(info=>{if(rvDay!==k)return;try{im.src=cv.toDataURL('image/png')}catch(e){}
+      note.textContent=(info&&info.total&&info.ok<info.total?(info.ok?'電波が弱く、背景の地図が一部欠けています。':'背景の地図を読み込めませんでした（線とピンだけ出ています）。'):'')+'線は地点をまっすぐ結んだもので、実際に走った道ではありません。'}).catch(()=>{note.textContent='地図を作れませんでした。'});
+  }
+  if(dlNs&&d.trips&&d.trips.length)dayImageJob(k).catch(()=>{});
 }
 /* Case number: the 日報's date (YYMMDD) and the ride's place in that day's time order, e.g. 261118-03.
    The same number shows on the day screen, the table, the one-page report, the map and in CSV. */
@@ -1818,12 +2023,19 @@ $('bk-file').addEventListener('change',e=>{
 $('bk-read').addEventListener('click',()=>{if(!$('bk-text').value.trim()){bkMsg('枠にバックアップの内容を貼り付けてから押してください。');return}offerRestore($('bk-text').value)});
 $('bk-confirm').addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(!b)return;if(b.dataset.bk==='yes')doRestore();else{bkPending=null;$('bk-confirm').hidden=true;bkMsg('復元をやめました。記録は変わっていません。')}});
 $('bk-undo').addEventListener('click',undoRestore);
+$('del-mode').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;delMode=b.dataset.del;delPending=null;$('del-confirm').hidden=true;delMsg('');delUi()});
+['del-from','del-to'].forEach(i=>$(i).addEventListener('change',()=>{delPending=null;$('del-confirm').hidden=true}));
+$('del-check').addEventListener('click',delCheck);
+$('del-goals').addEventListener('click',()=>{delGoals=!delGoals;delPending=null;$('del-confirm').hidden=true;delUi()});
+$('del-confirm').addEventListener('click',e=>{const b=e.target.closest('[data-dl]');if(!b)return;if(b.dataset.dl==='yes')doDelete();else{delPending=null;$('del-confirm').hidden=true;delMsg('消すのをやめました。記録は変わっていません。')}});
+$('del-undo').addEventListener('click',undoDelete);
+delUi();
 $('bk-drive').addEventListener('click',driveSave);
 document.addEventListener('input',e=>{if(!$('toast').hidden&&!$('toast-b').hidden&&!$('toast').contains(e.target))$('toast').hidden=true},true);
 $('sh-b').addEventListener('click',()=>{
   const d=day(cur);
   if(!d.startTime){d.startTime=nowHM();d.startTs=Date.now();shAsk=d.odoStart==null?'start':'';persist(cur);render();toast('出庫 '+d.startTime,false)}
-  else if(!d.endTime){const br=openBreak();if(br)br.e=nowHM();d.endTime=nowHM();shAsk=d.odoEnd==null?'end':'';persist(cur);render();toast('帰庫 '+d.endTime,false)}
+  else if(!d.endTime){const br=openBreak();if(br)br.e=nowHM();d.endTime=nowHM();shAsk=d.odoEnd==null?'end':'';persist(cur);render();toast('帰庫 '+d.endTime,false);if(!shAsk)afterKiko()}
   if(shAsk){$('sh-odo').value='';shHint();$('sh-odo').focus()}
 });
 $('sh-x').addEventListener('click',()=>{const d=day(cur);d.endTime='';shAsk='';persist(cur);render();toast('帰庫を取り消しました',false)});
@@ -1832,8 +2044,11 @@ $('sh-odo').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e
 $('sh-odo').addEventListener('blur',()=>{
   if(!shAsk)return;const v=resolveOdo($('sh-odo').value,odoBase()),d=day(cur);
   if(v!=null){d[shAsk==='start'?'odoStart':'odoEnd']=v;persist(cur)}
-  shAsk='';$('sh-odo').value='';render();
+  const was=shAsk;shAsk='';$('sh-odo').value='';render();
+  if(was==='end')setTimeout(afterKiko,250);
 });
+/* once a day is closed with 帰庫 (and its meter, if asked), its report opens by itself, with the map and the picture to keep */
+function afterKiko(){const d=days[cur];if(d&&d.endTime&&d.trips&&d.trips.length&&$('rv').hidden&&$('ov').hidden)openReport(cur,true)}
 $('mp-open').addEventListener('click',()=>{mapDay=cur;location.hash='#map'});
 $('mpprev').addEventListener('click',()=>{mapDay=shift(mapDay||cur,-1);mapFocus=null;renderMap()});
 $('mpnext').addEventListener('click',()=>{mapDay=shift(mapDay||cur,1);mapFocus=null;renderMap()});
@@ -1846,11 +2061,14 @@ $('ms-prev').addEventListener('click',()=>stepFocus(-1));
 $('ms-next').addEventListener('click',()=>stepFocus(1));
 $('ms-all').addEventListener('click',()=>setFocus(null,true));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mapBig)toggleBig(false)});
-$('rv-open').addEventListener('click',()=>{renderReport(cur);$('rv').hidden=false;$('toast').hidden=true;syncBar()});
+$('rv-open').addEventListener('click',()=>openReport(cur,false));
+$('rv-img').addEventListener('click',()=>saveDayImage(rvDay||cur,$('rv-img'),t=>{$('rv-msg').firstElementChild.textContent=t}));
+$('rv-tomap').addEventListener('click',()=>{mapDay=rvDay||cur;mapFocus=null;$('rv').hidden=true;syncBar();if(location.hash==='#map')renderMap();else location.hash='#map'});
+$('mp-img').addEventListener('click',()=>{const m=$('mp-img-msg');m.hidden=false;saveDayImage(mapDay||cur,$('mp-img'),t=>{m.firstElementChild.textContent=t})});
 $('rv-close').addEventListener('click',()=>{$('rv').hidden=true;syncBar()});
 $('rv').addEventListener('click',e=>{if(e.target===$('rv')){$('rv').hidden=true;syncBar()}});
 $('rv-copy').addEventListener('click',()=>{
-  const c=reportCsv(cur).slice(1),msg=$('rv-msg').firstElementChild;
+  const c=reportCsv(rvDay||cur).slice(1),msg=$('rv-msg').firstElementChild;
   const fallback=()=>{const b=$('rv-csv');b.hidden=false;b.value=c;b.focus();b.select();msg.textContent='下の枠を全選択してコピーし、Excelに貼り付けてください。'};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(c).then(()=>{msg.textContent='コピーしました。Excelやメモに貼り付けできます。'}).catch(fallback);else fallback();
 });
@@ -2001,6 +2219,7 @@ initCloud();
 
 /* dl.save({filename,data}) hands the viewer a file: Claude's own saver on Claude, the browser's share sheet or download in the stand-alone build */
 function wireDownloads(dl){
+   dlNs=dl;
    const b=$('csv-save');b.hidden=false;
     const yb=$('y-csv-save');yb.hidden=false;
     const kb=$('bk-save');kb.hidden=false;
@@ -2013,7 +2232,7 @@ function wireDownloads(dl){
     const rb=$('rv-save');rb.hidden=false;
     rb.addEventListener('click',()=>{
       const msg=$('rv-msg').firstElementChild;
-      dl.save({filename:'タクシー日報_'+cur+'.csv',data:reportCsv(cur)}).then(()=>{msg.textContent='この日の日報をCSVで書き出しました。'}).catch(e=>{
+      dl.save({filename:'タクシー日報_'+(rvDay||cur)+'.csv',data:reportCsv(rvDay||cur)}).then(()=>{msg.textContent='この日の日報をCSVで書き出しました。'}).catch(e=>{
         if(e&&e.code==='declined')msg.textContent='保存を取りやめました。';
         else{rb.hidden=true;msg.textContent='ここではファイル保存が使えません。「CSVをコピー」を使ってください。'}
       });
