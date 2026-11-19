@@ -9,6 +9,8 @@
   --accent:#0b7a5c; --accent-ink:#ffffff; --accent-soft:#dcefe8;
   --meter-bg:#0f1628; --meter-ok:#3ddba9; --meter-fg:#ffc64a; --meter-sub:#aab4c8; --meter-line:#27324d;
   --danger:#b93426; --field:#f5f6f9; --warn-bg:#fff3d1; --warn-line:#dfb84a;
+  --st-idle:#c62f22; --st-idle-ink:#fff; --st-idle-soft:#fdecea; --st-on:#0b7a5c; --st-on-ink:#fff; --st-on-soft:#dcefe8;
+  --st-brk:#b86a00; --st-brk-ink:#fff; --st-brk-soft:#fff1d6; --st-done:#1d4ed8; --st-done-ink:#fff; --st-done-soft:#e3ebff; --st-closed:#5a6375; --st-closed-ink:#fff; --st-closed-soft:#eceff3;
   --num:"Barlow Condensed","Avenir Next Condensed","Roboto Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
   --body:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",Meiryo,sans-serif;
 }
@@ -16,12 +18,16 @@
   --bg:#0a0f1a; --surface:#141b2b; --ink:#e9edf5; --muted:#97a1b5; --line:#28324a;
   --accent:#2fbf95; --accent-ink:#04261d; --accent-soft:#143429;
   --meter-bg:#060a13; --meter-fg:#ffc64a; --meter-sub:#97a1b5; --meter-line:#232d45;
-  --danger:#ff7a6b; --field:#0e1422; --warn-bg:#33290c; --warn-line:#6f5a1c; color-scheme:dark } }
+  --danger:#ff7a6b; --field:#0e1422; --warn-bg:#33290c; --warn-line:#6f5a1c; color-scheme:dark;
+  --st-idle:#ff6b5c; --st-idle-ink:#2a0703; --st-idle-soft:#3a1512; --st-on:#2fbf95; --st-on-ink:#04261d; --st-on-soft:#143429;
+  --st-brk:#f2a93b; --st-brk-ink:#2b1a00; --st-brk-soft:#352409; --st-done:#7aa2ff; --st-done-ink:#0a1633; --st-done-soft:#16213d; --st-closed:#97a1b5; --st-closed-ink:#0a0f1a; --st-closed-soft:#1b2335; } }
 :root[data-theme="dark"]{
   --bg:#0a0f1a; --surface:#141b2b; --ink:#e9edf5; --muted:#97a1b5; --line:#28324a;
   --accent:#2fbf95; --accent-ink:#04261d; --accent-soft:#143429;
   --meter-bg:#060a13; --meter-fg:#ffc64a; --meter-sub:#97a1b5; --meter-line:#232d45;
-  --danger:#ff7a6b; --field:#0e1422; --warn-bg:#33290c; --warn-line:#6f5a1c; color-scheme:dark }
+  --danger:#ff7a6b; --field:#0e1422; --warn-bg:#33290c; --warn-line:#6f5a1c; color-scheme:dark;
+  --st-idle:#ff6b5c; --st-idle-ink:#2a0703; --st-idle-soft:#3a1512; --st-on:#2fbf95; --st-on-ink:#04261d; --st-on-soft:#143429;
+  --st-brk:#f2a93b; --st-brk-ink:#2b1a00; --st-brk-soft:#352409; --st-done:#7aa2ff; --st-done-ink:#0a1633; --st-done-soft:#16213d; --st-closed:#97a1b5; --st-closed-ink:#0a0f1a; --st-closed-soft:#1b2335; }
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
@@ -126,6 +132,9 @@ label.f.wide{grid-column:1 / -1}
 .cmdbox{background:var(--field);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
 .cmdbox span{font-size:12.5px;color:var(--muted);letter-spacing:.1em}
 .cmdbox b{font-size:16px;overflow-wrap:anywhere}
+.cmdbox em{font-style:normal;font-size:14px;color:var(--muted)}
+#ride-closed{border:1px solid var(--warn-line);background:var(--warn-bg)}
+#ride-closed .btnrow{margin-top:6px}
 .cmdbox em{font-style:normal;font-size:16px;color:var(--accent);font-weight:700}
 .mtable td.best{color:var(--accent);font-weight:600}
 .cap{font-size:13px;color:var(--muted);letter-spacing:.1em;margin-bottom:-6px}
@@ -232,6 +241,25 @@ body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
 .ride.on{border-color:var(--accent);background:var(--accent-soft)}
 .ride-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .ride-t b{font-size:18px;letter-spacing:.06em}
+/* the current state as a large coloured badge, like the roof sign: 空車 red, 乗車中 green, 休憩中 amber, 降車済み blue, 帰庫済み grey */
+.ride[data-st]{--c:var(--st-idle);--ci:var(--st-idle-ink);--cs:var(--st-idle-soft);border:2px solid var(--c);border-left-width:10px;background:var(--cs);padding-left:12px}
+.ride[data-st="on"]{--c:var(--st-on);--ci:var(--st-on-ink);--cs:var(--st-on-soft)}
+.ride[data-st="brk"]{--c:var(--st-brk);--ci:var(--st-brk-ink);--cs:var(--st-brk-soft)}
+.ride[data-st="done"]{--c:var(--st-done);--ci:var(--st-done-ink);--cs:var(--st-done-soft)}
+.ride[data-st="closed"]{--c:var(--st-closed);--ci:var(--st-closed-ink);--cs:var(--st-closed-soft)}
+.ride[data-st] #ride-s{align-self:flex-start;display:inline-block;background:var(--c);color:var(--ci);font-size:clamp(22px,6.4vw,26px);font-weight:800;line-height:1.15;letter-spacing:.12em;padding:4px 14px 5px 16px;border-radius:10px;margin-bottom:3px}
+.ride[data-st] .ride-t span{color:var(--ink)}
+.ride[data-st] .ride-t{flex:1 0 100%;flex-direction:row;align-items:center;flex-wrap:wrap;gap:4px 12px;padding-right:4px}
+.ride[data-st] #ride-s{white-space:nowrap;margin-bottom:0}
+.ride[data-st] .ride-t span{font-size:15px}
+.ride[data-st] .ride-b{flex:1 1 auto}
+.ride[data-st="on"] #ride-s{animation:stpulse 2.4s ease-in-out infinite}
+@keyframes stpulse{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 30%,transparent)}}
+@media (prefers-reduced-motion:reduce){.ride[data-st="on"] #ride-s{animation:none}}
+/* the same badge stays at the top of the screen while the card is scrolled out of view */
+#stpill{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:10px;z-index:60;border:2px solid #fff;border-radius:999px;background:var(--c,#c62f22);color:var(--ci,#fff);font-size:17px;font-weight:800;letter-spacing:.1em;padding:6px 14px 7px 16px;box-shadow:0 2px 10px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px}
+#stpill[hidden]{display:none}
+#stpill i{font-style:normal;font-weight:600;font-size:13px;letter-spacing:0;opacity:.9}
 .ride-t span{font-size:13.5px;color:var(--muted)}
 .ride.on .ride-t span{color:var(--ink)}
 .ride-x{flex:none;min-height:44px;padding:0 8px;border:none;background:none;color:var(--muted);font-size:13.5px;text-decoration:underline}
@@ -305,7 +333,8 @@ body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
 #rv-note span{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px}
 #rv-map img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:var(--field)}
 #rv-map .mnote{font-size:13px;color:var(--muted);margin-top:4px}
-#rv-imgrow .btn{flex:1 1 0}
+#rv-imgrow .btn{flex:1 1 0;white-space:nowrap;padding-left:8px;padding-right:8px}
+@media (max-width:359px){#rv-imgrow .btn{font-size:14px}}
 #mp-img{width:100%;margin-top:4px}
 #rv-csv{width:100%;height:120px;font-size:12px;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px}
 /* v26: backup and restore of every record */
@@ -424,6 +453,7 @@ html.mapopen,html.mapopen body{overflow:hidden}
         <div class="pextra" id="geo-msg" hidden></div>
       </div>
       <div class="ride" id="ride" aria-live="polite"><div class="ride-t"><b id="ride-s">空車</b><span id="ride-d"></span></div><button class="ride-x" id="ride-x" hidden>取り消す</button><button type="button" class="ride-k" id="brk-b">休憩</button><button class="ride-b" id="ride-b">乗車</button><div class="ride-o"><label class="ro" for="r-o1"><span>乗車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o1" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="メーター " aria-label="乗車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><label class="ro" for="r-o2"><span>降車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o2" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="降車メーター " aria-label="降車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><span class="roh" id="r-o1-h"></span></div></div>
+      <div class="cmdbox" id="ride-closed" hidden><b>この日報は帰庫済みです</b><em>続けて乗せるときは、帰庫を取り消してから乗車します。</em><div class="btnrow"><button type="button" class="btn" id="rc-no">やめる</button><button type="button" class="btn pri" id="rc-yes">帰庫を取り消して乗車</button></div></div>
       <div hidden><input type="text" id="p-o1" autocomplete="off"><input type="text" id="p-o2" autocomplete="off"><div class="pextra" id="p-odo" hidden></div></div>
       <div class="stack" id="nbox">
       <div class="parsed">
@@ -676,6 +706,7 @@ html.mapopen,html.mapopen body{overflow:hidden}
   </div>
 </div>
 <div class="recbar" id="bar" hidden><div class="recbar-in"><div class="recbar-t"><b id="bar-fare"></b><span id="bar-sum"></span></div><button class="go" id="bar-go">記録</button></div></div>
+<button type="button" id="stpill" hidden aria-label="乗車の欄へ移動"></button>
 <div id="toast" hidden role="status"><span id="toast-t"></span><button id="toast-b">取り消す</button></div>
 
 <script>
@@ -835,16 +866,26 @@ let textKm=null,textO1=null,textO2=null,textFare=null;
 function parseKm(v){v=String(v==null?'':v).normalize('NFKC').replace(/,/g,'.').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<1000?Math.round(n*10)/10:null}
 const curKm=()=>parseKm($('p-km').value);
 const LSO='taxi-nippo-odo-v1',LST='taxi-nippo-time-v1';
+/* status pill at the top: shown on the 日報 screen only while the ride card is out of view */
+let rideSeen=true;
+function stPill(){
+  const pl=$('stpill'),box=$('ride');if(!pl||!box)return;
+  const show=!rideSeen&&!$('v-day').hidden&&$('rv').hidden&&$('ov').hidden&&box.dataset.st&&box.dataset.st!=='closed';
+  pl.hidden=!show;if(!show)return;
+  const cs=getComputedStyle(box);pl.style.setProperty('--c',cs.getPropertyValue('--c'));pl.style.setProperty('--ci',cs.getPropertyValue('--ci'));
+  pl.innerHTML=esc($('ride-s').textContent)+'<i>'+esc(box.dataset.st==='on'?($('ride-d').textContent.match(/\d+分/)||[''])[0]:box.dataset.st==='brk'?($('ride-d').textContent.split(' ').pop()||''):'')+'</i>';
+}
 function renderRide(){
   const t1=$('p-t1').value,t2=$('p-t2').value,box=$('ride'),b=$('ride-b');
+  if(!(days[cur]&&days[cur].endTime))$('ride-closed').hidden=true;
   const st=t2?'done':t1?'on':'idle';
   box.classList.toggle('on',st==='on');$('ride-x').hidden=st==='idle';
   const br=st==='idle'?openBreak():null;$('brk-b').hidden=st!=='idle'||!!br;
-  if(br){box.classList.add('on');$('ride-s').textContent='休憩中';$('ride-d').textContent=br.s+'から '+durTxt(brkLen(br,true));b.textContent='休憩終了';b.className='ride-b drop';odoHint();return}
-  if(st==='idle'){$('ride-s').textContent='空車';$('ride-d').textContent='乗せたら「乗車」を押します';b.textContent='乗車';b.className='ride-b'}
-  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+m+'分';b.textContent='降車';b.className='ride-b drop'}
-  else{$('ride-s').textContent='降車済み';$('ride-d').textContent=(t1||'—')+'→'+t2;b.textContent='料金へ';b.className='ride-b go2'}
-  odoHint();
+  if(br){box.classList.add('on');box.dataset.st='brk';$('ride-s').textContent='休憩中';$('ride-d').textContent=br.s+'から '+durTxt(brkLen(br,true));b.textContent='休憩終了';b.className='ride-b drop';odoHint();stPill();return}
+  if(st==='idle'){const cl=!!(days[cur]&&days[cur].endTime);box.dataset.st=cl?'closed':'idle';$('ride-s').textContent=cl?'帰庫済み':'空車';$('ride-d').textContent=cl?'この日の乗務は終わっています':'乗せたら「乗車」を押します';b.textContent='乗車';b.className='ride-b'}
+  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;box.dataset.st='on';$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+m+'分';b.textContent='降車';b.className='ride-b drop'}
+  else{box.dataset.st='done';$('ride-s').textContent='降車済み';$('ride-d').textContent=(t1||'—')+'→'+t2+'　料金を入れて記録';b.textContent='料金へ';b.className='ride-b go2'}
+  odoHint();stPill();
 }
 function saveTm(){renderRide();try{localStorage.setItem(LST,JSON.stringify({t1:$('p-t1').value,t2:$('p-t2').value}))}catch(e){}}
 function parseOdo(v){v=String(v==null?'':v).normalize('NFKC').replace(/[,\s]/g,'').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<10000000?Math.round(n*10)/10:null}
@@ -1565,7 +1606,7 @@ function followDate(){
   render();
 }
 /* The 記録 button sits below the chips; when it is off screen and there is something to record, the same button rides at the bottom edge. */
-function syncBar(){
+function syncBar(){stPill();
   const gb=$('go'),bar=$('bar');
   let on=!gb.disabled&&$('ov').hidden&&$('rv').hidden&&!$('v-day').hidden;
   if(on){const r=gb.getBoundingClientRect();on=!(r.top>=0&&r.bottom<=window.innerHeight)}
@@ -1973,9 +2014,19 @@ $('p-fare').addEventListener('input',renderParsed);
 /* no re-render here: rebuilding the chips while a tap on one is in progress would swallow the tap */
 $('p-fare').addEventListener('blur',()=>{const v=curFare();$('p-fare').value=v==null?'':String(v)});
 $('p-fare').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();if(!$('go').disabled)record();else $('p-fare').blur()}});
-$('r-o2').addEventListener('input',()=>{$('p-o2').value=$('r-o2').value;syncOdo()});
+/* After the drop-off meter, the fare. With the usual last-3-digit entry, the third digit moves on by itself when it gives a
+   believable ride (0–150 km); anyone who types the whole number gets this only when leaving the field. */
+let odoFull=false;try{odoFull=localStorage.getItem('taxi-nippo-odofull-v1')==='1'}catch(e){}
+function toFare(){const f=$('p-fare');if(f.value)return;f.focus();f.scrollIntoView({block:'center',behavior:'smooth'})}
+$('r-o2').addEventListener('input',()=>{$('p-o2').value=$('r-o2').value;syncOdo();
+  const raw=$('r-o2').value.replace(/[^0-9]/g,''),a=parseOdo($('p-o1').value);
+  if(raw.length>=4&&!odoFull){odoFull=true;try{localStorage.setItem('taxi-nippo-odofull-v1','1')}catch(e){}}
+  if(odoFull||raw.length!==3||a==null||!$('p-t2').value||$('p-fare').value)return;
+  const v=resolveOdo(raw,odoBase2());if(v!=null&&v>=a&&v-a<=150){$('r-o2').blur();toFare()}});
 $('r-o2').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('r-o2').blur()}});
-$('r-o2').addEventListener('blur',()=>{const v=resolveOdo($('r-o2').value,odoBase2()),x=v==null?'':String(v);$('r-o2').value=x;$('p-o2').value=x;syncOdo()});
+$('r-o2').addEventListener('blur',()=>{if(odoFull&&$('r-o2').value.replace(/[^0-9]/g,'').length===3){odoFull=false;try{localStorage.removeItem('taxi-nippo-odofull-v1')}catch(e){}}
+  const v=resolveOdo($('r-o2').value,odoBase2()),x=v==null?'':String(v);$('r-o2').value=x;$('p-o2').value=x;syncOdo();
+  if(x&&$('p-t2').value&&!$('p-fare').value)setTimeout(()=>{const a=document.activeElement;if(!a||a===document.body)toFare()},0)});
 ['r-o1','r-o2'].forEach(id=>$(id).addEventListener('focus',odoHint));
 /* The mic beside a meter field writes 「メーター 」 into the sentence box, so only the number has to be spoken. */
 document.querySelectorAll('[data-say]').forEach(b=>b.addEventListener('click',()=>{
@@ -1986,16 +2037,31 @@ document.querySelectorAll('[data-say]').forEach(b=>b.addEventListener('click',()
   toast(dict&&!$('mic').hidden?'数字を話してください（例：230）':'キーボードのマイクを押して、数字を話してください（例：230）',false);
 }));
 ['p-t1','p-t2'].forEach(id=>$(id).addEventListener('input',saveTm));
+/* 1) a second tap within 2 seconds is ignored, so a double tap cannot turn 乗車 into an instant 降車
+   2) after 降車 the next field is the fare (or the drop-off meter first, when the pickup one was entered)
+   3) on a day already closed with 帰庫, 乗車 asks first; the next shift's day is opened instead when it already has its own date */
+let rideTapAt=0;
+if('IntersectionObserver' in window)new IntersectionObserver(es=>{es.forEach(e=>{rideSeen=e.isIntersecting});stPill()},{threshold:0.15}).observe($('ride'));
+$('stpill').addEventListener('click',()=>$('ride').scrollIntoView({block:'center',behavior:'smooth'}));
 $('ride-b').addEventListener('click',()=>{
+  const now=Date.now();if(now-rideTapAt<2000){toast('続けて押されたので、2回目は受け付けませんでした',false);return}
   const t1=$('p-t1').value,t2=$('p-t2').value;
+  if(!t1&&!t2&&!openBreak()&&days[cur]&&days[cur].endTime){
+    const dd=defaultDate();
+    if(dd!==cur&&!(days[dd]&&days[dd].endTime)){cur=dd;curMonth=cur.slice(0,7);autoDate=dd;render();toast((fromYmd(dd).getMonth()+1)+'月'+fromYmd(dd).getDate()+'日の日報に切り替えました',false)}
+    else{const c=$('ride-closed');c.hidden=false;c.scrollIntoView({block:'nearest',behavior:'smooth'});return}
+  }
+  rideTapAt=now;
   {const br=!t1&&!t2?openBreak():null;if(br){br.e=nowHM();const len=brkLen(br);if(len<1){const d=days[cur];d.breaks=d.breaks.filter(x=>x!==br)}persist(cur);render();toast(len<1?'1分未満だったので、休憩は残しませんでした':'休憩終了　'+durTxt(len),false);return}}
   if(!t1&&!t2){$('p-t1').value=nowHM();saveTm();capture('from');toast('乗車 '+$('p-t1').value,false);if(!$('p-o1').value)$('r-o1').focus();return}
   if(t1&&!t2){$('p-t2').value=nowHM();saveTm();capture('to');
-    /* a pickup reading asks for the drop-off one; otherwise go on to the sentence box as before */
+    /* a pickup reading asks for the drop-off one; otherwise straight to the fare */
     if($('p-o1').value&&!$('p-o2').value){$('r-o2').focus();return}
-    const f=$('say');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});return}
+    toFare();return}
   const f=$('p-fare');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});
 });
+$('rc-no').addEventListener('click',()=>{$('ride-closed').hidden=true});
+$('rc-yes').addEventListener('click',()=>{const d=day(cur);d.endTime='';shAsk='';persist(cur);$('ride-closed').hidden=true;rideTapAt=0;render();$('ride-b').click()});
 $('ride-x').addEventListener('click',()=>{$('p-t1').value='';$('p-t2').value='';clearGeo();saveTm();renderParsed()});
 $('nbox').addEventListener('click',e=>{const b=e.target.closest('[data-now]');if(!b)return;$(b.dataset.now).value=nowHM();saveTm()});
 $('e-t1').addEventListener('input',()=>{if($('e-t1').value)$('e-t').value=$('e-t1').value});
