@@ -657,7 +657,7 @@ html.mapopen,html.mapopen body{overflow:hidden}
   --st-brk:#f29a1f; --st-brk-ink:#0b0b0b; --st-brk-soft:#3a2a12; --st-done:#8a5ae8; --st-done-ink:#ffffff; --st-done-soft:#2a2142; --st-closed:#bdb6a3; --st-closed-ink:#0b0b0b; --st-closed-soft:#2e2b24; }
 body{background-color:var(--bg);background-image:radial-gradient(var(--dot) 1.3px,transparent 1.5px);background-size:14px 14px}
 /* the heavy display face on titles, the status, the big buttons and the digits; its single weight is never faked bold */
-.top h1,h2,.datebar .d,.ride[data-st] #ride-s,.tl-lamp,.tl-x .tl-tm,#dockrow button,body.dock .ride[data-st] .ride-b,#sumbar b,.np-v,.np-k button:not(.fn):not(.pmore),.vs-btns .rec{font-family:var(--pop);font-synthesis:none}
+.top h1,h2,.datebar .d,.ride[data-st] #ride-s,.tl-lamp,.tl-x .tl-tm,.vs-btns .rec{font-family:var(--pop);font-synthesis:none}
 body.dock .ride[data-st] .ride-b::before,h2 small,.np-kf .pk.p1 small{font-family:var(--body)}
 .top h1{font-size:22px;letter-spacing:.04em}
 h2{font-size:15px;color:var(--ink);letter-spacing:.06em}
@@ -692,7 +692,6 @@ h2{font-size:15px;color:var(--ink);letter-spacing:.06em}
 #ride-d{background:var(--surface);border:2px solid var(--k);border-radius:12px;padding:3px 10px;font-weight:700}
 #ride-d:empty{display:none}
 /* the bottom: a white shelf with the big button and the three under it */
-body.dock:not(.typing):not(.vs-open):not(.np-open)::after{content:'';position:fixed;left:0;right:0;bottom:0;z-index:13;height:calc(206px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:3px solid var(--k)}
 body.dock .ride[data-st] .ride-b{font-weight:400;border:3px solid var(--k);border-radius:18px;box-shadow:6px 6px 0 var(--ks)}
 body.dock .ride[data-st] .ride-b::before{font-weight:800}
 body.dock .ride[data-st] .ride-b:active{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--ks)}
@@ -703,7 +702,6 @@ body.dock:not(.typing) #dockrow #vbtn{font-weight:400;border:3px solid var(--k);
 #dockrow #d-kiko.armed{background:var(--danger);border-color:var(--k);color:#fff;font-family:var(--body);font-weight:800}
 #dockrow button:active,body.dock:not(.typing) #dockrow #vbtn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ks)}
 #dockrow button.off{opacity:.45;box-shadow:none}
-@media (max-height:700px){body.dock:not(.typing):not(.vs-open):not(.np-open)::after{height:calc(170px + env(safe-area-inset-bottom,0px))}}
 /* timeline */
 .tl::before{width:3px;left:11px;background:var(--k)}
 .tl-dot{width:14px;height:14px;margin:16px 0 0 6px;border:2px solid var(--k)}
@@ -740,6 +738,27 @@ body.dock:not(.typing) #dockrow #vbtn{font-weight:400;border:3px solid var(--k);
 #toast{background:var(--surface);color:var(--ink);border:3px solid var(--k);box-shadow:4px 4px 0 var(--ks)}
 #toast button{border:2px solid var(--k)}
 #toast button.armed{background:var(--danger);border-color:var(--k);color:#fff}
+/* words that must stay on one line with the heavier outlines */
+#sumbar>span:first-child{flex:none;white-space:nowrap}
+#bk-save,#bk-copy,#bk-drive,#csv-save,#csv-copy,#y-csv-save,#y-csv-copy{flex:1 1 100%}
+.mtable td button{white-space:nowrap}
+/* the bottom buttons and the number keys: plain heavy type, easy to read at a glance; no shelf behind them */
+#dockrow button,body.dock:not(.typing) #dockrow #vbtn,body.dock .ride[data-st] .ride-b{font-family:var(--body);font-weight:900}
+body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
+#dockrow button,body.dock:not(.typing) #dockrow #vbtn{letter-spacing:.08em}
+.np-k button,.np-kf .pk,.np-v{font-family:var(--body);font-weight:800;font-variant-numeric:tabular-nums}
+.np-k button:not(.fn):not(.pk):not(.ok){font-size:30px}
+.np-v{font-size:36px}
+.np-kf .pk.p1{font-size:22px;font-weight:900}
+/* a button that cannot be pressed now is drawn flat and grey rather than see-through, so the page behind does not show through it */
+#dockrow button.off,#dockrow #d-brk.off,#dockrow #d-kiko.off{opacity:1;background:var(--field);color:var(--muted);border-color:var(--muted);box-shadow:none}
+/* the number pad: see-through frosted glass instead of a solid white sheet */
+.np{background:color-mix(in srgb,var(--surface) 55%,transparent);-webkit-backdrop-filter:blur(10px) saturate(1.2);backdrop-filter:blur(10px) saturate(1.2)}
+/* the takings in the top strip: plain heavy figures, read at a glance */
+#sumbar b{font-family:var(--body);font-weight:800;font-size:clamp(26px,8vw,32px);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+/* when the count and the goal do not fit beside the figure, they move to a line of their own instead of breaking into pieces */
+#sumbar{flex-wrap:wrap;row-gap:2px}
+#sb-sub{white-space:nowrap}
 </style>
 
 <div class="app">
