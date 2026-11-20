@@ -59,7 +59,13 @@ button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px}
 .tawrap{position:relative}
-textarea#say{width:100%;min-height:76px;resize:none;border:2px solid var(--line);background:var(--field);border-radius:12px;padding:12px 14px;font-size:19px;line-height:1.4;display:block}
+textarea#say{width:100%;min-height:54px;resize:none;border:2px solid var(--line);background:var(--field);border-radius:12px;padding:12px 14px;font-size:18px;line-height:1.4;display:block;field-sizing:content;max-height:9em}
+textarea#say::placeholder{font-size:15px;color:var(--muted)}
+.sayhead{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.sayhead span{font-size:13.5px;font-weight:700;color:var(--muted)}
+.sayhead button{margin-left:auto;min-height:36px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:700;padding:0 14px}
+.tawrap.full textarea#say{border-color:var(--accent);background:var(--surface)}
+#mic{display:none!important}
 textarea#say:focus{border-color:var(--accent);outline:none}
 .tawrap.hasmic textarea#say{padding-right:64px}
 #mic{position:absolute;right:8px;top:8px;width:48px;height:48px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
@@ -91,7 +97,7 @@ h2{font-size:14px;margin:6px 0 -6px;color:var(--muted);letter-spacing:.12em;font
 .trip .t{font-family:var(--num);font-size:19px;color:var(--muted);font-variant-numeric:tabular-nums;grid-row:1 / 3}
 .trip .r{min-width:0;font-size:16px;font-weight:600;overflow-wrap:anywhere}
 .trip .r i{font-style:normal;color:var(--muted);margin:0 4px;font-weight:400}
-.trip .f{font-family:var(--num);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;grid-row:1 / 3;grid-column:3}
+.trip .f{font-family:var(--num);font-size:clamp(19px,6.4vw,24px);white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;grid-row:1 / 3;grid-column:3}
 .trip .m{grid-column:2;font-size:13.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 8px}
 .tag{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:12.5px}
 .blank{background:var(--surface);border:1px dashed var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:var(--muted);font-size:14px}
@@ -169,7 +175,99 @@ h2 small{font-weight:400;letter-spacing:0;font-size:12.5px;margin-left:8px}
 .recbar-t span{font-size:13.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .recbar .go{flex:none;min-width:136px;padding:0 18px}
 body.hasbar .app{padding-bottom:128px}
-body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
+/* 案4: the next thing to press sits at the bottom of the screen, within reach of the thumb, and stays there while scrolling.
+   乗車 green, 降車 red, 料金へ blue, 休憩終了 orange; once a fare is in, the bottom bar with 「記録」 takes its place. */
+body.dock .app{padding-bottom:118px}
+body.dock .ride[data-st] .ride-b{position:fixed;left:50%;transform:translateX(-50%);width:min(536px,calc(100% - 24px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:14;min-height:78px;font-size:30px;letter-spacing:.25em;border:none;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.35);background:var(--st-on);color:var(--st-on-ink)}
+body.dock .ride[data-st="on"] .ride-b{background:var(--st-idle);color:var(--st-idle-ink)}
+body.dock .ride[data-st="done"] .ride-b{background:var(--st-done);color:var(--st-done-ink);font-size:28px;letter-spacing:.18em}
+body.dock .ride[data-st="brk"] .ride-b{background:var(--st-brk);color:var(--st-brk-ink);font-size:28px;letter-spacing:.18em}
+body.dock .ride[data-st="closed"] .ride-b{background:var(--st-closed);color:var(--st-closed-ink)}
+body.dock .ride[data-st] .ride-b:active{transform:translateX(-50%) translateY(2px);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+body.dock.typing .ride[data-st] .ride-b{display:none}
+/* The app's own number pad for the meter, fare and distance: big keys and a big 「確定」, in place of the iPhone keypad,
+   whose only way to finish is the small 「完了」 in its corner. */
+.np{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 28px rgba(0,0,0,.22);padding:10px max(10px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+.np[hidden]{display:none}
+.np-in{max-width:536px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.np-h{display:flex;align-items:baseline;gap:10px;padding:2px 4px 0}
+.np-l{font-size:15px;font-weight:700;color:var(--muted);white-space:nowrap}
+.np-v{margin-left:auto;font-family:var(--num);font-size:34px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-bottom:3px solid var(--accent);padding:0 2px}
+.np-v.fresh{background:var(--accent-soft);border-radius:6px 6px 0 0}
+.np-v.empty{color:var(--muted)}
+.np-hint{font-size:13.5px;color:var(--muted);min-height:1.3em;padding:0 4px;text-align:right}
+.np-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.np-k button{min-height:58px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);font-family:var(--num);font-size:28px;font-weight:600;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.np-k button:active{filter:brightness(.9);transform:translateY(1px)}
+.np-k .fn{font-family:inherit;font-size:16px;font-weight:700;color:var(--muted)}
+.np-k .ok{grid-row:span 2;background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-family:inherit;font-size:24px;font-weight:800;letter-spacing:.15em}
+body.np-open .app{padding-bottom:var(--nph,360px)}
+body.np-open #toast{bottom:calc(var(--nph,360px) + 8px)}
+body.np-open #bar,body.np-open #stpill{display:none!important}
+/* 🎤 話す: one press starts listening; when the speaker stops it ends by itself and shows what it understood, big, and reads it back. */
+body.dock{--dw:min(536px,calc(100vw - 24px))}
+body.dock .ride[data-st] .ride-b{left:calc(50% - var(--dw) / 2 + 90px);width:calc(var(--dw) - 90px);transform:none}
+body.dock .ride[data-st] .ride-b:active{transform:translateY(2px)}
+#vbtn{display:none}
+body.dock:not(.typing) #vbtn{display:flex;position:fixed;left:calc(50% - var(--dw) / 2);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:14;width:80px;height:78px;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:3px solid var(--ink);border-radius:20px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:800;letter-spacing:.1em;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+#vbtn:active{transform:translateY(2px)}
+body.vs-open #vbtn,body.vs-open .ride[data-st] .ride-b,body.vs-open #bar,body.vs-open #stpill{display:none!important}
+.vs-bg{position:fixed;inset:0;z-index:44;background:rgba(5,10,20,.45)}
+.vs-bg[hidden],.vs[hidden]{display:none}
+.vs{position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.3);padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));max-height:88vh;overflow:auto}
+.vs-in{max-width:536px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.vs-top{display:flex;align-items:center;gap:10px}
+.vs-top b{font-size:19px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#vs-listen{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:4px}
+#vs-listen[hidden]{display:none}
+.vs-tts{margin-left:auto;flex:none;white-space:nowrap;min-height:40px;border:1px solid var(--line);border-radius:999px;background:var(--field);color:var(--ink);font-size:14px;font-weight:700;padding:0 14px}
+.vs-tts[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
+.vs-mic{align-self:center;width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:var(--st-idle);color:#fff;animation:vspulse 1.4s ease-in-out infinite}
+.vs-mic svg{width:52px;height:52px}
+@keyframes vspulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--st-idle) 45%,transparent)}50%{box-shadow:0 0 0 18px color-mix(in srgb,var(--st-idle) 0%,transparent)}}
+@media (prefers-reduced-motion:reduce){.vs-mic{animation:none}}
+.vs-live{min-height:2.6em;font-size:22px;font-weight:700;text-align:center;line-height:1.35;overflow-wrap:anywhere}
+.vs-live.dim{color:var(--muted);font-size:16px;font-weight:500}
+.vs-rows{display:flex;flex-direction:column;gap:8px}
+.vs-row{display:flex;align-items:center;gap:10px;background:var(--field);border-radius:14px;padding:10px 14px;min-height:62px}
+.vs-row>span{flex:none;width:3.6em;font-size:14px;color:var(--muted);font-weight:700}
+.vs-row>b{flex:1;min-width:0;font-size:22px;overflow-wrap:anywhere}
+.vs-row.fare>b{font-family:var(--num);font-size:38px;font-variant-numeric:tabular-nums;color:var(--accent)}
+.vs-row.miss{background:var(--warn-bg);border:1px solid var(--warn-line)}
+.vs-row.miss>b{font-family:inherit;font-size:18px;color:var(--ink)}
+.vs-row button{flex:none;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:15px;font-weight:700;padding:0 12px}
+.vs-pays{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.vs-pays button{min-height:46px;padding:0 14px;border-radius:999px;font-size:16px}
+.vs-pays button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.vs-heard{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.vs-btns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:10px}
+.vs-btns button{min-height:64px;border-radius:16px;font-size:19px;font-weight:800;border:2px solid var(--ink);background:var(--surface);color:var(--ink)}
+.vs-btns .rec{border:none;background:var(--accent);color:var(--accent-ink);font-size:24px;letter-spacing:.15em}
+.vs-btns .rec:disabled{background:var(--field);color:var(--muted)}
+.vs-btns .wide{grid-column:1 / -1;min-height:56px;font-size:17px;border-width:2px;border-color:var(--st-idle);color:var(--st-idle)}
+.ck-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--field);border:1px solid transparent;border-radius:12px;padding:9px 12px;min-height:50px;color:var(--ink)}
+.ck-row i{flex:none;width:24px;font-style:normal;font-weight:800;font-size:18px;text-align:center}
+.ck-row span{flex:none;width:6.2em;font-size:13.5px;font-weight:700;color:var(--muted)}
+.ck-row b{flex:1;min-width:0;font-size:16px;overflow-wrap:anywhere}
+.ck-row.ok i{color:var(--accent)}
+.ck-row.warn{background:var(--warn-bg);border-color:var(--warn-line)}
+.ck-row.warn i{color:#b86a00}
+.ck-row.warn::after{content:"直す ›";flex:none;font-size:13.5px;font-weight:700;color:var(--ink)}
+.ck-row.opt b{color:var(--muted);font-weight:500}
+.ck-list{display:flex;flex-direction:column;gap:6px}
+#rv-check{border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+#rv-check.clean{background:var(--accent-soft);font-weight:700}
+#rv-check.issues{background:var(--warn-bg);border:1px solid var(--warn-line)}
+#rv-check>b{font-size:16px}
+#rv-check button{display:flex;gap:8px;align-items:center;width:100%;min-height:46px;text-align:left;border:1px solid var(--warn-line);border-radius:10px;background:var(--surface);color:var(--ink);font-size:15px;padding:6px 12px}
+#rv-check button::after{content:"直す ›";margin-left:auto;flex:none;font-size:13px;font-weight:700}
+#rv-check button em{font-style:normal;font-family:var(--num);font-weight:700;color:var(--muted);flex:none}
+.vs-close{align-self:center;min-height:40px;border:none;background:none;color:var(--muted);font-size:15px;text-decoration:underline}
+body.dock .ride[data-st] .ride-k{flex:1 1 auto;min-height:52px}
+.recbar .go{min-height:66px;min-width:150px;font-size:26px;border-radius:16px}
+body.hasbar #toast,body.dock:not(.typing) #toast{bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+body.hasbar #go{display:none}
+body.hasbar .ride[data-st="done"] .ride-b{display:none}
 #ymode .chip{flex:1 1 auto;padding:0 8px;font-size:14px;white-space:nowrap}
 #yrange .grid2{margin-bottom:10px}
 #yrange label.f input{padding:0 6px;font-size:16px}
@@ -259,6 +357,47 @@ body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
 /* the same badge stays at the top of the screen while the card is scrolled out of view */
 #stpill{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:10px;z-index:60;border:2px solid #fff;border-radius:999px;background:var(--c,#c62f22);color:var(--ci,#fff);font-size:17px;font-weight:800;letter-spacing:.1em;padding:6px 14px 7px 16px;box-shadow:0 2px 10px rgba(0,0,0,.3);display:flex;align-items:center;gap:8px}
 #stpill[hidden]{display:none}
+/* the status, small, at the top of the big button at the bottom */
+body.dock .ride[data-st] .ride-b{padding-top:16px}
+body.dock .ride[data-st] .ride-b::before{content:attr(data-s);position:absolute;top:6px;left:0;right:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.06em;opacity:.92;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}
+.ride[data-st="pre"]{--c:var(--st-closed);--ci:var(--st-closed-ink)}
+body.dock .ride[data-st="pre"] .ride-b{background:var(--st-on);color:var(--st-on-ink)}
+/* parts of the input card that wait until they are needed */
+#composer.lite #nbox,#composer.lite #tawrap,#composer.lite #partial{display:none}
+#composer[data-ph="pre"] #nbox0,#composer[data-ph="pre"] #help{display:none}
+/* before 出庫 the shift card above already says 出庫前; the input card steps aside, leaving only the big 出庫 button at the bottom */
+body.dock #composer[data-ph="pre"]{padding:0;border:none;background:none;box-shadow:none;margin-top:-6px;min-height:0}
+body.dock #composer[data-ph="pre"] .ride{display:contents}
+body.dock #composer[data-ph="pre"] .ride-t,body.dock #composer[data-ph="pre"] .ride-x{display:none}
+#go{display:none!important}
+.resetb[hidden],#why[hidden],#m-fold[hidden]{display:none!important}
+.qrow{display:flex;gap:8px;flex-wrap:wrap}
+.qrow[hidden]{display:none}
+.qrow button{flex:1 1 140px;min-height:46px;border:1px dashed var(--line);border-radius:12px;background:none;color:var(--ink);font-size:15px;font-weight:700}
+.ride-o[hidden],.ride-o .ro[hidden]{display:none!important}
+/* the revenue card folded to one line while working; 「大きく表示」 opens it */
+#meterp.fold{padding-top:12px;padding-bottom:12px}
+#meterp.fold .big,#meterp.fold .goal,#meterp.fold .setgoal,#meterp.fold .pays{display:none!important}
+#meterp .lab #m-fold{margin-left:auto}
+#meterp .lab #m-more:not([hidden])+#m-fold{margin-left:10px}
+/* payment buttons that replace the number keys after 確定 */
+.np.pay .np-k{display:none}
+.np-pay{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.np-pay[hidden]{display:none}
+.np-pay button{min-height:64px;border:2px solid var(--line);border-radius:14px;background:var(--field);color:var(--ink);font-size:clamp(14px,4.6vw,19px);font-weight:800;touch-action:manipulation;white-space:nowrap;padding:0 4px}
+.seg a{white-space:nowrap}
+@media (max-width:360px){.seg{gap:1px;padding:2px}.seg a{padding:8px 5px;font-size:13px}}
+.np-pay button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.np-pay button.fn{grid-column:span 3;min-height:46px;font-size:15px;font-weight:700;color:var(--muted);background:none;border-width:1px}
+.np-pay button.fn+button.fn{margin-top:-2px}
+#bar.nopay #bar-sum{color:var(--danger);font-weight:700}
+/* edit sheet */
+.paxst{display:flex;align-items:center;gap:6px;margin-top:4px}
+.paxst button{flex:none;width:48px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink);font-size:22px;font-weight:700}
+.paxst input{flex:1;min-width:0;height:44px;text-align:center;font-size:20px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink)}
+.emore{margin-top:4px;border-top:1px solid var(--line);padding-top:8px}
+.emore summary{cursor:pointer;font-size:14.5px;font-weight:700;color:var(--muted);padding:6px 0;list-style-position:inside}
+.emore .grid2{margin-top:6px}
 #stpill i{font-style:normal;font-weight:600;font-size:13px;letter-spacing:0;opacity:.9}
 .ride-t span{font-size:13.5px;color:var(--muted)}
 .ride.on .ride-t span{color:var(--ink)}
@@ -323,7 +462,7 @@ body.hasbar #toast{bottom:calc(98px + env(safe-area-inset-bottom,0px))}
 #rv .btn.x{flex:0 0 auto}
 #rv-body{display:flex;flex-direction:column;gap:14px}
 .rtable{width:100%;border-collapse:collapse;font-size:15px}
-.rtable th{text-align:left;font-weight:400;color:var(--muted);padding:7px 4px;border-top:1px solid var(--line);font-size:14px}
+.rtable th{text-align:left;font-weight:400;color:var(--muted);padding:7px 4px;border-top:1px solid var(--line);font-size:14px;white-space:nowrap}
 .rtable td{text-align:right;padding:7px 4px;border-top:1px solid var(--line);font-family:var(--num);font-size:18px;font-variant-numeric:tabular-nums}
 .rtable tr:first-child th,.rtable tr:first-child td{border-top:none}
 .rtable td.tx{font-family:var(--body);font-size:15px;text-align:left;overflow-wrap:anywhere}
@@ -426,7 +565,7 @@ html.mapopen,html.mapopen body{overflow:hidden}
 <div class="app">
   <header class="top">
     <h1>売上日報</h1>
-    <nav class="seg" aria-label="表示切替"><a href="#day" id="tab-day">日報</a><a href="#list" id="tab-list">一覧</a><a href="#month" id="tab-month">月集計</a><a href="#year" id="tab-year">年集計</a><a href="#map" id="tab-map" hidden>地図</a></nav>
+    <nav class="seg" aria-label="表示切替"><a href="#day" id="tab-day">日報</a><a href="#list" id="tab-list">一覧</a><a href="#month" id="tab-month">月集計</a><a href="#year" id="tab-year">年集計</a><a href="#map" id="tab-map" hidden>地図</a><a href="#set" id="tab-set">設定</a></nav>
   </header>
 
   <section id="v-day" style="display:contents">
@@ -442,18 +581,20 @@ html.mapopen,html.mapopen body{overflow:hidden}
 
     <div class="card" id="composer">
       <div class="warn" id="daywarn" hidden><span id="daywarn-t"></span><button id="daywarn-b">今の日報へ</button></div>
-      <div class="tawrap" id="tawrap">
-        <textarea id="say" rows="2" placeholder="例：新宿駅から渋谷まで 2400円 カード" autocomplete="off" autocapitalize="off" enterkeyhint="done" aria-label="乗車内容を話すか入力"></textarea>
-        <button id="mic" hidden aria-label="音声入力を開始"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
-      </div>
-      <div id="partial" hidden></div>
+<div class="ride" id="ride" aria-live="polite"><div class="ride-t"><b id="ride-s">空車</b><span id="ride-d"></span></div><button class="ride-x" id="ride-x" hidden>取り消す</button><button type="button" class="ride-k" id="brk-b">休憩</button><button class="ride-b" id="ride-b">乗車</button><div class="ride-o"><label class="ro" for="r-o1"><span>乗車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o1" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="メーター " aria-label="乗車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><label class="ro" for="r-o2"><span>降車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o2" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="降車メーター " aria-label="降車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><span class="roh" id="r-o1-h"></span></div></div>
+      <div class="cmdbox" id="ride-closed" hidden><b>この日報は帰庫済みです</b><em>続けて乗せるときは、帰庫を取り消してから乗車します。</em><div class="btnrow"><button type="button" class="btn" id="rc-no">やめる</button><button type="button" class="btn pri" id="rc-yes">帰庫を取り消して乗車</button></div></div>
+      <div class="qrow" id="qrow" hidden><button type="button" id="q-text">✎ 文字で入れる</button><button type="button" id="q-fare">¥ 料金から入れる</button></div>
       <div class="stack" id="nbox0">
         <div class="routeline" id="routeline" hidden><span>乗車地</span><strong id="p-from" class="empty">—</strong><i>→</i><span>降車地</span><strong id="p-to" class="empty">—</strong></div>
         <div class="pextra" id="p-extra" hidden></div>
         <div class="pextra" id="geo-msg" hidden></div>
       </div>
-      <div class="ride" id="ride" aria-live="polite"><div class="ride-t"><b id="ride-s">空車</b><span id="ride-d"></span></div><button class="ride-x" id="ride-x" hidden>取り消す</button><button type="button" class="ride-k" id="brk-b">休憩</button><button class="ride-b" id="ride-b">乗車</button><div class="ride-o"><label class="ro" for="r-o1"><span>乗車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o1" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="メーター " aria-label="乗車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><label class="ro" for="r-o2"><span>降車時メーター km</span><span class="roin"><input type="text" inputmode="decimal" id="r-o2" autocomplete="off" enterkeyhint="done" maxlength="10" placeholder="—"><button type="button" class="rmic" data-say="降車メーター " aria-label="降車時メーターを声で入れる"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span></label><span class="roh" id="r-o1-h"></span></div></div>
-      <div class="cmdbox" id="ride-closed" hidden><b>この日報は帰庫済みです</b><em>続けて乗せるときは、帰庫を取り消してから乗車します。</em><div class="btnrow"><button type="button" class="btn" id="rc-no">やめる</button><button type="button" class="btn pri" id="rc-yes">帰庫を取り消して乗車</button></div></div>
+            <div class="tawrap" id="tawrap">
+        <div class="sayhead"><span>話した内容</span><button type="button" id="say-x" hidden>消す</button></div>
+        <textarea id="say" rows="1" placeholder="「🎤 話す」で入ります（文字でも入れられます）" autocomplete="off" autocapitalize="off" enterkeyhint="done" aria-label="乗車内容を話すか入力"></textarea>
+        <button id="mic" hidden aria-label="音声入力を開始"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      </div>
+      <div id="partial" hidden></div>
       <div hidden><input type="text" id="p-o1" autocomplete="off"><input type="text" id="p-o2" autocomplete="off"><div class="pextra" id="p-odo" hidden></div></div>
       <div class="stack" id="nbox">
       <div class="parsed">
@@ -486,18 +627,18 @@ html.mapopen,html.mapopen body{overflow:hidden}
       </div>
       <div class="cmdbox" id="cmdbox" hidden></div>
       <button class="go" id="go" disabled>記録</button>
-      <div class="why" id="why">料金を話すか、料金の欄に数字で入れると記録できます</div>
+      <div class="why" id="why">料金を話すか、料金の欄に数字キーで入れると記録できます</div>
       <button type="button" class="resetb" id="reset">入力をリセット</button>
       <details class="help" id="help">
       <summary id="help-s">話し方と直し方</summary>
-      <div class="hint" id="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span id="hint-t">上の枠をタップし、キーボードのマイクボタンを押して話してください。</span></div>
+      <div class="hint" id="hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span id="hint-t">下の「🎤 話す」を押して話します。聞き取った内容は「話した内容」に入り、文字で直すこともできます。</span></div>
       <div class="hint"><span>直すときは「さっきのはカード」「さっきの 3000円」、消すときは「取り消し」。料金は、話すかわりに料金の欄へ数字キーで入れることもできます。距離は「4.2キロ」と話すか、料金の横の欄に数字で入れます。あとから足すときは「さっきの 4.2キロ」。乗車時と降車時のメーターを入れると、差が距離に入ります。乗車時メーターは乗せたときに入れておけば、記録するまで残ります。メーターの欄には、乗車時も降車時も下3桁だけ入れれば、残りの桁を補います。「メーター 230」「降車メーター 241」と話しても入ります。メーター欄の横のマイクのボタンを押すと、入力欄に「メーター」が入るので、続けて数字だけ話します。乗車時刻・降車時刻は、「乗車」「降車」ボタンを押すとその時刻が入ります。「時刻・客層・きっかけ・天気」を開くと、時刻を直せます。</span></div>
       <div class="hint"><span>人数・迎車・高速代も「迎車 2名 高速1320円」のように続けて話せます。乗車のきっかけは「流し」「付け待ち」「無線」「アプリ配車」「予約」と話すか、ボタンで選びます。出庫と帰庫は、いちばん上の「出庫」「帰庫」を押すと時刻が入り、続けてメーターを入れられます。休憩は、空車のときに「休憩」を押して入り、「休憩終了」で終わります。合計と一覧は「乗務情報・目標」に出ます。客層・きっかけ・天気のボタンは、「時刻・客層・きっかけ・天気」を開くと出ます。</span></div>
       </details>
     </div>
 
     <div class="meter" id="meterp" aria-live="polite">
-      <div class="lab"><span>営収（税込）</span><button class="more" id="m-more" aria-expanded="false" aria-controls="m-pays" hidden>内訳を見る</button></div>
+      <div class="lab"><span>営収（税込）</span><button class="more" id="m-more" aria-expanded="false" aria-controls="m-pays" hidden>内訳を見る</button><button type="button" class="more" id="m-fold" aria-expanded="false">大きく表示</button></div>
       <div class="big num"><small>¥</small><span id="m-total">0</span></div>
       <div class="goal" id="m-goal" hidden><div class="bar"><i id="m-goal-bar"></i></div><div class="gt"><span id="m-goal-l"></span><span id="m-goal-r"></span></div></div>
       <button class="setgoal" id="m-setgoal">目標を設定</button>
@@ -527,7 +668,12 @@ html.mapopen,html.mapopen body{overflow:hidden}
       <button type="button" class="btn" id="brk-add">休憩をあとから追加</button>
     </details>
 
-    <details class="card" id="bk">
+    
+  </section>
+
+  <section id="v-set" hidden style="display:none">
+    <h2><span>設定・バックアップ</span></h2>
+    <details class="card" id="bk" open>
       <summary>バックアップ <span>記録の保存・復元・消去</span></summary>
       <div class="hint"><span id="bk-info"></span></div>
       <div class="btnrow"><button type="button" class="btn pri" id="bk-save" hidden>バックアップを保存</button><button type="button" class="btn" id="bk-copy">バックアップをコピー</button></div>
@@ -662,25 +808,29 @@ html.mapopen,html.mapopen body{overflow:hidden}
 <div class="ov" id="ov" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-h">
     <h3 id="sh-h">乗車記録を修正</h3>
+    <input type="hidden" id="e-t">
     <div class="grid2">
-      <label class="f">時刻<input type="time" id="e-t"></label>
       <label class="f">料金 円<input type="number" inputmode="numeric" id="e-fare" min="0"></label>
-      <label class="f">乗車時刻<input type="time" id="e-t1"></label>
-      <label class="f">降車時刻<input type="time" id="e-t2"></label>
-      <label class="f">実車距離 km<input type="number" inputmode="decimal" step="0.1" min="0" id="e-km"></label>
       <label class="f">支払方法<select id="e-pay"></select></label>
-      <label class="f">乗車時メーター km<input type="text" inputmode="decimal" id="e-o1" autocomplete="off"></label>
-      <label class="f">降車時メーター km<input type="text" inputmode="decimal" id="e-o2" autocomplete="off"></label>
       <label class="f wide">乗車地<input type="text" id="e-from"></label>
       <label class="f wide">降車地<input type="text" id="e-to"></label>
-      <label class="f">人数<input type="number" inputmode="numeric" id="e-pax" min="1" max="9"></label>
+      <label class="f">乗車時刻<input type="time" id="e-t1"></label>
+      <label class="f">降車時刻<input type="time" id="e-t2"></label>
+      <div class="f">人数<div class="paxst"><button type="button" data-pax="-1" aria-label="1人減らす">−</button><input type="number" inputmode="numeric" id="e-pax" min="1" max="9" aria-label="人数"><button type="button" data-pax="1" aria-label="1人増やす">＋</button></div></div>
       <label class="f">高速代 円<input type="number" inputmode="numeric" id="e-toll" min="0"></label>
+    </div>
+    <details class="emore" id="e-more"><summary>その他（距離・メーター・迎車・客層・きっかけ・天気・メモ）</summary>
+    <div class="grid2">
+      <label class="f">実車距離 km<input type="number" inputmode="decimal" step="0.1" min="0" id="e-km"></label>
       <label class="f">迎車<select id="e-mukae"><option value="0">なし</option><option value="1">あり</option></select></label>
+      <label class="f">乗車時メーター km<input type="text" inputmode="decimal" id="e-o1" autocomplete="off"></label>
+      <label class="f">降車時メーター km<input type="text" inputmode="decimal" id="e-o2" autocomplete="off"></label>
       <label class="f">客層<select id="e-seg"></select></label>
-      <label class="f wide">乗車のきっかけ<select id="e-src"></select></label>
+      <label class="f">乗車のきっかけ<select id="e-src"></select></label>
       <label class="f wide">天気<select id="e-w"></select></label>
       <label class="f wide">メモ<input type="text" id="e-note"></label>
     </div>
+    </details>
     <div class="btnrow"><button class="btn del" id="e-del">削除</button><button class="btn" id="e-cancel">閉じる</button><button class="btn pri" id="e-save">保存</button></div>
   </div>
 </div>
@@ -697,6 +847,7 @@ html.mapopen,html.mapopen body{overflow:hidden}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rv-h">
     <h3 id="rv-h"></h3>
     <div id="rv-note" hidden></div>
+    <div id="rv-check" hidden></div>
     <div id="rv-map" hidden><img id="rv-mapimg" alt="この日の順路の地図"><div class="mnote" id="rv-mapnote"></div></div>
     <div class="btnrow" id="rv-imgrow" hidden><button type="button" class="btn" id="rv-tomap" hidden>地図で詳しく見る</button><button type="button" class="btn pri" id="rv-img" hidden>画像で保存</button></div>
     <div id="rv-body"></div>
@@ -707,6 +858,26 @@ html.mapopen,html.mapopen body{overflow:hidden}
 </div>
 <div class="recbar" id="bar" hidden><div class="recbar-in"><div class="recbar-t"><b id="bar-fare"></b><span id="bar-sum"></span></div><button class="go" id="bar-go">記録</button></div></div>
 <button type="button" id="stpill" hidden aria-label="乗車の欄へ移動"></button>
+<button type="button" id="vbtn" aria-label="話して入れる"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>話す</button>
+<div class="vs-bg" id="vs-bg" hidden></div>
+<div class="vs" id="vs" hidden role="dialog" aria-modal="true" aria-labelledby="vs-t"><div class="vs-in">
+  <div class="vs-top"><b id="vs-t">話してください</b><button type="button" class="vs-tts" id="vs-tts" aria-pressed="true">🔈 読み上げ</button></div>
+  <div id="vs-listen"><div class="vs-mic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div><div class="vs-live" id="vs-live" aria-live="polite"></div></div>
+  <div id="vs-res" hidden><div class="vs-rows" id="vs-rows"></div><div class="vs-heard" id="vs-heard"></div></div>
+  <div class="vs-btns" id="vs-btns"></div>
+  <button type="button" class="vs-close" id="vs-close">閉じて、入力欄で直す</button>
+</div></div>
+<div class="np" id="np" hidden role="group" aria-label="数字キー"><div class="np-in">
+  <div class="np-h"><span class="np-l" id="np-l"></span><span class="np-v" id="np-v"></span></div>
+  <div class="np-hint" id="np-hint"></div>
+  <div class="np-k">
+    <button type="button" tabindex="-1" data-k="7">7</button><button type="button" tabindex="-1" data-k="8">8</button><button type="button" tabindex="-1" data-k="9">9</button><button type="button" tabindex="-1" class="fn" data-k="back" aria-label="1文字消す">⌫</button>
+    <button type="button" tabindex="-1" data-k="4">4</button><button type="button" tabindex="-1" data-k="5">5</button><button type="button" tabindex="-1" data-k="6">6</button><button type="button" tabindex="-1" class="fn" data-k="clear">クリア</button>
+    <button type="button" tabindex="-1" data-k="1">1</button><button type="button" tabindex="-1" data-k="2">2</button><button type="button" tabindex="-1" data-k="3">3</button><button type="button" tabindex="-1" class="ok" data-k="ok">確定</button>
+    <button type="button" tabindex="-1" data-k="0">0</button><button type="button" tabindex="-1" data-k="00" id="np-x">00</button><button type="button" tabindex="-1" class="fn" data-k="close">閉じる</button>
+  </div>
+  <div class="np-pay" id="np-pay" hidden></div>
+</div></div>
 <div id="toast" hidden role="status"><span id="toast-t"></span><button id="toast-b">取り消す</button></div>
 
 <script>
@@ -717,7 +888,7 @@ const PAYRE=[
  ['ticket',/(タクシー)?チケット|タクシー券|タク券|クーポン/i],
  ['qr',/QR(コード)?|ペイペイ|PayPay|楽天ペイ|d払い|au ?PAY|メルペイ|バーコード|コード決済/i],
  ['emoney',/電子マネー|交通系(IC)?(カード)?|Suica|スイカ|PASMO|パスモ|QUICPay|クイックペイ|nanaco|ナナコ|WAON|ワオン|Edy|エディ/i],
- ['app',/GO ?(Pay|ペイ|決済|払い)|ゴーペイ|アプリ(決済|払い)?|ネット決済|S\.?RIDE|エスライド|Uber|ウーバー|DiDi|ディディ/i],
+ ['app',/GO ?(Pay|ペイ|決済|払い)|ゴーペイ|\bGO\b|(?:^|\s)ゴー(?=\s|$)|アプリ(決済|払い)?|ネット決済|S\.?RIDE|エスライド|Uber|ウーバー|DiDi|ディディ/i],
  ['card',/クレジット(カード)?|クレカ|カード/i],
  ['cash',/現金|キャッシュ/i]
 ];
@@ -763,6 +934,8 @@ function parseSay(raw){
   const o={from:'',to:'',fare:null,toll:0,pay:null,seg:null,src:null,pax:1,paxSet:false,km:null,o1:null,o2:null,t:null,mukae:false};
   let s=(raw||'').normalize('NFKC').replace(/\s+/g,' ').trim();
   if(!s)return o;
+  /* 「2400えん」: the phone sometimes writes 円 in kana */
+  s=s.replace(/([\d〇一二三四五六七八九十百千万])\s*えん/g,'$1円');
   let m;
   /* Meter readings: 「メーター 230」「降車メーター 241」. Spoken forms vary (メータ, 乗車時のメーター, 二百三十, 2 3 0); the last one said wins, so saying it again corrects it. */
   {const MN='((?:\\d\\s){1,6}\\d(?!\\d|\\s*円)|\\d[\\d,]*(?:\\.\\d)?(?!\\d|\\s*円)|[〇一二三四五六七八九十百千万]+(?![\\d〇一二三四五六七八九十百千万]|\\s*円))\\s*(?:キロメートル|キロ|km)?';
@@ -791,6 +964,8 @@ function parseSay(raw){
     if((m=s.match(re))){o.seg=key;s=s.replace(new RegExp('('+re.source+')(のお客様?|のお客さん|の方|さん)?'),' ');break}
   }
   if(/迎車/.test(s)){o.mukae=true;s=s.replace(/迎車(料金|あり)?/g,' ')}
+  /* words that are not places: 「料金2400円」「領収書あり」 */
+  s=s.replace(/(?:料金|運賃)(?!所)(?:は|が|を)?|領収書(?:あり|発行|渡し)?|レシート/g,' ');
   s=s.replace(/[、。,.円]/g,' ');
   const drop=new Set(['で','です','でした','を','は','と','の','にて','払い','支払い','お客様','お客さん','に','へ','が']);
   const tok=s.split(' ').map(x=>x.trim()).filter(x=>x&&!drop.has(x));
@@ -861,16 +1036,18 @@ const LSD='taxi-nippo-dirty-v1';
 try{const j=JSON.parse(localStorage.getItem(LSD)||'[]');if(Array.isArray(j))j.forEach(k=>{if(/^\d{4}-\d\d-\d\d$/.test(k))dirty.add(k)})}catch(e){}
 const saveDirty=()=>{try{localStorage.setItem(LSD,JSON.stringify([...dirty]))}catch(e){}};
 const resend=()=>{if(col)[...dirty].forEach(k=>{if(days[k])persist(k)})};
-const LSU='taxi-nippo-ui-v1';let ui={pays:false,lscope:'day'},autoDate=null,helpTouched=false;
+const LSU='taxi-nippo-ui-v1';let ui={pays:false,lscope:'day',mbig:false},autoDate=null,helpTouched=false;
 let textKm=null,textO1=null,textO2=null,textFare=null;
 function parseKm(v){v=String(v==null?'':v).normalize('NFKC').replace(/,/g,'.').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<1000?Math.round(n*10)/10:null}
 const curKm=()=>parseKm($('p-km').value);
+const curPay=()=>payOverride||(parsed&&parsed.pay)||null;
 const LSO='taxi-nippo-odo-v1',LST='taxi-nippo-time-v1';
 /* status pill at the top: shown on the 日報 screen only while the ride card is out of view */
 let rideSeen=true;
 function stPill(){
   const pl=$('stpill'),box=$('ride');if(!pl||!box)return;
-  const show=!rideSeen&&!$('v-day').hidden&&$('rv').hidden&&$('ov').hidden&&box.dataset.st&&box.dataset.st!=='closed';
+  /* the status now rides in the big button at the bottom; the pill stays only for the screen without that button (number pad open) */
+  const show=false&&!rideSeen&&!$('v-day').hidden&&$('rv').hidden&&$('ov').hidden&&box.dataset.st&&box.dataset.st!=='closed';
   pl.hidden=!show;if(!show)return;
   const cs=getComputedStyle(box);pl.style.setProperty('--c',cs.getPropertyValue('--c'));pl.style.setProperty('--ci',cs.getPropertyValue('--ci'));
   pl.innerHTML=esc($('ride-s').textContent)+'<i>'+esc(box.dataset.st==='on'?($('ride-d').textContent.match(/\d+分/)||[''])[0]:box.dataset.st==='brk'?($('ride-d').textContent.split(' ').pop()||''):'')+'</i>';
@@ -881,11 +1058,29 @@ function renderRide(){
   const st=t2?'done':t1?'on':'idle';
   box.classList.toggle('on',st==='on');$('ride-x').hidden=st==='idle';
   const br=st==='idle'?openBreak():null;$('brk-b').hidden=st!=='idle'||!!br;
-  if(br){box.classList.add('on');box.dataset.st='brk';$('ride-s').textContent='休憩中';$('ride-d').textContent=br.s+'から '+durTxt(brkLen(br,true));b.textContent='休憩終了';b.className='ride-b drop';odoHint();stPill();return}
-  if(st==='idle'){const cl=!!(days[cur]&&days[cur].endTime);box.dataset.st=cl?'closed':'idle';$('ride-s').textContent=cl?'帰庫済み':'空車';$('ride-d').textContent=cl?'この日の乗務は終わっています':'乗せたら「乗車」を押します';b.textContent='乗車';b.className='ride-b'}
-  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;box.dataset.st='on';$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+m+'分';b.textContent='降車';b.className='ride-b drop'}
-  else{box.dataset.st='done';$('ride-s').textContent='降車済み';$('ride-d').textContent=(t1||'—')+'→'+t2+'　料金を入れて記録';b.textContent='料金へ';b.className='ride-b go2'}
-  odoHint();stPill();
+  if(br){box.classList.add('on');box.dataset.st='brk';$('ride-s').textContent='休憩中';$('ride-d').textContent=br.s+'から '+durTxt(brkLen(br,true));b.textContent='休憩終了';b.className='ride-b drop';b.dataset.s='休憩中　'+durTxt(brkLen(br,true));odoHint();layoutCmp();stPill();return}
+  if(st==='idle'){const d0=days[cur],cl=!!(d0&&d0.endTime),pre=!cl&&!(d0&&d0.startTime)&&!(d0&&d0.trips&&d0.trips.length);
+    /* before 出庫 the big button at the bottom is 出庫, so the day starts the right way round */
+    box.dataset.st=cl?'closed':pre?'pre':'idle';$('ride-s').textContent=cl?'帰庫済み':pre?'出庫前':'空車';
+    $('ride-d').textContent=cl?'この日の乗務は終わっています':pre?'まず下の「出庫」を押します':'乗せたら「乗車」を押します';
+    b.textContent=pre?'出庫':'乗車';b.className='ride-b';b.dataset.s=cl?'帰庫済み':pre?'出庫前':'いま 空車';if(pre)$('brk-b').hidden=true}
+  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;box.dataset.st='on';$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+m+'分';b.textContent='降車';b.className='ride-b drop';b.dataset.s='いま 乗車中　'+m+'分'}
+  else{box.dataset.st='done';$('ride-s').textContent='降車済み';$('ride-d').textContent=(t1||'—')+'→'+t2+'　料金を入れて記録';b.textContent='料金へ';b.className='ride-b go2';b.dataset.s='降車済み　料金を入れます'}
+  odoHint();layoutCmp();syncBar();
+}
+/* Show only what the moment needs: 空車 → the pickup meter; 乗車中 → the drop-off meter; 降車済み → fare and payment.
+   The sentence box and the fare fields stay folded until something is said or typed, or 「文字で入れる」「料金から入れる」 is pressed. */
+let manualIn=false;
+function cmpEntered(){return !!($('say').value.trim()||$('p-fare').value||$('p-km').value||payOverride||segOverride!=null||srcOverride!=null||cmd)}
+function layoutCmp(){
+  const c=$('composer'),st=$('ride').dataset.st||'idle',ent=cmpEntered(),ride=st==='on'||st==='done';
+  const showN=st==='done'||ent||manualIn,o1=!!$('p-o1').value,o2=!!$('p-o2').value;let uo=false;try{uo=usesOdo()||odoBase()!=null}catch(e){}
+  c.dataset.ph=st;c.classList.toggle('lite',!showN);
+  const r1=st==='idle'||st==='on'||(st==='done'&&(uo||o1)),r2=ride&&(uo||o1||o2);
+  $('r-o1').closest('.ro').hidden=!r1;$('r-o2').closest('.ro').hidden=!r2;$('ride').querySelector('.ride-o').hidden=!(r1||r2);
+  const q=!showN&&(st==='idle'||st==='on'||st==='brk');$('qrow').hidden=!q;$('q-fare').hidden=st!=='idle';
+  $('reset').hidden=!(ent||$('p-t1').value||o1||o2);
+  if(!cmd)$('why').hidden=!((ent||st==='done')&&$('go').disabled);
 }
 function saveTm(){renderRide();try{localStorage.setItem(LST,JSON.stringify({t1:$('p-t1').value,t2:$('p-t2').value}))}catch(e){}}
 function parseOdo(v){v=String(v==null?'':v).normalize('NFKC').replace(/[,\s]/g,'').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<10000000?Math.round(n*10)/10:null}
@@ -933,7 +1128,24 @@ function syncOdo(){
   syncBar();odoHint();
 }
 function saveUi(){try{localStorage.setItem(LSU,JSON.stringify(ui))}catch(e){}}
-function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LS)||'{}');if(j&&typeof j==='object')days=j}catch(e){}try{const w=JSON.parse(localStorage.getItem(LSX)||'null');if(w&&w.d===ymd(new Date())&&WXS.includes(w.w))wxSel=w.w}catch(e){}try{const g=JSON.parse(localStorage.getItem(LSS)||'null');if(g&&typeof g==='object')settings={dayGoal:g.dayGoal||null,monthGoal:g.monthGoal||null,breakGoal:g.breakGoal||null}}catch(e){}try{const u=JSON.parse(localStorage.getItem(LSU)||'null');if(u&&typeof u==='object')ui={pays:!!u.pays,lscope:u.lscope==='month'?'month':'day'}}catch(e){}}
+/* Records read back from this device or from Claude are checked before use: a damaged day (null, rides that are not objects,
+   breaks that are not a list) is repaired or left out, so one bad entry cannot stop the whole screen. */
+function cleanDay(k,d){
+  if(!d||typeof d!=='object'||Array.isArray(d))return null;
+  d.type='day';if(/^\d{4}-\d\d-\d\d$/.test(k))d.date=k;
+  d.trips=(Array.isArray(d.trips)?d.trips:[]).filter(t=>t&&typeof t==='object'&&!Array.isArray(t));
+  d.trips.forEach((t,i)=>{if(t.id==null)t.id='r'+k.replace(/-/g,'')+'_'+i+'_'+Math.random().toString(36).slice(2,7);
+    if(typeof t.fare!=='number'||!isFinite(t.fare))t.fare=isFinite(+t.fare)?+t.fare:0;
+    if(typeof t.t!=='string'||!/^\d{1,2}:\d\d$/.test(t.t))t.t=(typeof t.tin==='string'&&/^\d{1,2}:\d\d$/.test(t.tin))?t.tin:'00:00';
+    /* a ride with both meter readings but no distance gets the distance from them (実車距離・実車率 in the report) */
+    if(t.km==null&&typeof t.o1==='number'&&typeof t.o2==='number'&&t.o2>=t.o1&&t.o2-t.o1<500)t.km=Math.round((t.o2-t.o1)*10)/10});
+  if(d.breaks!=null)d.breaks=Array.isArray(d.breaks)?d.breaks.filter(b=>b&&typeof b==='object'):[];
+  ['startTime','endTime'].forEach(f=>{if(d[f]!=null&&typeof d[f]!=='string')d[f]=''});
+  ['odoStart','odoEnd'].forEach(f=>{if(d[f]!=null&&!(typeof d[f]==='number'&&isFinite(d[f])))d[f]=null});
+  return d;
+}
+function cleanDays(o){const r={};if(o&&typeof o==='object'&&!Array.isArray(o))for(const k of Object.keys(o)){const d=cleanDay(k,o[k]);if(d)r[k]=d}return r}
+function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LS)||'{}');if(j&&typeof j==='object')days=cleanDays(j)}catch(e){}try{const w=JSON.parse(localStorage.getItem(LSX)||'null');if(w&&w.d===ymd(new Date())&&WXS.includes(w.w))wxSel=w.w}catch(e){}try{const g=JSON.parse(localStorage.getItem(LSS)||'null');if(g&&typeof g==='object')settings={dayGoal:g.dayGoal||null,monthGoal:g.monthGoal||null,breakGoal:g.breakGoal||null}}catch(e){}try{const u=JSON.parse(localStorage.getItem(LSU)||'null');if(u&&typeof u==='object')ui={pays:!!u.pays,lscope:u.lscope==='month'?'month':'day',mbig:!!u.mbig}}catch(e){}}
 function saveSettings(){
   try{localStorage.setItem(LSS,JSON.stringify(settings))}catch(e){}
   if(!col)return;settingsDirty=true;const body={type:'settings',dayGoal:settings.dayGoal,monthGoal:settings.monthGoal,breakGoal:settings.breakGoal};
@@ -1118,7 +1330,7 @@ function undoRestore(){
   let u=null;try{u=JSON.parse(localStorage.getItem(LSUNDO)||'null')}catch(e){}
   if(!u||!u.days){bkInfo();return}
   const ks=Object.keys(u.days).sort();
-  ks.forEach(k=>{days[k]=u.days[k]||{type:'day',date:k,trips:[],startTime:'',endTime:'',odoStart:null,odoEnd:null}});
+  ks.forEach(k=>{days[k]=cleanDay(k,u.days[k])||{type:'day',date:k,trips:[],startTime:'',endTime:'',odoStart:null,odoEnd:null}});
   if(u.settings){settings={dayGoal:u.settings.dayGoal||null,monthGoal:u.settings.monthGoal||null,breakGoal:u.settings.breakGoal||null};saveSettings()}
   try{localStorage.removeItem(LSUNDO)}catch(e){}
   saveLocal();render();pushDays(ks);bkMsg('復元する前の状態に戻しました。');
@@ -1171,7 +1383,7 @@ function undoDelete(){
   let u=null;try{u=JSON.parse(localStorage.getItem(LSDEL)||'null')}catch(e){}
   if(!u||!u.days){delUi();return}
   const ks=Object.keys(u.days).sort();
-  ks.forEach(k=>{if(u.days[k])days[k]=u.days[k]});
+  ks.forEach(k=>{const c=cleanDay(k,u.days[k]);if(c)days[k]=c});
   if(u.settings){settings={dayGoal:u.settings.dayGoal||null,monthGoal:u.settings.monthGoal||null,breakGoal:u.settings.breakGoal||null};saveSettings()}
   try{localStorage.removeItem(LSDEL)}catch(e){}
   saveLocal();render();pushDays(ks);delUi();bkInfo();delMsg('消した記録'+(u.settings?'と目標の設定':'')+'を戻しました。');
@@ -1500,8 +1712,41 @@ async function saveDayImage(k,btn,say){
     else say('画像を保存できませんでした。');
   }finally{btn.disabled=false}
 }
+/* 2) The day, checked: 出庫・帰庫, meters, each ride's places, times and meters, overlapping rides, a long day without a break.
+   Shown at the top of the day's report (it opens by itself after 帰庫); each line opens the place to fix it. */
+function dayCheck(k){
+  const d=days[k]||{},tr=d.trips?sorted(d):[],out=[],cn=caseNos(k);
+  const odo=d.odoStart!=null||d.odoEnd!=null||tr.some(x=>x.o1!=null||x.o2!=null);
+  if(!d.startTime)out.push({msg:'出庫時刻が入っていません',meta:1});
+  if(!d.endTime)out.push({msg:'帰庫時刻が入っていません',meta:1});
+  if(odo&&d.odoStart==null)out.push({msg:'出庫メーターが入っていません',meta:1});
+  if(odo&&d.endTime&&d.odoEnd==null)out.push({msg:'帰庫メーターが入っていません',meta:1});
+  let prevEnd=null;
+  tr.forEach(x=>{const no=cn[x.id]||'',miss=[];
+    if(!x.from)miss.push('乗車地');if(!x.to)miss.push('降車地');
+    if(odo&&x.o1==null)miss.push('乗車メーター');if(odo&&x.o2==null)miss.push('降車メーター');
+    if(!(x.fare>=500&&x.fare<=50000))miss.push('料金（¥'+yen(x.fare)+'）');
+    if(miss.length)out.push({no:no,id:x.id,msg:miss.join('・')+(miss.some(m=>/料金/.test(m))?'を確かめる':'がない')});
+    const st=x.tin||x.t;if(prevEnd&&st&&mins(st)<mins(prevEnd)&&mins(prevEnd)-mins(st)<720)out.push({no:no,id:x.id,msg:'前の乗車と時間が重なっています（'+st+' < '+prevEnd+'）'});
+    prevEnd=x.tout||st||prevEnd});
+  if(d.startTime&&d.endTime){let a=mins(d.startTime),e=mins(d.endTime);if(e<a)e+=1440;if(e-a>=360&&!brkTotal(k))out.push({msg:'休憩が0分です（押し忘れはありませんか）',meta:1,brk:1})}
+  return out;
+}
+function renderDayCheck(k){
+  const box=$('rv-check'),c=dayCheck(k),d=days[k]||{};
+  if(!(d.trips&&d.trips.length)&&!d.startTime){box.hidden=true;return c}
+  box.hidden=false;box.className=c.length?'issues':'clean';
+  box.innerHTML=c.length?'<b>⚠ 確かめてほしいところ '+c.length+'件</b>'+c.map((x,i)=>'<button type="button" data-dc="'+i+'">'+(x.no?'<em>'+esc(x.no)+'</em>':'')+'<span>'+esc(x.msg)+'</span></button>').join(''):'✓ 入力の漏れはありません';
+  box._items=c;return c;
+}
+$('rv-check').addEventListener('click',e=>{
+  const b=e.target.closest('[data-dc]');if(!b)return;const x=$('rv-check')._items[+b.dataset.dc];if(!x)return;
+  const k=rvDay||cur;$('rv').hidden=true;syncBar();
+  if(x.id){openEdit(x.id,k);return}
+  if(location.hash)location.hash='';const m=$('meta');m.open=true;setTimeout(()=>{(x.brk?$('brk-add'):m).scrollIntoView({block:'center',behavior:'smooth'})},80);
+});
 function openReport(k,closing){
-  rvDay=k;renderReport(k);
+  rvDay=k;renderReport(k);renderDayCheck(k);
   const d=days[k]||{},T=totals(d.trips||[]);
   $('rv-note').hidden=!closing;
   if(closing)$('rv-note').innerHTML='帰庫しました。お疲れさまでした。<span>今日は '+T.n+'回・'+yen(T.sum)+'円でした。'+(dlNs?'「画像で保存」で、'+(SOLO&&hasPos(k)?'今日の地図と':'')+'まとめを1枚の画像にして残せます。':'')+'</span>';
@@ -1547,7 +1792,7 @@ async function initCloud(){
     const timer=setTimeout(()=>setSync('まだ読み込めていません。この端末の記録を表示しています'),10000);
     col.onSnapshot(snap=>{
       const remote={};
-      let rs=null;snap.docs.forEach(d=>{const b=d.data();if(b&&b.type==='settings')rs=b;if(b&&b.type==='day'&&/^\d{4}-\d\d-\d\d$/.test(b.date||''))remote[b.date]=JSON.parse(JSON.stringify(b))});
+      let rs=null;snap.docs.forEach(d=>{const b=d.data();if(b&&b.type==='settings')rs=b;if(b&&b.type==='day'&&/^\d{4}-\d\d-\d\d$/.test(b.date||'')){const c=cleanDay(b.date,JSON.parse(JSON.stringify(b)));if(c)remote[b.date]=c}});
       if(rs&&!settingsDirty){settings={dayGoal:rs.dayGoal||null,monthGoal:rs.monthGoal||null,breakGoal:rs.breakGoal||null};try{localStorage.setItem(LSS,JSON.stringify(settings))}catch(e){}}
       for(const k in remote)if(!dirty.has(k))days[k]=remote[k];
       if(!snap.metadata.fromCache){
@@ -1607,9 +1852,9 @@ function followDate(){
 }
 /* The 記録 button sits below the chips; when it is off screen and there is something to record, the same button rides at the bottom edge. */
 function syncBar(){stPill();
-  const gb=$('go'),bar=$('bar');
-  let on=!gb.disabled&&$('ov').hidden&&$('rv').hidden&&!$('v-day').hidden;
-  if(on){const r=gb.getBoundingClientRect();on=!(r.top>=0&&r.bottom<=window.innerHeight)}
+  const gb=$('go'),bar=$('bar'),dayOn=$('ov').hidden&&$('rv').hidden&&!$('v-day').hidden;
+  let on=!gb.disabled&&dayOn;
+  document.body.classList.toggle('dock',dayOn&&!on);
   bar.hidden=!on;document.body.classList.toggle('hasbar',on);
   if(!on)return;
   const cd=fromYmd(cur),other=cur!==defaultDate()?(cd.getMonth()+1)+'/'+cd.getDate()+'分　':'';
@@ -1618,8 +1863,8 @@ function syncBar(){stPill();
     const t=cmd.target;$('bar-fare').textContent=t?'¥'+yen(t.fare):'';
     $('bar-sum').textContent=other+(t?t.t+'　':'')+(cmd.cmd==='undo'?'この記録を取り消します':(cmd.ch?cmd.ch.list.join('、'):''));
   }else{
-    const p=payOverride||parsed.pay||'cash',rt=(parsed.from||parsed.to)?(parsed.from||'—')+(parsed.to?' → '+parsed.to:''):'場所なし';
-    const k=curKm();$('bar-fare').textContent='¥'+yen(curFare());$('bar-sum').textContent=other+rt+'　'+PAYNAME[p]+(k!=null?'　'+k+'km':'');
+    const p=curPay(),rt=(parsed.from||parsed.to)?(parsed.from||'—')+(parsed.to?' → '+parsed.to:''):'場所なし';
+    const k=curKm();$('bar-fare').textContent='¥'+yen(curFare());$('bar-sum').textContent=other+rt+'　'+(p?PAYNAME[p]:'支払い未選択')+(k!=null?'　'+k+'km':'');$('bar').classList.toggle('nopay',!p);
   }
 }
 function renderDay(){
@@ -1629,7 +1874,7 @@ function renderDay(){
   {const off=cur!==defaultDate();$('daywarn').hidden=!off;if(off)$('daywarn-t').textContent='いま開いているのは'+$('dlabel').textContent+'の日報です。記録はこの日に入ります。'}
   $('m-total').textContent=yen(T.sum);fitBig('m-total');$('m-count').textContent=T.n;
   $('m-avg').textContent=yen(T.n?T.sum/T.n:0);$('m-net').textContent=yen(T.sum/1.1);
-  goalUI('m',settings.dayGoal,T.sum);
+  goalUI('m',settings.dayGoal,T.sum);setTimeout(mFold,0);
   {const g=settings.dayGoal;$('sb-total').textContent='¥'+yen(T.sum);$('sb-sub').textContent=T.n+'回'+(g>0?(T.sum>=g?'　目標達成':'　目標まであと '+yen(g-T.sum)):'')}
   $('m-pays').innerHTML=paysHtml(T.pay)+(T.toll?'<span>高速代<b>'+yen(T.toll)+'</b></span>':'');
   {const mb=$('m-more');mb.hidden=!T.n;mb.setAttribute('aria-expanded',String(ui.pays));mb.textContent=ui.pays?'内訳を閉じる':'内訳を見る';$('m-pays').hidden=!T.n||!ui.pays}
@@ -1901,7 +2146,7 @@ function optSum(){
   if(SEGNAME[sg])a.push(SEGNAME[sg]);if(SRCNAME[sr])a.push(SRCNAME[sr]);if(wxSel)a.push(wxSel);
   $('opt-sum').textContent=a.join('・');
 }
-function renderParsed(){renderParsed0();optSum();syncBar()}
+function renderParsed(){renderParsed0();optSum();layoutCmp();syncBar();const has=!!$('say').value.trim();$('say-x').hidden=!has;$('tawrap').classList.toggle('full',has)}
 function renderParsed0(){
   parsed=parseSay($('say').value);
   if(parsed.pay)payOverride=null;
@@ -1919,7 +2164,7 @@ function renderParsed0(){
     if(parsed.o2!==textO2&&parsed.o2!=null){const v=resolveOdo(parsed.o2,odoBase2());if(v!=null){$('p-o2').value=String(v);od=true}}
     if(od)syncOdo()}
   textO1=parsed.o1;textO2=parsed.o2;
-  const p=payOverride||parsed.pay||'cash';
+  const p=curPay();
   $('paychips').innerHTML=PAYS.map(x=>'<button class="chip" data-pay="'+x[0]+'" aria-pressed="'+(x[0]===p)+'">'+x[1]+'</button>').join('');
   if(parsed.seg)segOverride=null;
   const sg=segOverride!=null?segOverride:(parsed.seg||'');
@@ -1951,32 +2196,87 @@ function applyCmd(){
 }
 
 /* ---------- actions ---------- */
-function record(){
+/* 1) Before a ride is saved, its items are checked; if something worth having is missing or looks wrong, the list is shown
+      (and, by voice, read out) and the ride is saved only on 「このまま記録」/「はい」. Nothing missing — saved at once. */
+function record(force,voice){
   if(cmd){applyCmd();return}
+  if(curFare()==null)return;
+  if(!force){const ck=rideCheck();if(ck.warn.length){vsCheck(ck,!!voice);return}}
+  record0();
+}
+function rideCheck(){
+  const it=[],add=(k,label,val,st)=>it.push({k:k,label:label,val:val,st:st});
+  const fr=curFare();add('fare','料金','¥'+yen(fr)+(fr<500?'　少なすぎませんか':fr>50000?'　多すぎませんか':''),fr<500||fr>50000?'warn':'ok');
+  const pay=curPay();add('pay','支払方法',pay?PAYNAME[pay]:'未選択',pay?'ok':'warn');
+  const t1=$('p-t1').value,t2=$('p-t2').value;
+  if(t1&&t2){const bad=mins(t2)<mins(t1)&&mins(t1)-mins(t2)<720;add('time','時刻',t1+' → '+t2+(bad?'　降車が乗車より前です':''),bad?'warn':'ok')}
+  else if(t1||parsed.t)add('time','時刻',(parsed.t||t1)+(t2?' → '+t2:''),'ok');
+  else add('time','時刻','未入力（いまの時刻で記録）','warn');
+  const f=parsed.from||(geo.from?gShow('from'):''),to=parsed.to||(geo.to?gShow('to'):'');
+  add('from','乗車地',f||'未入力',f?'ok':'warn');add('to','降車地',to||'未入力',to?'ok':'warn');
+  if(usesOdo()){const a=parseOdo($('p-o1').value),b=parseOdo($('p-o2').value);
+    add('o1','乗車メーター',a!=null?fmtO(a)+' km':'未入力',a!=null?'ok':'warn');
+    add('o2','降車メーター',b!=null?fmtO(b)+' km'+(a!=null&&b<a?'　乗車より小さい':''):'未入力',b!=null&&!(a!=null&&b<a)?'ok':'warn')}
+  const km=curKm();add('km','距離',km!=null?km+' km':'未入力（任意）',km!=null?'ok':'opt');
+  const ex=[];ex.push((parsed.pax||1)+'名');if(parsed.mukae)ex.push('迎車');if(parsed.toll)ex.push('高速 '+yen(parsed.toll)+'円');add('pax','人数など',ex.join('・'),'ok');
+  const sg=segOverride!=null?segOverride:(parsed.seg||''),sr=srcOverride!=null?srcOverride:(parsed.src||'');
+  add('seg','客層',sg?SEGNAME[sg]:'未入力（任意）',sg?'ok':'opt');add('src','きっかけ',sr?SRCNAME[sr]:'未入力（任意）',sr?'ok':'opt');add('wx','天気',wxSel||'未入力（任意）',wxSel?'ok':'opt');
+  return {items:it,warn:it.filter(x=>x.st==='warn')};
+}
+const CKSAY={pay:'支払方法',fare:'料金',time:'時刻',from:'乗車地',to:'降車地',o1:'乗車メーター',o2:'降車メーター'};
+function vsCheck(ck,voice){
+  VC.step=null;vsShow();$('vs-listen').hidden=true;$('vs-res').hidden=false;
+  $('vs-t').textContent='記録前の確認　⚠ '+ck.warn.length+'件';
+  $('vs-rows').innerHTML='<div class="ck-list">'+ck.items.map(x=>'<button type="button" class="ck-row '+x.st+'" data-ck="'+x.k+'"><i>'+(x.st==='ok'?'✓':x.st==='warn'?'⚠':'–')+'</i><span>'+esc(x.label)+'</span><b>'+esc(x.val)+'</b></button>').join('')+'</div>';
+  $('vs-heard').textContent='⚠ の行を押すと、その欄を直せます。';
+  const say=ck.warn.map(x=>CKSAY[x.k]+(x.val.includes('　')?'を確かめてください':'')).join('、');
+  let miss=ck.warn.filter(x=>!x.val.includes('　')).map(x=>CKSAY[x.k]);if(miss.includes('乗車メーター')&&miss.includes('降車メーター'))miss=miss.filter(x=>!/メーター/.test(x)).concat('メーター');
+  const msg=miss.length?miss.join('、')+'が入っていません。':'';
+  const odd=ck.warn.filter(x=>x.val.includes('　')).map(x=>CKSAY[x.k]+'を確かめてください。').join('');
+  VC.step='check';
+  vsBtns('<button type="button" data-vs="close">戻って直す</button><button type="button" class="rec" data-vs="force">このまま記録</button>'+(VO.kind?'<button type="button" class="wide" data-vs="answer">🎤 声で答える（「はい」「府中駅まで」など）</button>':''));
+  speakJa(voice||say?(msg+odd+'このまま記録しますか'):'',()=>{if(voice&&VC.step==='check'&&!VO.active&&VO.kind==='web'&&!$('vs').hidden)voStart('',true)});
+  if(!voice&&synth)try{synth.cancel()}catch(e){}
+}
+/* jump from a ⚠ line to the place where it is fixed */
+function ckJump(k){
+  vsHide();
+  const go=el=>{el.scrollIntoView({block:'center',behavior:'smooth'});setTimeout(()=>el.focus(),250)};
+  if(k==='fare')return $('p-fare').focus();
+  if(k==='o1')return $('r-o1').focus();
+  if(k==='o2')return $('r-o2').focus();
+  if(k==='km')return $('p-km').focus();
+  if(k==='from'||k==='to'){const f=$('say');go(f);toast(k==='from'?'「〇〇から」と話すか、入力欄に書いてください':'「〇〇まで」と話すか、入力欄に書いてください',false);return}
+  if(k==='pay'){if(curFare()!=null){$('p-fare').focus();setTimeout(()=>{if(npF===$('p-fare'))npPay()},60)}else $('paychips').scrollIntoView({block:'center',behavior:'smooth'});return}
+  $('opt').open=true;
+  const tg={time:'p-t1',seg:'segchips',src:'srcchips',wx:'wxchips',pax:'say'}[k]||'opt';const el=$(tg)||$('opt');
+  el.scrollIntoView({block:'center',behavior:'smooth'});if(k==='time')setTimeout(()=>$('p-t1').focus(),250);
+}
+function record0(){
   const fare=curFare();if(fare==null)return;
   const d=day(cur);
-  const tr={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),t:parsed.t||$('p-t1').value||nowHM(),tin:$('p-t1').value||null,tout:$('p-t2').value||null,from:parsed.from||gName('from'),to:parsed.to||gName('to'),g1:gPos('from'),g2:gPos('to'),fare:fare,toll:parsed.toll||0,pay:payOverride||parsed.pay||'cash',pax:parsed.pax||1,mukae:!!parsed.mukae,km:curKm(),o1:parseOdo($('p-o1').value),o2:parseOdo($('p-o2').value),seg:segOverride!=null?segOverride:(parsed.seg||''),src:srcOverride!=null?srcOverride:(parsed.src||''),wx:wxSel?{w:wxSel,t:null}:null,note:''};
+  const tr={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),ts:Date.now(),t:parsed.t||$('p-t1').value||nowHM(),tin:$('p-t1').value||null,tout:$('p-t2').value||null,from:parsed.from||gName('from'),to:parsed.to||gName('to'),g1:gPos('from'),g2:gPos('to'),fare:fare,toll:parsed.toll||0,pay:curPay()||'cash',pax:parsed.pax||1,mukae:!!parsed.mukae,km:curKm(),o1:parseOdo($('p-o1').value),o2:parseOdo($('p-o2').value),seg:segOverride!=null?segOverride:(parsed.seg||''),src:srcOverride!=null?srcOverride:(parsed.src||''),wx:wxSel?{w:wxSel,t:null}:null,note:''};
   ['from','to'].forEach(k=>{const g=geo[k];if(g&&!g.n&&!parsed[k]){g.tid=tr.id;g.day=cur}});
   d.trips.push(tr);
   if(geo.from||geo.to){geo.from=null;geo.to=null;saveGeo();geoMsg('')}
   $('p-o1').value='';$('p-o2').value='';$('r-o1').value='';$('r-o2').value='';$('p-odo').hidden=true;$('p-t1').value='';$('p-t2').value='';try{localStorage.removeItem(LSO);localStorage.removeItem(LST)}catch(e){}
   if(!d.startTime&&d.trips.length===1&&cur===ymd(new Date())){/* leave 出庫 for the driver to set */}
   persist(cur);lastAdded={date:cur,id:tr.id};
-  $('say').value='';$('p-km').value='';textKm=null;kmFromOdo=false;$('p-fare').value='';textFare=null;payOverride=null;segOverride=null;srcOverride=null;$('partial').hidden=true;
+  $('say').value='';$('p-km').value='';textKm=null;kmFromOdo=false;$('p-fare').value='';textFare=null;payOverride=null;segOverride=null;srcOverride=null;$('partial').hidden=true;manualIn=false;
   renderParsed();render();
-  toast('記録しました　¥'+yen(tr.fare),true);
+  toast('記録しました　¥'+yen(tr.fare)+'　'+(PAYNAME[tr.pay]||''),true);
   $('say').blur();$('p-fare').blur();
 }
 function toast(text,undo){
   $('toast-t').textContent=text;$('toast-b').hidden=!undo;$('toast').hidden=false;
   clearTimeout(toastTimer);/* a toast that offers 取り消す stays until the next thing is typed (or 90 s), so a slip can still be undone */
-  toastTimer=setTimeout(()=>{$('toast').hidden=true},undo?90000:6000);
+  toastTimer=setTimeout(()=>{$('toast').hidden=true},undo?60000:2500);
 }
 function openEdit(id,date){
   const ed=date||cur,d=day(ed),t=d.trips.find(x=>x.id===id);if(!t)return;
   editDate=ed;{const dt=fromYmd(ed);$('sh-h').textContent='乗車記録を修正　'+(caseNos(ed)[id]||'')+(ed!==cur?'（'+(dt.getMonth()+1)+'月'+dt.getDate()+'日）':'')}
   editing=id;$('e-t').value=t.t||'';$('e-fare').value=t.fare;$('e-from').value=t.from||'';$('e-to').value=t.to||'';
-  $('e-pay').value=t.pay||'cash';$('e-pax').value=t.pax||1;$('e-toll').value=t.toll||'';$('e-mukae').value=t.mukae?'1':'0';$('e-note').value=t.note||'';$('e-seg').value=t.seg||'';$('e-src').value=t.src||'';$('e-km').value=t.km!=null?t.km:'';$('e-o1').value=t.o1!=null?t.o1:'';$('e-o2').value=t.o2!=null?t.o2:'';$('e-t1').value=t.tin||'';$('e-t2').value=t.tout||'';{const w=(t.wx&&t.wx.w)||'';$('e-w').innerHTML='<option value="">未入力</option>'+(w&&!WXS.includes(w)?[w]:[]).concat(WXS).map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('');$('e-w').value=w}
+  $('e-pay').value=t.pay||'cash';$('e-pax').value=t.pax||1;$('e-toll').value=t.toll||'';$('e-mukae').value=t.mukae?'1':'0';$('e-note').value=t.note||'';$('e-seg').value=t.seg||'';$('e-src').value=t.src||'';$('e-km').value=t.km!=null?t.km:'';$('e-o1').value=t.o1!=null?t.o1:'';$('e-o2').value=t.o2!=null?t.o2:'';$('e-t1').value=t.tin||t.t||'';$('e-t2').value=t.tout||'';$('e-more').open=false;{const w=(t.wx&&t.wx.w)||'';$('e-w').innerHTML='<option value="">未入力</option>'+(w&&!WXS.includes(w)?[w]:[]).concat(WXS).map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('');$('e-w').value=w}
   $('e-del').textContent='削除';$('e-del').dataset.armed='';$('ov').hidden=false;syncBar();
 }
 function closeEdit(){editing=null;$('ov').hidden=true;syncBar()}
@@ -1987,8 +2287,8 @@ function csvFor(ym){
   return {n:rows.length-1,text:'﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'};
 }
 function route(){
-  const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
-  [['day','v-day','tab-day'],['list','v-list','tab-list'],['month','v-month','tab-month'],['year','v-year','tab-year'],['map','v-map','tab-map']].forEach(([k,v,t])=>{
+  const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#set'?'set':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
+  [['day','v-day','tab-day'],['list','v-list','tab-list'],['month','v-month','tab-month'],['year','v-year','tab-year'],['map','v-map','tab-map'],['set','v-set','tab-set']].forEach(([k,v,t])=>{
     const on=k===h;$(v).hidden=!on;$(v).style.display=on?'contents':'none';
     if(on)$(t).setAttribute('aria-current','page');else $(t).removeAttribute('aria-current');
   });
@@ -1997,6 +2297,7 @@ function route(){
   if(h==='map'){mapDay=mapDay||cur;renderMap()}
   else if(mapBig)toggleBig(false);
   if(h==='year'){curYear=yMode==='fy'?fyOf(curMonth):curMonth.slice(0,4);$('y-csvbox').hidden=true;renderYear()}
+  if(h==='set'){try{bkInfo()}catch(e){}}
   syncBar();
 }
 
@@ -2009,6 +2310,7 @@ $('srcchips').addEventListener('click',e=>{const b=e.target.closest('[data-src]'
 $('segchips').addEventListener('click',e=>{const b=e.target.closest('[data-seg]');if(!b)return;const c=segOverride!=null?segOverride:(parsed.seg||'');segOverride=c===b.dataset.seg?'':b.dataset.seg;[...$('segchips').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.seg===segOverride));optSum()});
 $('wxchips').addEventListener('click',e=>{const b=e.target.closest('[data-wx]');if(b)setWx(wxSel===b.dataset.wx?'':b.dataset.wx)});renderWx();
 $('say').addEventListener('input',renderParsed);
+$('say-x').addEventListener('click',()=>{$('say').value='';renderParsed();toast('話した内容を消しました',false)});
 $('p-km').addEventListener('input',()=>{kmFromOdo=false;syncBar()});
 $('p-fare').addEventListener('input',renderParsed);
 /* no re-render here: rebuilding the chips while a tap on one is in progress would swallow the tap */
@@ -2030,6 +2332,7 @@ $('r-o2').addEventListener('blur',()=>{if(odoFull&&$('r-o2').value.replace(/[^0-
 ['r-o1','r-o2'].forEach(id=>$(id).addEventListener('focus',odoHint));
 /* The mic beside a meter field writes 「メーター 」 into the sentence box, so only the number has to be spoken. */
 document.querySelectorAll('[data-say]').forEach(b=>b.addEventListener('click',()=>{
+  if(VO.kind){voStart(b.dataset.say);return}
   const f=$('say'),v=f.value.replace(/\s+$/,'');
   f.value=(v?v+' ':'')+b.dataset.say;renderParsed();
   if(dict&&!$('mic').hidden){if(!dict.active())dict.start().catch(()=>{});f.scrollIntoView({block:'center',behavior:'smooth'})}
@@ -2040,12 +2343,278 @@ document.querySelectorAll('[data-say]').forEach(b=>b.addEventListener('click',()
 /* 1) a second tap within 2 seconds is ignored, so a double tap cannot turn 乗車 into an instant 降車
    2) after 降車 the next field is the fare (or the drop-off meter first, when the pickup one was entered)
    3) on a day already closed with 帰庫, 乗車 asks first; the next shift's day is opened instead when it already has its own date */
+/* ===== Number pad =====
+   Opens when one of these fields gets focus; the iPhone keypad stays away (inputmode="none"). Keys write into the field
+   and fire its own 'input' event, so every existing check (last-3-digit meter, distance, the jump to the fare) works as before.
+   「確定」 leaves the field the same way 「完了」 did, so what normally follows still follows: after the drop-off meter comes
+   the fare, after the fare the bottom 「記録」. A key pressed first replaces what was in the field. */
+const NP={'r-o1':{l:'乗車時メーター（下3桁でよい）',dot:1,hint:'r-o1-h'},'r-o2':{l:'降車時メーター（下3桁でよい）',dot:1,hint:'r-o1-h'},
+  'p-fare':{l:'料金',yen:1},'p-km':{l:'距離（km）',dot:1},'sh-odo':{l:()=>$('sh-ol').textContent+'（下3桁でよい）',dot:1,hint:'sh-oh'}};
+let npF=null,npFresh=false,npAt=0;
+Object.keys(NP).forEach(id=>{const f=$(id);if(f){f.setAttribute('inputmode','none')}});
+function npRender(){
+  const f=npF;if(!f)return;const c=NP[f.id],v=f.value;
+  $('np-l').textContent=typeof c.l==='function'?c.l():c.l;
+  const el=$('np-v');el.textContent=v?(c.yen?'¥'+yen(Number(v)||0):v):'—';el.classList.toggle('empty',!v);el.classList.toggle('fresh',npFresh&&!!v);
+  $('np-hint').textContent=c.hint?$(c.hint).textContent:c.yen?(v?'「確定」のあと、支払方法を押すと記録します':'料金を入れて「確定」'):'';
+  const x=$('np-x');x.dataset.k=c.dot?'.':'00';x.textContent=c.dot?'.':'00';
+}
+/* After 確定 on the fare: the payment, big, and a tap records the ride (with the check before recording, if anything is missing). */
+let npPayOn=false;
+function npPay(){
+  if(!npF||npF.id!=='p-fare')return;npPayOn=true;npAt=Date.now();const p=curPay();
+  $('np').classList.add('pay');$('np-l').textContent='支払方法';const el=$('np-v');el.textContent='¥'+yen(curFare()||0);el.classList.remove('empty','fresh');
+  $('np-hint').textContent='押すと、この支払いで記録します';
+  $('np-pay').innerHTML=PAYS.map(x=>'<button type="button" tabindex="-1" data-pk="'+x[0]+'" aria-pressed="'+(x[0]===p)+'">'+x[1]+'</button>').join('')+'<button type="button" tabindex="-1" class="fn" data-pk="back">料金に戻る</button><button type="button" tabindex="-1" class="fn" data-pk="later">記録せずに閉じる</button>';
+  $('np-pay').hidden=false;document.documentElement.style.setProperty('--nph',($('np').offsetHeight+16)+'px');
+}
+function npPayOff(){npPayOn=false;$('np').classList.remove('pay');$('np-pay').hidden=true}
+function npOpen(f){
+  if(npPayOn&&f!==npF)npPayOff();
+  if(!$('toast').hidden&&$('toast-b').hidden){clearTimeout(toastTimer);$('toast').hidden=true}
+  npF=f;npFresh=!!f.value;const pad=$('np');const was=pad.hidden;if(was)npAt=Date.now();pad.hidden=false;document.body.classList.add('np-open');
+  document.documentElement.style.setProperty('--nph',(pad.offsetHeight+16)+'px');npRender();
+  requestAnimationFrame(()=>{const r=f.getBoundingClientRect(),room=innerHeight-pad.offsetHeight;if(r.top<70||r.bottom>room-12)window.scrollBy({top:r.top-Math.max(80,room*0.35),behavior:was?'auto':'smooth'})});
+}
+function npClose(){npF=null;npPayOff();$('np').hidden=true;document.body.classList.remove('np-open');syncBar()}
+document.addEventListener('focusin',e=>{if(e.target&&NP[e.target.id])npOpen(e.target)});
+document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&NP[a.id]))npClose();else if(a!==npF)npOpen(a)},40));
+$('np').addEventListener('pointerdown',e=>e.preventDefault());
+$('np').addEventListener('mousedown',e=>e.preventDefault());
+$('np').addEventListener('click',e=>{
+  const pb=e.target.closest('[data-pk]');
+  if(pb&&npF){if(Date.now()-npAt<450)return;const k=pb.dataset.pk,f=npF;
+    if(k==='back'){npPayOff();npRender();return}
+    if(k==='later'){f.blur();return}
+    payOverride=k;[...$('paychips').children].forEach(c=>c.setAttribute('aria-pressed',c.dataset.pay===k));f.blur();syncBar();record();return}
+  const b=e.target.closest('[data-k]');const f=npF;if(!b||!f)return;
+  /* a key hit in the first moment after the pad slid in is the second half of a double tap on the button that was there */
+  if(Date.now()-npAt<450)return;const k=b.dataset.k,c=NP[f.id];
+  if(k==='ok'&&f.id==='p-fare'&&!cmd&&curFare()!=null){npPay();return}
+  if(k==='ok'||k==='close'){f.blur();return}
+  let v=f.value;
+  if(k==='clear')v='';
+  else if(k==='back')v=npFresh?'':v.slice(0,-1);
+  else{if(npFresh)v='';
+    if(k==='.'){if(!c.dot||v.includes('.'))return;v=(v||'0')+'.'}
+    else v+=k;
+    const mx=Number(f.getAttribute('maxlength'))||10;if(v.length>mx)return;
+    if(c.yen)v=v.replace(/^0+(?=\d)/,'');}
+  npFresh=false;f.value=v;f.dispatchEvent(new Event('input',{bubbles:true}));
+  if(npF===f)npRender();
+});
+/* ===== Voice: 🎤 話す =====
+   Stand-alone: the browser's own speech recognition (ja-JP). Claude version: the dictation capability.
+   Without either, the button opens the sentence box for the keyboard's microphone.
+   Listening stops by itself about two seconds after the last word; what was heard goes through the same reading as typed text,
+   and the result is shown big — fare, payment, route, extras — and read back aloud, then 「これで記録」. */
+const VO={kind:'',dict:null,rec:null,active:false,buf:'',live:'',prefix:'',timer:0,err:'',cancel:false};
+const SRCls=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SOLO&&SRCls)VO.kind='web';
+let vsTts=true;try{vsTts=localStorage.getItem('taxi-nippo-tts-v1')!=='0'}catch(e){}
+const synth=window.speechSynthesis||null;
+function speakJa(t,cb){
+  let done=false;const fin=()=>{if(done)return;done=true;if(cb)cb()};
+  if(!vsTts||!synth||!t){if(cb)setTimeout(fin,250);return}
+  try{synth.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=1.05;
+    const v=(synth.getVoices()||[]).find(x=>/^ja(-|_|$)/i.test(x.lang));if(v)u.voice=v;u.onend=()=>setTimeout(fin,200);u.onerror=fin;synth.speak(u);
+    if(cb)setTimeout(fin,1200+t.length*190)}catch(e){if(cb)setTimeout(fin,250)}}
+function unlockTts(){if(!synth)return;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;u.lang='ja-JP';synth.speak(u)}catch(e){}}
+function vsShow(){$('vs').hidden=false;$('vs-bg').hidden=false;document.body.classList.add('vs-open')}
+function vsHide(){VC.step=null;clearTimeout(VC.t);$('vs').hidden=true;$('vs-bg').hidden=true;document.body.classList.remove('vs-open');if(synth)try{synth.cancel()}catch(e){};syncBar()}
+function vsBtns(h){$('vs-btns').innerHTML=h}
+function vsListenUi(){
+  $('vs-t').textContent=VC.step&&VC.step!=='confirm'?VC.q:'聞いています…';$('vs-listen').hidden=false;$('vs-res').hidden=true;
+  const t=(VO.buf+VO.live).trim(),el=$('vs-live');el.textContent=t||(VC.step==='confirm'?'「はい」で記録。「カード」「3000円」などで直せます':VC.step?VC.ex||'':VO.prefix?'数字を話してください（例：230）':'例：「乗車」「降車 236 2400円 カード」「休憩」');el.classList.toggle('dim',!t);
+  vsBtns('<button type="button" data-vs="cancel">やめる</button><button type="button" class="rec" data-vs="stop">話し終わった</button>');
+}
+function voKick(){clearTimeout(VO.timer);VO.timer=setTimeout(()=>{if(VO.active&&(VO.buf+VO.live).trim())voStop()},2200)}
+function voPartial(t){VO.live=t||'';if(VO.active){vsListenUi();voKick()}}
+function voFinal(t){VO.buf+=(t||'');VO.live='';if(VO.active){vsListenUi();voKick()}}
+function voStart(prefix,auto){
+  VO.prefix=prefix||'';VO.buf='';VO.live='';VO.err='';VO.cancel=false;VO.auto=!!auto;if(synth)try{synth.cancel()}catch(e){}
+  if(!VO.kind){const f=$('say'),v=f.value.replace(/\s+$/,'');if(prefix)f.value=(v?v+' ':'')+prefix;renderParsed();f.focus();try{f.setSelectionRange(f.value.length,f.value.length)}catch(e){}
+    f.scrollIntoView({block:'center',behavior:'smooth'});toast('キーボードのマイクを押して話してください',false);return}
+  if(!auto)unlockTts();VO.active=true;vsShow();vsListenUi();
+  if(VO.kind==='claude'){VO.dict.start().catch(e=>{VO.active=false;VO.err=(e&&e.code)||'error';voEnded()});return}
+  try{const r=new SRCls();VO.rec=r;r.lang='ja-JP';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+    r.onresult=e=>{let fin='',int='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=x;else int+=x}if(fin)voFinal(fin);voPartial(int)};
+    r.onerror=e=>{VO.err=e.error||'error'};r.onend=()=>{VO.rec=null;voEnded()};r.start();voKick();
+  }catch(e){VO.err='not-allowed';voEnded()}
+}
+function voStop(){clearTimeout(VO.timer);if(VO.kind==='claude'&&VO.dict){VO.dict.stop().catch(()=>{});return}if(VO.rec)try{VO.rec.stop()}catch(e){voEnded()}}
+function voCancel(){VO.cancel=true;clearTimeout(VO.timer);if(VO.kind==='claude'&&VO.dict&&VO.dict.active())VO.dict.stop().catch(()=>{});else if(VO.rec)try{VO.rec.abort()}catch(e){}VO.active=false;vsHide()}
+function voEnded(){
+  if(!VO.active&&!VO.err)return;VO.active=false;clearTimeout(VO.timer);if(VO.cancel){VO.cancel=false;return}
+  const heard=(VO.buf+VO.live).trim();
+  if(!heard&&(VO.auto||VC.step)){if(VC.step==='confirm')vsResult($('say').value,false,true);else if(VC.step)vsAskUi();else vsHide();return}
+  if(!heard){
+    if(/not-allowed|service-not-allowed|not_granted|unavailable|audio-capture/.test(VO.err)){if(VO.kind==='web')VO.kind='';vsHide();voStart(VO.prefix);return}
+    $('vs-t').textContent='聞き取れませんでした';$('vs-listen').hidden=false;$('vs-res').hidden=true;$('vs-live').textContent='もう一度、少しゆっくり話してください';$('vs-live').classList.add('dim');
+    vsBtns('<button type="button" data-vs="close">閉じる</button><button type="button" class="rec" data-vs="again">もう一度話す</button>');speakJa('聞き取れませんでした');return}
+  vcHandle(heard);
+}
+/* the result, big; payment can be changed right here; anything else is fixed by speaking again or in the sentence box */
+function vsResult(heard,read,ask){
+  $('vs-listen').hidden=true;$('vs-res').hidden=false;const rows=[],gb=$('go');let say='';
+  if(cmd){
+    $('vs-t').textContent=cmd.cmd==='undo'?'直前の記録を取り消します':'直前の記録を直します';
+    const t=cmd.target;if(t)rows.push('<div class="vs-row"><span>直前</span><b>'+esc(t.t||'')+'　¥'+yen(t.fare)+(t.from?'　'+esc(t.from)+(t.to?' → '+esc(t.to):''):'')+'</b></div>');
+    if(cmd.cmd!=='undo')rows.push('<div class="vs-row'+(cmd.ch&&cmd.ch.list.length?'':' miss')+'"><span>直す</span><b>'+(cmd.ch&&cmd.ch.list.length?cmd.ch.list.map(esc).join('<br>'):'直す内容が聞き取れませんでした')+'</b></div>');
+    say=cmd.cmd==='undo'?'直前の記録を取り消します':(cmd.ch&&cmd.ch.list.length?'直前の記録を、'+cmd.ch.list.join('、').replace(/\s*→\s*/g,'から')+'に直します':'直す内容が聞き取れませんでした');
+  }else{
+    $('vs-t').textContent='これで記録しますか';
+    const fr=curFare(),p=curPay(),from=parsed.from||gShow('from'),to=parsed.to||gShow('to');
+    rows.push(fr!=null?'<div class="vs-row fare"><span>料金</span><b>¥'+yen(fr)+'</b><button type="button" data-vs="fare">直す</button></div>'
+      :'<div class="vs-row fare miss"><span>料金</span><b>料金が聞き取れませんでした</b><button type="button" data-vs="fare">数字キーで入れる</button></div>');
+    rows.push('<div class="vs-row'+(p?'':' miss')+'"><span>支払</span><div class="vs-pays">'+PAYS.map(x=>'<button type="button" data-vp="'+x[0]+'" aria-pressed="'+(x[0]===p)+'">'+x[1]+'</button>').join('')+'</div></div>');
+    if(from||to)rows.push('<div class="vs-row"><span>区間</span><b>'+esc(from||'—')+(to?' → '+esc(to):'')+'</b></div>');
+    const ex=[];if(parsed.pax>1)ex.push(parsed.pax+'名');if(parsed.mukae)ex.push('迎車');if(parsed.toll)ex.push('高速 '+yen(parsed.toll)+'円');const km=curKm();if(km!=null)ex.push(km+'km');
+    if(parsed.t)ex.push(parsed.t);if(parsed.seg)ex.push(SEGNAME[parsed.seg]);if(parsed.src)ex.push(SRCNAME[parsed.src]);
+    if(parsed.o1!=null)ex.push('乗車メーター '+fmtO(parseOdo($('p-o1').value)||0));if(parsed.o2!=null)ex.push('降車メーター '+fmtO(parseOdo($('p-o2').value)||0));
+    if(ex.length)rows.push('<div class="vs-row"><span>ほか</span><b style="font-size:18px">'+esc(ex.join('・'))+'</b></div>');
+    say=fr!=null?yen(fr).replace(/,/g,'')+'円、'+(p?PAYNAME[p]:'支払いは未選択')+(from&&to&&parsed.from?'、'+from+'から'+to+'まで':'')+'。記録しますか':'料金が聞き取れませんでした';
+    if(fr==null&&(parsed.o1!=null||parsed.o2!=null)){$('vs-t').textContent='メーターを入れました';say='メーターを入れました'}
+  }
+  $('vs-rows').innerHTML=rows.join('');$('vs-heard').textContent=heard?'聞き取った言葉：'+heard:'';
+  const meterOnly=!cmd&&curFare()==null&&(parsed.o1!=null||parsed.o2!=null);
+  ask=ask&&!meterOnly&&!gb.disabled;if(ask)VC.step='confirm';
+  vsBtns('<button type="button" data-vs="again">話し直す</button>'+(meterOnly?'<button type="button" class="rec" data-vs="close">OK</button>':'<button type="button" class="rec" data-vs="rec"'+(gb.disabled?' disabled':'')+'>'+(cmd?esc(gb.textContent):'これで記録')+'</button>')
+    +(ask?'<button type="button" class="wide" data-vs="answer">🎤 声で答える（「はい」「カード」など）</button>':''));
+  if(read)speakJa(say,ask?()=>{if(VC.step==='confirm'&&!VO.active&&VO.kind==='web'&&!$('vs').hidden)voStart('',true)}:null);
+}
+/* ===== 案A＋案B: everything by voice =====
+   A: one phrase does it — 「出庫 190」「乗車 230」「降車 236 2400円 カード」「休憩」「休憩終わり」「帰庫 290」「はい」.
+   B: anything missing is asked for aloud — メーターは？ 料金は？ — and the answer is listened for (on its own where the phone
+   allows it, otherwise with one press of 「🎤 答える」). The ride is read back and 「はい」 records it; 「カード」「3000円」 change it. */
+const VC={step:null,q:'',ex:'',sh:'',t:0};
+const kikoMsg=()=>{const n=dayCheck(cur).length;return '帰庫しました。お疲れさまでした。'+(n?'確かめてほしいところが'+n+'件あります。画面で確かめてください':'入力の漏れはありません')};
+const YES=/^(はい|ええ|うん|オッケー|OK|オーケー|お願いします?|記録(して(ください)?|する|お願いします?)?|それで(お願いします?|いい(です)?|OK)?|大丈夫(です)?|いいです|いいよ)$/i;
+const NO=/^(いいえ|いや|やめる|やめて|キャンセル|中止|ストップ)$/;
+const SKIP=/^(なし|無し|ない|いらない|スキップ|入れない|わからない|分からない)$/;
+function numIn(t){t=String(t||'').normalize('NFKC');let m=t.match(/\d[\d,]*(?:\.\d+)?/);if(m)return m[0].replace(/,/g,'');m=t.match(new RegExp(NUM));return m?String(jaNum(m[0])):null}
+const usesOdo=()=>{const d=days[cur];return !!(d&&(d.odoStart!=null||(d.trips||[]).some(x=>x.o1!=null)))||!!$('p-o1').value};
+function vsAskUi(){vsShow();$('vs-t').textContent=VC.q;$('vs-listen').hidden=false;$('vs-res').hidden=true;const el=$('vs-live');el.textContent=VC.ex||'';el.classList.add('dim');
+  vsBtns('<button type="button" data-vs="cancel">やめる</button><button type="button" class="rec" data-vs="answer">🎤 答える</button>')}
+function vsAsk(step,q,ex){VC.step=step;VC.q=q;VC.ex=ex||'';vsAskUi();speakJa(q,()=>{if(VC.step===step&&!VO.active&&VO.kind==='web'&&!$('vs').hidden)voStart('',true)})}
+function vsDone(msg,close){VC.step=null;vsShow();$('vs-t').textContent=msg;$('vs-listen').hidden=false;$('vs-res').hidden=true;$('vs-live').textContent='';
+  vsBtns('<button type="button" data-vs="close">閉じる</button><button type="button" class="rec" data-vs="again">続けて話す</button>');speakJa(msg);
+  clearTimeout(VC.t);VC.t=setTimeout(()=>{if(!VO.active&&!VC.step&&$('vs-t').textContent===msg)vsHide()},close||2600)}
+function setMeter(id,n){const f=$(id);f.value=String(n);f.dispatchEvent(new Event('input',{bubbles:true}));layoutCmp();if(f.closest('.ro').hidden){f.closest('.ro').hidden=false;$('ride').querySelector('.ride-o').hidden=false}if(document.activeElement===f)f.blur();else{f.focus();f.blur()}}
+function blurAll(){const a=document.activeElement;if(a&&a!==document.body&&a.blur)a.blur()}
+function payFrom(t){const pp=parseSay(t);if(pp.pay){const b=$('paychips').querySelector('[data-pay="'+pp.pay+'"]');if(b)b.click()}return pp.pay}
+function nextAfterDrop(){
+  if(parseOdo($('p-o1').value)!=null&&!$('p-o2').value)return vsAsk('o2','降車メーターは？','例：236（下3桁でよい）、なし');
+  if(!cmd&&curFare()==null)return vsAsk('fare','料金は？','例：2400、2400円 カード');
+  if(!cmd&&!curPay())return vsAsk('pay','支払いは？','例：現金、カード、QR');
+  blurAll();vsResult($('say').value,true,true);
+}
+function vcHandle(heard){
+  const t=heard.normalize('NFKC').replace(/[、。,!！?？]/g,' ').replace(/\s+/g,' ').trim(),st=$('ride').dataset.st,d=days[cur],step=VC.step;VC.step=null;
+  if(step){
+    if(NO.test(t)&&step==='check'){vsHide();speakJa('直してから記録してください');return}
+    if(NO.test(t)){if(step==='confirm'||step==='fare'||step==='pay'){$('say').value='';$('p-fare').value='';textFare=null;payOverride=null;renderParsed()}vsHide();speakJa('やめました');return}
+    if(step==='check'){
+      if(YES.test(t)){vsHide();record(true);speakJa('記録しました');return}
+      $('say').value=($('say').value+' '+heard).trim();renderParsed();payFrom(t);
+      const ck=rideCheck();if(ck.warn.length){vsCheck(ck,true);return}
+      vsResult($('say').value,true,true);return}
+    if(step==='confirm'){
+      if(YES.test(t)){if($('go').disabled){vsResult($('say').value,true,true);return}const was=cmd?cmd.cmd:'';if(!cmd){const ck=rideCheck();if(ck.warn.length){vsCheck(ck,true);return}}vsHide();record(true);speakJa(was==='undo'?'取り消しました':was?'直しました':'記録しました');return}
+      const pay=payFrom(t),pp=parseSay(t),n=pp.fare!=null?pp.fare:(/^[\d〇一二三四五六七八九十百千万]/.test(t)?Number(numIn(t)):null);
+      if(n&&!cmd){$('p-fare').value=String(n);renderParsed()}
+      if(!pay&&!n){$('say').value=($('say').value+' '+heard).trim();renderParsed()}
+      vsResult($('say').value,true,true);return}
+    if(step==='o1'||step==='o2'||step==='shodo'){
+      const skip=SKIP.test(t),n=skip?null:numIn(t);
+      if(n==null&&!skip){vsAsk(step,'数字が聞き取れませんでした。メーターは？','例：236、なし');return}
+      if(step==='shodo'){$('sh-odo').value=n||'';$('sh-odo').blur();if(VC.sh==='end'){vsHide();speakJa(kikoMsg())}else vsDone('出庫しました');return}
+      if(n!=null)setMeter(step==='o1'?'r-o1':'r-o2',n);else blurAll();
+      if(step==='o1'){vsDone('入れました');return}
+      return nextAfterDrop()}
+    if(step==='fare'){
+      const pp=parseSay(/円/.test(t)?t:t.replace(/^([\d,〇一二三四五六七八九十百千万]+)/,'$1円')),n=pp.fare!=null?pp.fare:Number(numIn(t));
+      if(!n){vsAsk('fare','料金が聞き取れませんでした。料金は？','例：2400');return}
+      $('p-fare').value=String(n);renderParsed();payFrom(t);blurAll();
+      if(!curPay())return vsAsk('pay','支払いは？','例：現金、カード、QR');
+      vsResult($('say').value,true,true);return}
+    if(step==='pay'){
+      const pk=payFrom(t);if(!pk){vsAsk('pay','支払い方法が聞き取れませんでした。支払いは？','例：現金、カード、QR、電子マネー');return}
+      blurAll();vsResult($('say').value,true,true);return}
+  }
+  let m;
+  if((m=t.match(/^出庫(?:\s*(?:メーター|メータ)?\s*(.*))?$/))){
+    if(d&&d.startTime){vsDone('もう出庫しています');return}
+    VC.sh='start';$('sh-b').click();const n=numIn(m[1]);
+    if(!shAsk){blurAll();vsDone('出庫しました');return}
+    if(n!=null){$('sh-odo').value=n;$('sh-odo').blur();vsDone('出庫しました');return}
+    return vsAsk('shodo','出庫メーターは？','例：190（下3桁でよい）、なし')}
+  if((m=t.match(/^帰庫(?:\s*(?:メーター|メータ)?\s*(.*))?$/))){
+    if(!d||!d.startTime){vsDone('まだ出庫していません');return}
+    if(d.endTime){vsDone('もう帰庫しています');return}
+    if(st==='on'||st==='done'){vsDone('乗車の記録が終わってから帰庫してください');return}
+    VC.sh='end';const n=numIn(m[1]);$('sh-b').click();
+    if(!shAsk){vsHide();speakJa(kikoMsg());return}
+    if(n!=null){$('sh-odo').value=n;vsHide();$('sh-odo').blur();speakJa(kikoMsg());return}
+    return vsAsk('shodo','帰庫メーターは？','例：290（下3桁でよい）、なし')}
+  if(/^休憩(?:\s*)(終わり|おわり|終了|明け|あけ|おしまい)/.test(t)){if(openBreak()){rideTapAt=0;$('ride-b').click();vsDone('休憩を終わりました')}else vsDone('休憩中ではありません');return}
+  if(/^休憩(します|に入る|入ります|開始|スタート|入り)?$/.test(t)){
+    if(openBreak()){vsDone('もう休憩中です');return}
+    if(st!=='idle'){vsDone(st==='on'?'乗車中は休憩にできません':st==='closed'?'この日報は帰庫済みです':'先に記録してください');return}
+    $('brk-b').click();vsDone('休憩に入りました');return}
+  if(st==='pre'&&/^(?:乗車|乗せ(?:た|ました))/.test(t)){vsDone('まだ出庫していません。先に「出庫」と言ってください');return}
+  if((m=t.match(/^(?:乗車|乗せ(?:た|ました)|お客(?:様|さん)?(?:乗車|乗り(?:ました)?))(?:\s*(?:メーター|メータ)?\s*(.*))?$/))&&(st==='idle'||st==='closed'||st==='brk')){
+    if(st==='brk'){vsDone('休憩中です。先に「休憩終わり」と言ってください');return}
+    if(st==='closed'){vsDone('この日報は帰庫済みです。画面の確認から乗車してください');return}
+    rideTapAt=0;$('ride-b').click();const n=numIn(m[1]);
+    if(n!=null){setMeter('r-o1',n);vsDone('乗車しました');return}
+    if(usesOdo()&&!$('p-o1').value)return vsAsk('o1','乗車しました。メーターは？','例：230（下3桁でよい）、なし');
+    blurAll();vsDone('乗車しました');return}
+  if((m=t.match(/^(?:降車|降ろし(?:た|ました)|降り(?:た|ました))(.*)$/))&&(st==='on'||st==='idle')){
+    if(st==='on'){rideTapAt=0;$('ride-b').click()}
+    let rest=(m[1]||'').replace(/^\s*(?:メーター|メータ)?\s*/,'');
+    const mm=rest.match(/^(\d[\d,]*(?:\.\d)?)(?!\d|\s*円)(?:\s|$)/);
+    if(mm&&parseOdo($('p-o1').value)!=null){setMeter('r-o2',mm[1].replace(/,/g,''));rest=rest.slice(mm[0].length)}
+    if(rest.trim()){$('say').value=rest.trim();renderParsed()}
+    blurAll();return nextAfterDrop()}
+  if(YES.test(t)&&!$('go').disabled){if(!cmd){const ck=rideCheck();if(ck.warn.length){vsCheck(ck,true);return}}vsHide();record(true);speakJa('記録しました');return}
+  /* a sentence, as before; whatever is missing is asked for */
+  const f=$('say'),v=VO.prefix?f.value.replace(/\s+$/,''):'';f.value=VO.prefix?(v?v+' ':'')+VO.prefix+heard:heard;renderParsed();
+  if(VO.prefix){vsResult(heard,true);return}
+  if(!cmd&&curFare()==null&&parsed.o1==null&&parsed.o2==null)return vsAsk('fare','料金は？','例：2400、2400円 カード');
+  if(!cmd&&curFare()!=null&&!curPay())return vsAsk('pay','支払いは？','例：現金、カード、QR');
+  vsResult(heard,true,true);
+}
+$('vs-tts').addEventListener('click',()=>{vsTts=!vsTts;$('vs-tts').setAttribute('aria-pressed',String(vsTts));try{localStorage.setItem('taxi-nippo-tts-v1',vsTts?'1':'0')}catch(e){}if(!vsTts&&synth)try{synth.cancel()}catch(e){}});
+$('vs-tts').setAttribute('aria-pressed',String(vsTts));
+$('vs').addEventListener('click',e=>{
+  const ckb=e.target.closest('[data-ck]');if(ckb){if(ckb.classList.contains('ok')&&ckb.dataset.ck!=='pay')return;ckJump(ckb.dataset.ck);return}
+  const vp=e.target.closest('[data-vp]');
+  if(vp){const b=$('paychips').querySelector('[data-pay="'+vp.dataset.vp+'"]');if(b)b.click();vsResult($('vs-heard').textContent.replace(/^聞き取った言葉：/,''),false);return}
+  const b=e.target.closest('[data-vs]');if(!b)return;const a=b.dataset.vs;
+  if(a==='stop')voStop();
+  else if(a==='cancel'){VC.step=null;voCancel()}
+  else if(a==='answer')voStart('');
+  else if(a==='again'){VC.step=null;if(synth)try{synth.cancel()}catch(x){}const pre=VO.prefix;if(!pre){$('say').value='';renderParsed()}voStart(pre)}
+  else if(a==='close')vsHide();
+  else if(a==='fare'){vsHide();$('p-fare').focus()}
+  else if(a==='rec'){if($('go').disabled)return;const was=cmd?cmd.cmd:'';if(!cmd){const ck=rideCheck();if(ck.warn.length){vsCheck(ck,false);return}}vsHide();record(true);speakJa(was==='undo'?'取り消しました':was?'直しました':'記録しました')}
+  else if(a==='force'){vsHide();record(true);speakJa('記録しました')}
+});
+$('vs-close').addEventListener('click',()=>{if(VO.active)voCancel();else vsHide();const f=$('say');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'})});
+$('vs-bg').addEventListener('click',()=>{if(VO.active)voCancel();else vsHide()});
+$('vbtn').addEventListener('click',()=>voStart(''));
 let rideTapAt=0;
+/* while typing (keyboard up) the docked button steps aside, so it cannot be hit by accident above the keyboard */
+const isField=e=>e&&(e.tagName==='INPUT'&&!/^(checkbox|radio|button|file|date)$/.test(e.type)||e.tagName==='TEXTAREA');
+document.addEventListener('focusin',e=>{if(isField(e.target))document.body.classList.add('typing')});
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!isField(document.activeElement))document.body.classList.remove('typing')},60));
 if('IntersectionObserver' in window)new IntersectionObserver(es=>{es.forEach(e=>{rideSeen=e.isIntersecting});stPill()},{threshold:0.15}).observe($('ride'));
 $('stpill').addEventListener('click',()=>$('ride').scrollIntoView({block:'center',behavior:'smooth'}));
 $('ride-b').addEventListener('click',()=>{
   const now=Date.now();if(now-rideTapAt<2000){toast('続けて押されたので、2回目は受け付けませんでした',false);return}
   const t1=$('p-t1').value,t2=$('p-t2').value;
+  if($('ride').dataset.st==='pre'&&!t1&&!t2){rideTapAt=now;$('sh-b').click();return}
   if(!t1&&!t2&&!openBreak()&&days[cur]&&days[cur].endTime){
     const dd=defaultDate();
     if(dd!==cur&&!(days[dd]&&days[dd].endTime)){cur=dd;curMonth=cur.slice(0,7);autoDate=dd;render();toast((fromYmd(dd).getMonth()+1)+'月'+fromYmd(dd).getDate()+'日の日報に切り替えました',false)}
@@ -2053,7 +2622,7 @@ $('ride-b').addEventListener('click',()=>{
   }
   rideTapAt=now;
   {const br=!t1&&!t2?openBreak():null;if(br){br.e=nowHM();const len=brkLen(br);if(len<1){const d=days[cur];d.breaks=d.breaks.filter(x=>x!==br)}persist(cur);render();toast(len<1?'1分未満だったので、休憩は残しませんでした':'休憩終了　'+durTxt(len),false);return}}
-  if(!t1&&!t2){$('p-t1').value=nowHM();saveTm();capture('from');toast('乗車 '+$('p-t1').value,false);if(!$('p-o1').value)$('r-o1').focus();return}
+  if(!t1&&!t2){$('p-t1').value=nowHM();saveTm();capture('from');toast('乗車 '+$('p-t1').value,false);if(!$('p-o1').value&&(usesOdo()||odoBase()!=null))$('r-o1').focus();return}
   if(t1&&!t2){$('p-t2').value=nowHM();saveTm();capture('to');
     /* a pickup reading asks for the drop-off one; otherwise straight to the fare */
     if($('p-o1').value&&!$('p-o2').value){$('r-o2').focus();return}
@@ -2075,7 +2644,7 @@ try{const o=JSON.parse(localStorage.getItem(LSO)||'null');if(o&&typeof o==='obje
 $('p-km').addEventListener('blur',()=>{const f=$('p-km'),v=curKm();f.value=v==null?'':String(v);syncBar()});
 $('p-km').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();if(!$('go').disabled)record();else $('p-km').blur()}});
 $('say').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();if(!$('go').disabled)record();else $('say').blur()}});
-$('go').addEventListener('click',record);
+$('go').addEventListener('click',()=>record());
 {let rz=0;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{['m-total','mm-total','y-total'].forEach(fitBig)},150)})}
 $('bk-copy').addEventListener('click',()=>{
   const c=backupText();
@@ -2161,9 +2730,11 @@ $('brk-list').addEventListener('click',e=>{
   if(!x.dataset.armed){x.dataset.armed='1';x.textContent='もう一度';return}
   d.breaks=d.breaks.filter(b=>b.id!==row.dataset.b);persist(cur);x.blur();render();toast('休憩を削除しました',false);
 });
-$('sumbar').addEventListener('click',()=>$('meterp').scrollIntoView({block:'start',behavior:'smooth'}));
+$('sumbar').addEventListener('click',()=>{if(!ui.mbig){ui.mbig=true;saveUi();renderDay()}$('meterp').scrollIntoView({block:'start',behavior:'smooth'})});
+$('q-text').addEventListener('click',()=>{manualIn=true;layoutCmp();const f=$('say');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'})});
+$('q-fare').addEventListener('click',()=>{manualIn=true;layoutCmp();const f=$('p-fare');f.focus()});
 $('reset').addEventListener('click',()=>{
-  if(dict&&dict.active())dict.stop().catch(()=>{});
+  if(dict&&dict.active())dict.stop().catch(()=>{});manualIn=false;
   ['say','p-fare','p-km','p-t1','p-t2','p-o1','p-o2','r-o1','r-o2'].forEach(id=>{$(id).value=''});
   textKm=null;kmFromOdo=false;textFare=null;textO1=null;textO2=null;payOverride=null;segOverride=null;srcOverride=null;$('partial').hidden=true;$('p-odo').hidden=true;
   try{localStorage.removeItem(LSO);localStorage.removeItem(LST)}catch(e){}
@@ -2175,8 +2746,10 @@ $('listwrap').addEventListener('click',e=>{
   const b=e.target.closest('[data-id]');if(b)openEdit(b.dataset.id);
 });
 const go=d=>{navigated=true;cur=d;renderDay()};
-$('bar-go').addEventListener('click',record);
+$('bar-go').addEventListener('click',()=>record());
 $('m-more').addEventListener('click',()=>{ui.pays=!ui.pays;saveUi();renderDay()});
+function mFold(){const big=!!ui.mbig;$('meterp').classList.toggle('fold',!big);const b=$('m-fold');b.textContent=big?'小さくする':'大きく表示';b.setAttribute('aria-expanded',String(big));if(!big)$('m-more').hidden=true}
+$('m-fold').addEventListener('click',()=>{ui.mbig=!ui.mbig;saveUi();renderDay()});
 $('daywarn-b').addEventListener('click',()=>go(defaultDate()));
 $('help-s').addEventListener('click',()=>{helpTouched=true});
 {let raf=0;const tick=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;syncBar()})};window.addEventListener('scroll',tick,{passive:true});window.addEventListener('resize',tick)}
@@ -2199,13 +2772,14 @@ $('mcard').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if
   $(b).addEventListener('click',()=>{if($('v-day').hidden){location.hash='#day';route()}$('meta').open=true;$(f).scrollIntoView({block:'center'});$(f).focus()});
 });
 $('e-cancel').addEventListener('click',closeEdit);
+$('ov').addEventListener('click',e=>{const b=e.target.closest('[data-pax]');if(!b)return;const f=$('e-pax');f.value=String(Math.min(9,Math.max(1,(Math.round(+f.value)||1)+(+b.dataset.pax))))});
 $('ov').addEventListener('click',e=>{if(e.target===$('ov'))closeEdit()});
 $('e-save').addEventListener('click',()=>{
   const d=day(editDate||cur),t=d.trips.find(x=>x.id===editing);if(!t)return closeEdit();
   const fare=Math.round(+$('e-fare').value);
   if(!(fare>0)){$('e-fare').focus();return}
-  t.t=$('e-t').value||t.t;t.fare=fare;t.from=$('e-from').value.trim();t.to=$('e-to').value.trim();t.pay=$('e-pay').value;
-  t.pax=Math.max(1,Math.round(+$('e-pax').value)||1);t.toll=Math.max(0,Math.round(+$('e-toll').value)||0);t.mukae=$('e-mukae').value==='1';t.note=$('e-note').value.trim();t.seg=$('e-seg').value;t.src=$('e-src').value;{const k=$('e-km').value;t.km=k===''?null:Math.max(0,Math.round(+k*10)/10)}t.o1=parseOdo($('e-o1').value);t.o2=parseOdo($('e-o2').value);t.tin=$('e-t1').value||null;t.tout=$('e-t2').value||null;
+  const t0=t.t,tin0=t.tin;t.t=$('e-t1').value||$('e-t').value||t.t;t.fare=fare;t.from=$('e-from').value.trim();t.to=$('e-to').value.trim();t.pay=$('e-pay').value;
+  t.pax=Math.max(1,Math.round(+$('e-pax').value)||1);t.toll=Math.max(0,Math.round(+$('e-toll').value)||0);t.mukae=$('e-mukae').value==='1';t.note=$('e-note').value.trim();t.seg=$('e-seg').value;t.src=$('e-src').value;const oldDf=odoDiff(t.o1,t.o2);{const k=$('e-km').value;t.km=k===''?null:Math.max(0,Math.round(+k*10)/10)}t.o1=parseOdo($('e-o1').value);t.o2=parseOdo($('e-o2').value);{const df=odoDiff(t.o1,t.o2);if(df!=null&&df<500&&(t.km==null||t.km===oldDf))t.km=df}{const v1=$('e-t1').value;t.tin=v1?((tin0==null&&v1===t0)?null:v1):null}t.tout=$('e-t2').value||null;
   {const w=$('e-w').value;t.wx=w?{w:w,t:(t.wx&&t.wx.w===w&&t.wx.t!=null)?t.wx.t:null}:null}
   persist(editDate||cur);closeEdit();render();toast('修正しました',false);
 });
@@ -2325,18 +2899,18 @@ if(window.claude&&window.claude.use){
   window.claude.use('downloads').then(dl=>{if(dl)wireDownloads(dl)}).catch(()=>{});
   window.claude.use('dictation').then(d=>{
     if(!d)return;dict=d;
-    const mic=$('mic');mic.hidden=false;$('tawrap').classList.add('hasmic');
-    $('hint-t').textContent='マイクボタンを押して話してください。キーボードのマイクでも入力できます。';
-    d.onPartial(({text})=>{const p=$('partial');p.textContent=text;p.hidden=!text});
-    d.onFinal(({text})=>{const ta=$('say');ta.value=ta.value?ta.value+text:text.replace(/^\s+/,'');$('partial').hidden=true;renderParsed()});
+    const mic=$('mic');
+    
+    VO.kind='claude';VO.dict=d;
+    d.onPartial(({text})=>voPartial(text));
+    d.onFinal(({text})=>voFinal(text));
     d.onState(({state,reason})=>{
-      mic.classList.toggle('on',state!=='idle');mic.setAttribute('aria-label',state==='idle'?'音声入力を開始':'音声入力を止める');
-      if(state==='idle'&&(reason==='not_granted'||reason==='unavailable')){mic.hidden=true;$('tawrap').classList.remove('hasmic');$('hint-t').textContent='上の枠をタップし、キーボードのマイクボタンを押して話してください。'}
+      mic.classList.toggle('on',state!=='idle');
+      if(state==='idle'){if(VO.active&&(reason==='rate_limited'||reason==='upstream_error')){VO.active=false;vsHide();toast('音声入力を開始できませんでした。少し待ってもう一度お試しください',false);return}
+        if(reason==='not_granted'||reason==='unavailable'){VO.err=reason;$('hint-t').textContent='「話した内容」の欄を押し、キーボードのマイクを押して話してください。';const was=VO.active;VO.kind='';if(was){VO.active=false;vsHide();voStart(VO.prefix)}return}
+        if(VO.active)voEnded()}
     });
-    mic.addEventListener('click',()=>{
-      if(d.active())d.stop().catch(()=>{});
-      else d.start().catch(e=>{if(e&&(e.code==='rate_limited'||e.code==='upstream_error'))toast('音声入力を開始できませんでした。少し待ってもう一度お試しください',false)});
-    });
+    mic.addEventListener('click',()=>voStart(''));
   }).catch(()=>{});
 }
 if(SOLO){
