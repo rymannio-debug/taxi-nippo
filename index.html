@@ -759,6 +759,108 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
 /* when the count and the goal do not fit beside the figure, they move to a line of their own instead of breaking into pieces */
 #sumbar{flex-wrap:wrap;row-gap:2px}
 #sb-sub{white-space:nowrap}
+/* 前年・複数年の比べ */
+.cmpsel{margin-bottom:10px}
+.cmpsel .chip{min-height:40px}
+.mtable.my th:nth-child(1){width:19%}.mtable.my th:nth-child(2){width:23%}.mtable.my th:nth-child(3){width:13%}.mtable.my th:nth-child(4){width:10%}.mtable.my th:nth-child(5){width:20%}.mtable.my th:nth-child(6){width:15%}
+.mtable.my td:first-child{white-space:nowrap;font-size:clamp(12.5px,3.7vw,15px)}
+.mtable.my td:nth-child(3){padding-left:6px}
+.mtable.my th{letter-spacing:0;padding:6px 2px}
+.mtable.my td.pl{padding:10px 2px}
+.mtable.my td.n.pl{font-size:clamp(12px,3.6vw,15.5px)}
+.mtable.my td.up{color:var(--accent)}.mtable.my td.down{color:var(--danger)}
+.mtable.my tr.sel td{font-weight:700}
+.lg{flex-wrap:wrap;row-gap:4px}
+.lg i.ln{width:16px;height:3px;border-radius:2px;vertical-align:middle}
+.lg i.l0{background:var(--accent);height:4px}.lg i.l1{background:var(--ink);opacity:.7}.lg i.l2{background:var(--ink);opacity:.45}.lg i.l3{background:var(--ink);opacity:.3}.lg i.l4{background:var(--ink);opacity:.2}
+.chart .ly{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .ly0{stroke:var(--accent);stroke-width:3}.chart .ly1{stroke:var(--ink);opacity:.7}.chart .ly2{stroke:var(--ink);opacity:.45}.chart .ly3{stroke:var(--ink);opacity:.3}.chart .ly4{stroke:var(--ink);opacity:.2}
+.chart .dt0{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+.chart .hit{fill:transparent}
+.chart svg text.el{font-family:var(--body);font-size:10.5px;font-weight:700;fill:var(--ink)}
+/* 集計 ⇄ 分析 */
+:root{--heat-hi:var(--ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--heat-hi:var(--accent-ink)}}
+:root[data-theme="dark"]{--heat-hi:var(--accent-ink)}
+.vsel .chip{flex:1 1 0;font-weight:700;min-height:44px}
+.ajump{gap:6px}
+.ajump .chip{min-height:36px;padding:0 11px;font-size:13.5px}
+.ana>.card{scroll-margin-top:calc(env(safe-area-inset-top,0px) + 12px)}
+.ana{display:flex;flex-direction:column;gap:14px}
+#v-month.anaon>.sumpart,#v-year.anaon>.sumpart{display:none!important}
+#v-month:not(.anaon)>#m-ana,#v-year:not(.anaon)>#y-ana{display:none!important}
+.ctitle.sub{font-size:14px;margin-top:2px}
+.astat{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.astat>div{border:2px solid var(--k);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;background:var(--field);min-width:0}
+.astat span{font-size:13.5px;color:var(--muted);font-weight:700}
+.astat b{font-family:var(--num);font-size:clamp(22px,6.6vw,28px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15;color:var(--ink)}
+.astat i{font-style:normal;font-size:13px;color:var(--muted)}
+.mtable.a5 th,.mtable.a5b th,.mtable.a4w th,.mtable.a3 th{letter-spacing:0;padding:6px 2px}
+.mtable.a5 th{font-size:12px}
+.mtable.a5t th:nth-child(1){width:20%}.mtable.a5t th:nth-child(2){width:15%}.mtable.a5t th:nth-child(3){width:20%}.mtable.a5t th:nth-child(4){width:21%}.mtable.a5t th:nth-child(5){width:24%}
+.mtable.a5e th:nth-child(1){width:24%}.mtable.a5e th:nth-child(2){width:13%}.mtable.a5e th:nth-child(3){width:19%}.mtable.a5e th:nth-child(4){width:21%}.mtable.a5e th:nth-child(5){width:23%}
+.mtable.a4 th:nth-child(1){width:38%}.mtable.a4 th:nth-child(2){width:14%}.mtable.a4 th:nth-child(3){width:22%}.mtable.a4 th:nth-child(4){width:26%}
+.mtable.a5 td.pl,.mtable.a5b td.pl,.mtable.a4w td.pl,.mtable.a3 td.pl{padding:10px 2px}
+.mtable.a5 td.n.pl,.mtable.a5b td.n.pl,.mtable.a4w td.n.pl{font-size:clamp(13px,3.9vw,16.5px)}
+.mtable.a5 td button{padding:11px 2px;font-size:clamp(13px,3.7vw,15px)}
+.mtable.a5 td.n button{font-size:clamp(13px,3.9vw,16.5px)}
+.mtable td.c{text-align:center}
+.mtable.dt td:first-child,.mtable.dt td:first-child button,.mtable.a5b td:first-child{font-size:clamp(12px,3.6vw,15px);white-space:nowrap}
+.mtable.a5g th:nth-child(1){width:26%}.mtable.a5g th:nth-child(2){width:22%}.mtable.a5g th:nth-child(3){width:14%}.mtable.a5g th:nth-child(4){width:19%}.mtable.a5g th:nth-child(5){width:19%}
+.mtable.a5b th:nth-child(1){width:27%}.mtable.a5b th:nth-child(2){width:13%}.mtable.a5b th:nth-child(3){width:15%}.mtable.a5b th:nth-child(4){width:27%}.mtable.a5b th:nth-child(5){width:18%}
+.mtable.a4w th:nth-child(1){width:30%}.mtable.a4w th:nth-child(2){width:13%}.mtable.a4w th:nth-child(3){width:17%}.mtable.a4w th:nth-child(4){width:40%}
+.mtable.a4w th:nth-child(4),.mtable.a4w td:nth-child(4){text-align:left;padding-left:8px}
+.mtable.a3 th:nth-child(1){width:30%}.mtable.a3 th:nth-child(2),.mtable.a3 th:nth-child(3){width:35%}
+.mtable.a3 th,.mtable.a3 td{text-align:left}
+.mtable.a3 td:nth-child(n+2){font-weight:700}
+.mtable.a4 td.pl:first-child,.mtable.a4w td.pl,.mtable.a3 td.pl{overflow-wrap:anywhere}
+.hwrap{overflow-x:auto}
+.htable{width:100%;min-width:290px;border-collapse:separate;border-spacing:2px;table-layout:fixed}
+.htable th{font-size:12.5px;color:var(--muted);font-weight:700;padding:3px 0;text-align:center}
+.htable th:first-child{width:13%}
+.htable th[scope="row"]{text-align:right;padding-right:5px;white-space:nowrap}
+.htable td{text-align:center;font-family:var(--num);font-size:clamp(12.5px,3.7vw,15px);font-variant-numeric:tabular-nums;padding:7px 0;border-radius:5px;color:var(--ink)}
+.htable td.hi{color:var(--heat-hi);font-weight:700}
+.htable td.nx{background:transparent}
+.htable td.top{box-shadow:inset 0 0 0 2px var(--k)}
+.amap{height:280px;border:2px solid var(--k);border-radius:12px;overflow:hidden;z-index:0}
+.alist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.alist li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 2px;border-top:1px solid var(--hair)}
+.alist b{font-size:14px}
+.alist span{grid-column:1;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.alist em{grid-row:1/span 2;grid-column:2;align-self:center;font-style:normal;font-family:var(--num);font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+/* ---- 使用感の見直し (2026-11) ---- */
+/* 分析: the point of each card first, the tables folded */
+.asum{margin:0;font-size:15.5px;line-height:1.7;color:var(--ink)}
+.asum b{font-weight:800;font-size:16.5px}
+.atog{min-height:44px;border:2px solid var(--k);border-radius:12px;background:var(--surface);color:var(--ink);font-family:var(--body);font-weight:800;font-size:15px;letter-spacing:.04em}
+.atog[aria-expanded="true"]{background:var(--field)}
+.abody{display:flex;flex-direction:column;gap:12px}
+.abody[hidden]{display:none!important}
+/* the pad's "stop asking" for ride meters */
+.np-hrow{display:flex;align-items:center;gap:8px;min-width:0}
+.np-hrow .np-hint{flex:1 1 auto;min-width:0}
+.np-skip{flex:none;border:2px solid var(--k);border-radius:999px;background:var(--surface);color:var(--ink);font-family:var(--body);font-weight:800;font-size:13.5px;padding:5px 11px;white-space:nowrap}
+.np-skip[hidden]{display:none}
+/* the dock: 休憩 and 話す */
+body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+/* short screens (iPhone SE/8): one row — 休憩 | 乗車 | 話す — so the page keeps two thirds of the screen */
+@media (max-height:700px){
+  body.dock{--rowh:68px;--sw:76px}
+  body.dock .ride[data-st] .ride-b{left:calc(50% - var(--dw) / 2 + var(--sw) + 8px);width:calc(var(--dw) - 2 * var(--sw) - 16px);bottom:calc(12px + env(safe-area-inset-bottom,0px));min-height:var(--rowh);height:var(--rowh);font-size:30px;padding-top:13px;border-radius:16px}
+  body.dock .ride[data-st] .ride-b::before{top:3px;font-size:11.5px;content:attr(data-ss)}
+  body.dock .ride[data-st="done"] .ride-b,body.dock .ride[data-st="brk"] .ride-b{font-size:24px;letter-spacing:.06em;padding-left:.06em}
+  body.dock:not(.typing) #dockrow{grid-template-columns:var(--sw) minmax(0,1fr) var(--sw)}
+  body.dock:not(.typing) #dockrow #d-brk{grid-column:1}
+  body.dock:not(.typing) #dockrow #vbtn{grid-column:3;flex-direction:column;gap:0;font-size:14px;letter-spacing:.02em}
+  #dockrow button{font-size:15px}
+  body.dock .app{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+}
+/* small print the driver reads: at least 14px */
+#r-o1-h,#geo-msg,#v-day .tl-sub,#sh-d,#ride-x,.ro>span:first-child{font-size:14.5px}
+#v-day label.f,#meta-sum,#l-tip,#m-fold{font-size:14px}
+#geo-msg .gm{margin-top:4px}
+#geo-msg .gm summary{font-weight:800;cursor:pointer}
 </style>
 
 <div class="app">
@@ -878,6 +980,11 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
 
   <section id="v-set" hidden style="display:none">
     <h2><span>設定・バックアップ</span></h2>
+    <div class="card" id="odoset">
+      <b class="disp-h">メーターを入れるとき</b>
+      <div class="chips" id="odochips" role="group" aria-label="メーターを入れるとき"><button type="button" class="chip" data-odo="ride">乗車・降車のたび</button><button type="button" class="chip" data-odo="end">出庫・帰庫のときだけ</button></div>
+      <span class="disp-n">「出庫・帰庫のときだけ」にすると、乗車のたびにメーターの欄と数字キーが出なくなります。そのときの実車キロ・実車率は、乗車ごとに距離を入れた分だけで出ます。</span>
+    </div>
     <div class="card" id="disp">
       <b class="disp-h">画面の明るさ</b>
       <div class="chips" id="themechips" role="group" aria-label="画面の明るさ"><button type="button" class="chip" data-theme-set="auto">自動（iPhoneに合わせる）</button><button type="button" class="chip" data-theme-set="light">昼（明るい）</button><button type="button" class="chip" data-theme-set="dark">夜（暗い画面）</button></div>
@@ -920,7 +1027,9 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
       <div class="d" id="mlabel"></div>
       <button class="ib" id="mnext" aria-label="次の月">›</button>
     </div>
-    <div class="meter">
+    <div class="chips vsel" id="m-view" role="group" aria-label="集計と分析の切り替え"></div>
+    <div class="ana" id="m-ana"></div>
+    <div class="meter sumpart">
       <div class="lab">月間営収（税込）</div>
       <div class="big num"><small>¥</small><span id="mm-total">0</span></div>
       <div class="goal" id="mm-goal" hidden><div class="bar"><i id="mm-goal-bar"></i></div><div class="gt"><span id="mm-goal-l"></span><span id="mm-goal-r"></span></div></div>
@@ -928,12 +1037,12 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
       <div class="row"><span>出番<b id="mm-days">0</b></span><span>回数<b id="mm-count">0</b></span><span>1出番平均<b id="mm-avg">0</b></span><span>税抜<b id="mm-net">0</b></span><span id="mm-km-w" hidden>実車<b id="mm-km"></b><i>km</i></span><span id="mm-rate-w" hidden>実車率<b id="mm-rate"></b></span><span id="mm-brk-w" hidden>休憩<b id="mm-brk"></b></span></div>
       <div class="pays" id="mm-pays"></div>
     </div>
-    <div class="card chart" id="m-trend" hidden></div>
-    <div class="card" id="m-cmp" hidden></div>
-    <div class="card" id="mcard"></div>
-    <div class="card" id="timecard" hidden></div>
-    <div class="card" id="segcard" hidden></div>
-    <div class="card">
+    <div class="card chart sumpart" id="m-trend" hidden></div>
+    <div class="card sumpart" id="m-cmp" hidden></div>
+    <div class="card sumpart" id="mcard"></div>
+    <div class="card sumpart" id="timecard" hidden></div>
+    <div class="card sumpart" id="segcard" hidden></div>
+    <div class="card sumpart">
       <div class="btnrow"><button class="btn pri" id="csv-save" hidden>CSVを保存（Excel用）</button><button class="btn" id="csv-copy">CSVをコピー</button></div>
       <textarea id="csvbox" hidden readonly aria-label="CSVデータ"></textarea>
       <div class="hint" id="csv-msg"><span>この月の乗車記録を1行ずつ書き出します。</span></div>
@@ -956,18 +1065,20 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
       <button class="ib" id="ynext" aria-label="次の年">›</button>
     </div>
     <div class="chips" id="yq" role="group" aria-label="集計する期間"></div>
-    <div class="meter">
+    <div class="chips vsel" id="y-view" role="group" aria-label="集計と分析の切り替え"></div>
+    <div class="ana" id="y-ana"></div>
+    <div class="meter sumpart">
       <div class="lab" id="y-lab">年間営収（税込）</div>
       <div class="big num"><small>¥</small><span id="y-total">0</span></div>
       <div class="row"><span>出番<b id="y-days">0</b></span><span>回数<b id="y-count">0</b></span><span>月平均<b id="y-mavg">0</b></span><span>1出番平均<b id="y-avg">0</b></span><span>税抜<b id="y-net">0</b></span><span id="y-km-w" hidden>実車<b id="y-km"></b><i>km</i></span></div>
       <div class="pays" id="y-pays"></div>
     </div>
-    <div class="card chart" id="y-trend" hidden></div>
-    <div class="card" id="y-cmp" hidden></div>
-    <div class="card" id="yqcard"></div>
-    <div class="card" id="ycard"></div>
-    <div class="card" id="ygcard" hidden></div>
-    <div class="card">
+    <div class="card chart sumpart" id="y-trend" hidden></div>
+    <div class="card sumpart" id="y-cmp" hidden></div>
+    <div class="card sumpart" id="yqcard"></div>
+    <div class="card sumpart" id="ycard"></div>
+    <div class="card sumpart" id="ygcard" hidden></div>
+    <div class="card sumpart">
       <div class="btnrow"><button class="btn pri" id="y-csv-save" hidden>この期間のCSVを保存</button><button class="btn" id="y-csv-copy">この期間のCSVをコピー</button></div>
       <textarea id="y-csvbox" hidden readonly aria-label="この期間のCSVデータ"></textarea>
       <div class="hint" id="y-csv-msg"><span>上で選んだ期間の乗車記録を1行ずつ書き出します。</span></div>
@@ -1068,7 +1179,7 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
 </div>
 <div class="recbar" id="bar" hidden><div class="recbar-in"><div class="recbar-t"><b id="bar-fare"></b><span id="bar-sum"></span></div><button class="go" id="bar-go">記録</button></div></div>
 <button type="button" id="stpill" hidden aria-label="乗車の欄へ移動"></button>
-<div id="dockrow"><button type="button" id="d-brk">休憩</button><button type="button" id="vbtn" aria-label="話して入れる"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>話す</button><button type="button" id="d-kiko">帰庫</button></div>
+<div id="dockrow"><button type="button" id="d-brk">休憩</button><button type="button" id="vbtn" aria-label="話して入れる"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>話す</button></div>
 <div class="vs-bg" id="vs-bg" hidden></div>
 <div class="vs" id="vs" hidden role="dialog" aria-modal="true" aria-labelledby="vs-t"><div class="vs-in">
   <div class="vs-top"><b id="vs-t">話してください</b><button type="button" class="vs-tts" id="vs-tts" aria-pressed="true">🔈 読み上げ</button></div>
@@ -1079,7 +1190,7 @@ body.dock .ride[data-st] .ride-b{letter-spacing:.2em;padding-left:.2em}
 </div></div>
 <div class="np" id="np" hidden role="group" aria-label="数字キー"><div class="np-in">
   <div class="np-h"><span class="np-l" id="np-l"></span><span class="np-v" id="np-v"></span></div>
-  <div class="np-hint" id="np-hint"></div>
+  <div class="np-hrow"><div class="np-hint" id="np-hint"></div><button type="button" tabindex="-1" class="np-skip" id="np-skip" hidden>毎回は入れない</button></div>
   <div class="np-k">
     <button type="button" tabindex="-1" data-k="7">7</button><button type="button" tabindex="-1" data-k="8">8</button><button type="button" tabindex="-1" data-k="9">9</button><button type="button" tabindex="-1" class="fn" data-k="back" aria-label="1文字消す">⌫</button>
     <button type="button" tabindex="-1" data-k="4">4</button><button type="button" tabindex="-1" data-k="5">5</button><button type="button" tabindex="-1" data-k="6">6</button><button type="button" tabindex="-1" class="fn" data-k="clear">クリア</button>
@@ -1252,7 +1363,7 @@ const LSD='taxi-nippo-dirty-v1';
 try{const j=JSON.parse(localStorage.getItem(LSD)||'[]');if(Array.isArray(j))j.forEach(k=>{if(/^\d{4}-\d\d-\d\d$/.test(k))dirty.add(k)})}catch(e){}
 const saveDirty=()=>{try{localStorage.setItem(LSD,JSON.stringify([...dirty]))}catch(e){}};
 const resend=()=>{if(col)[...dirty].forEach(k=>{if(days[k])persist(k)})};
-const LSU='taxi-nippo-ui-v1';let ui={pays:false,lscope:'day',mbig:false,theme:'auto'},autoDate=null,helpTouched=false;
+const LSU='taxi-nippo-ui-v1';let ui={pays:false,lscope:'day',mbig:false,theme:'auto',mcmp:'prev',nyears:5,mview:'sum',yview:'sum',aplace:'muni',acond:'src',aopen:{},odo:'ride'},autoDate=null,helpTouched=false;
 let textKm=null,textO1=null,textO2=null,textFare=null;
 function parseKm(v){v=String(v==null?'':v).normalize('NFKC').replace(/,/g,'.').replace(/[^\d.]/g,'');if(!v)return null;const n=parseFloat(v);return isFinite(n)&&n>=0&&n<1000?Math.round(n*10)/10:null}
 const curKm=()=>parseKm($('p-km').value);
@@ -1282,9 +1393,10 @@ function renderRide(){
   if(st==='idle'){const d0=days[cur],cl=!!(d0&&d0.endTime),pre=!cl&&!(d0&&d0.startTime)&&!(d0&&d0.trips&&d0.trips.length);
     /* before 出庫 the big button at the bottom is 出庫, so the day starts the right way round */
     box.dataset.st=cl?'closed':pre?'pre':'idle';$('ride-s').textContent=cl?'帰庫済み':pre?'出庫前':'空車';
-    $('ride-d').textContent=cl?'この日の乗務は終わっています':pre?'まず下の「出庫」を押します':'乗せたら「乗車」を押します';
+    const ie=!cl&&!pre?idleFor():null;
+    $('ride-d').textContent=cl?'この日の乗務は終わっています':pre?'まず下の「出庫」を押します':ie&&ie.m>=180?'空車 '+durTxt(ie.m)+'。帰庫を忘れていませんか？':'乗せたら「乗車」を押します';
     b.textContent=pre?'出庫':'乗車';b.className='ride-b';b.dataset.s=cl?'帰庫済み':pre?'出庫前':'いま 空車';if(pre)$('brk-b').hidden=true}
-  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;box.dataset.st='on';$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+m+'分';b.textContent='降車';b.className='ride-b drop';b.dataset.s='いま 乗車中　'+m+'分'}
+  else if(st==='on'){const m=(mins(nowHM())-mins(t1)+1440)%1440;box.dataset.st='on';$('ride-s').textContent='乗車中';$('ride-d').textContent=t1+'から '+durTxt(m);b.textContent='降車';b.className='ride-b drop';b.dataset.s='いま 乗車中　'+durTxt(m)}
   else{box.dataset.st='done';$('ride-s').textContent='降車済み';$('ride-d').textContent=(t1||'—')+'→'+t2+'　料金を入れて記録';b.textContent='料金へ';b.className='ride-b go2';b.dataset.s='降車済み　料金を入れます'}
   odoHint();layoutCmp();tlNow();dockRow();syncBar();
 }
@@ -1297,7 +1409,8 @@ function layoutCmp(){
   const c=$('composer'),st=$('ride').dataset.st||'idle',ent=cmpEntered(),ride=st==='on'||st==='done';
   const showN=st==='done'||ent||manualIn,o1=!!$('p-o1').value,o2=!!$('p-o2').value;let uo=false;try{uo=usesOdo()||odoBase()!=null}catch(e){}
   c.dataset.ph=st;c.classList.toggle('lite',!showN);
-  const r1=st==='idle'||st==='on'||(st==='done'&&(uo||o1)),r2=ride&&(uo||o1||o2);
+  /* 設定「メーターを入れるとき」が「出庫・帰庫のときだけ」なら、乗車ごとのメーター欄は出さない（声で入れたときは出す） */
+  const moff=ui.odo==='end'&&!o1&&!o2,r1=!moff&&(st==='idle'||st==='on'||(st==='done'&&(uo||o1))),r2=!moff&&ride&&(uo||o1||o2);
   $('r-o1').closest('.ro').hidden=!r1;$('r-o2').closest('.ro').hidden=!r2;$('ride').querySelector('.ride-o').hidden=!(r1||r2);
   const q=!showN&&(st==='idle'||st==='on'||st==='brk');$('qrow').hidden=!q;$('q-fare').hidden=st!=='idle';
   $('reset').hidden=!(ent||$('p-t1').value||o1||o2);
@@ -1328,13 +1441,13 @@ function odoHint(){
   const a=parseOdo($('p-o1').value),from=a!=null?'乗車時':'前回';
   if(ae===f2||(ae!==f1&&f2.value)){
     const base=odoBase2(),v=resolveOdo(f2.value,base);
-    if(v==null)h.textContent=base!=null?from+' '+fmtO(base)+' km。降車時も下3桁だけ入れれば、残りの桁を補います':'降車時メーターは全部の桁を入れます';
+    if(v==null)h.textContent=base!=null?from+' '+fmtO(base)+' km（下3桁でよい）':'降車時メーターは全部の桁を入れます';
     else if(base!=null&&v<base)h.textContent='降車時 '+fmtO(v)+' km は、'+from+'の '+fmtO(base)+' km より小さくなっています';
     else h.textContent='降車時 '+fmtO(v)+' km'+(a!=null?'　移動距離 '+fmtO(Math.round((v-a)*10)/10)+' km':'');
     return;
   }
   const base=odoBase(),v=resolveOdo(f1.value,base);
-  if(v==null)h.textContent=base!=null?'前回 '+fmtO(base)+' km。下3桁だけ入れれば、残りの桁を補います':'最初は全部の桁を入れます。次からは下3桁だけで入ります';
+  if(v==null)h.textContent=base!=null?'前回 '+fmtO(base)+' km（下3桁でよい）':'最初だけ全部の桁を入れます';
   else h.textContent='乗車時 '+fmtO(v)+' km'+(base!=null?'　前回から '+(v>=base?'+':'−')+fmtO(Math.abs(Math.round((v-base)*10)/10))+' km':'');
 }
 let kmFromOdo=false;
@@ -1368,7 +1481,7 @@ function cleanDay(k,d){
   return d;
 }
 function cleanDays(o){const r={};if(o&&typeof o==='object'&&!Array.isArray(o))for(const k of Object.keys(o)){const d=cleanDay(k,o[k]);if(d)r[k]=d}return r}
-function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LS)||'{}');if(j&&typeof j==='object')days=cleanDays(j)}catch(e){}try{const w=JSON.parse(localStorage.getItem(LSX)||'null');if(w&&w.d===ymd(new Date())&&WXS.includes(w.w))wxSel=w.w}catch(e){}try{const g=JSON.parse(localStorage.getItem(LSS)||'null');if(g&&typeof g==='object')settings={dayGoal:g.dayGoal||null,monthGoal:g.monthGoal||null,breakGoal:g.breakGoal||null}}catch(e){}try{const u=JSON.parse(localStorage.getItem(LSU)||'null');if(u&&typeof u==='object')ui={pays:!!u.pays,lscope:u.lscope==='month'?'month':'day',mbig:!!u.mbig,theme:['light','dark'].includes(u.theme)?u.theme:'auto'}}catch(e){}}
+function loadLocal(){try{const j=JSON.parse(localStorage.getItem(LS)||'{}');if(j&&typeof j==='object')days=cleanDays(j)}catch(e){}try{const w=JSON.parse(localStorage.getItem(LSX)||'null');if(w&&w.d===ymd(new Date())&&WXS.includes(w.w))wxSel=w.w}catch(e){}try{const g=JSON.parse(localStorage.getItem(LSS)||'null');if(g&&typeof g==='object')settings={dayGoal:g.dayGoal||null,monthGoal:g.monthGoal||null,breakGoal:g.breakGoal||null}}catch(e){}try{const u=JSON.parse(localStorage.getItem(LSU)||'null');if(u&&typeof u==='object')ui={pays:!!u.pays,lscope:u.lscope==='month'?'month':'day',mbig:!!u.mbig,theme:['light','dark'].includes(u.theme)?u.theme:'auto',mcmp:['yoy','multi'].includes(u.mcmp)?u.mcmp:'prev',nyears:[3,5,10].includes(u.nyears)?u.nyears:5,mview:u.mview==='ana'?'ana':'sum',yview:u.yview==='ana'?'ana':'sum',aplace:u.aplace==='name'?'name':'muni',acond:['seg','wx'].includes(u.acond)?u.acond:'src',aopen:(u.aopen&&typeof u.aopen==='object')?Object.fromEntries(Object.keys(u.aopen).filter(k=>/^[0-5]$/.test(k)&&u.aopen[k]===true).map(k=>[k,true])):{},odo:u.odo==='end'?'end':'ride'}}catch(e){}}
 function saveSettings(){
   try{localStorage.setItem(LSS,JSON.stringify(settings))}catch(e){}
   if(!col)return;settingsDirty=true;const body={type:'settings',dayGoal:settings.dayGoal,monthGoal:settings.monthGoal,breakGoal:settings.breakGoal};
@@ -1445,7 +1558,7 @@ function reportCsv(k){
   return '﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'+csvFor([k]).text.slice(1);
 }
 function rateTable(ks,order){
-  const g={};ks.forEach(k=>{const d=days[k],EM=emptyKm(d);d.trips.forEach(t=>{if(t.km==null||EM[t.id]==null)return;const hk=(+String(t.t||'0').slice(0,2))+'時台';g[hk]=g[hk]||{l:0,e:0};g[hk].l+=t.km;g[hk].e+=EM[t.id]})});
+  const g={};ks.forEach(k=>{const d=days[k],EM=emptyKm(d);d.trips.forEach(t=>{const hk=hourOf(t);if(t.km==null||EM[t.id]==null||!hk)return;g[hk]=g[hk]||{l:0,e:0};g[hk].l+=t.km;g[hk].e+=EM[t.id]})});
   const hs=order.filter(k=>g[k]&&g[k].l+g[k].e>0);if(!hs.length)return '';
   const rate=k=>g[k].l/(g[k].l+g[k].e);let best=null;if(hs.length>1)hs.forEach(k=>{if(best==null||rate(k)>rate(best))best=k});
   return '<table class="mtable"><thead><tr><th>時間帯別の実車率</th><th>実車km</th><th>空車km</th><th>実車率</th></tr></thead><tbody>'+hs.map(k=>'<tr><td class="pl">'+k+'</td><td class="n pl">'+fmtO(Math.round(g[k].l*10)/10)+'</td><td class="n pl">'+fmtO(Math.round(g[k].e*10)/10)+'</td><td class="n pl'+(k===best?' best':'')+'">'+Math.round(rate(k)*100)+'%</td></tr>').join('')+'</tbody></table><div class="hint"><span>空車kmは、前の降車時メーターから次の乗車時メーターまでの距離で、乗せた時刻の時間帯に入れています。乗車時・降車時のメーターを入れた乗車だけで計算します。</span></div>';
@@ -1625,7 +1738,7 @@ const saveGeo=()=>{try{localStorage.setItem(LSG,JSON.stringify({on:geo.on,from:g
 const gName=k=>geo[k]?(geo[k].n||''):'';
 const gPos=k=>geo[k]?[geo[k].la,geo[k].lo]:undefined;
 const gShow=k=>geo[k]?(geo[k].n||(geo[k].fail?'地名なし（位置は記録）':'地名を取得中…')):'';
-function geoMsg(t){const m=$('geo-msg');m.textContent=t||'';m.hidden=!t}
+function geoMsg(t,more){const m=$('geo-msg');if(more)m.innerHTML=esc(t)+'<details class="gm"><summary>直し方</summary>'+esc(more)+'</details>';else m.textContent=t||'';m.hidden=!t}
 function clearGeo(){geo.from=null;geo.to=null;geoErr={from:false,to:false};saveGeo();geoMsg('')}
 /* A place name for a ride record, down to the 丁目: municipality (and ward) from OpenStreetMap, town and 丁目 from the
    Geospatial Information Authority of Japan, whose answer is the official 町丁目 name. Each fills in for the other when one fails. */
@@ -1672,7 +1785,8 @@ function capture(which,manual){
     });
   },err=>{
     geoErr[which]=true;saveGeo();renderParsed();
-    geoMsg(err&&err.code===1?'位置情報が許可されていません。iPhoneの「設定」→「プライバシーとセキュリティ」→「位置情報サービス」でSafariを「使用中のみ」にしてください。':err&&err.code===3?'位置の取得に時間がかかりすぎました。空の見える場所でもう一度お試しください。':'位置を取得できませんでした。場所は話して入れてください。');
+    if(err&&err.code===1)geoMsg('位置情報がオフのため、乗車地が入りません。','iPhoneの「設定」→「プライバシーとセキュリティ」→「位置情報サービス」で、Safariを「使用中のみ」にします。');
+    else geoMsg(err&&err.code===3?'位置が取れませんでした。空の見える場所でもう一度。':'位置が取れませんでした。場所は話して入れてください。');
   },{enableHighAccuracy:true,timeout:12000,maximumAge:3000});
 }
 async function soloSave(o){
@@ -1952,7 +2066,7 @@ function dayCheck(k){
   let prevEnd=null;
   tr.forEach(x=>{const no=cn[x.id]||'',miss=[];
     if(!x.from&&!x.nf)miss.push('乗車地');if(!x.to&&!x.nt)miss.push('降車地');
-    if(odo&&x.o1==null)miss.push('乗車メーター');if(odo&&x.o2==null)miss.push('降車メーター');
+    if(odo&&ui.odo!=='end'&&x.o1==null)miss.push('乗車メーター');if(odo&&ui.odo!=='end'&&x.o2==null)miss.push('降車メーター');
     if(!(x.fare>=500&&x.fare<=50000))miss.push('料金（¥'+yen(x.fare)+'）');
     if(miss.length)out.push({no:no,id:x.id,msg:miss.join('・')+(miss.some(m=>/料金/.test(m))?'を確かめる':'がない')});
     const st=x.tin||x.t;if(prevEnd&&st&&mins(st)<mins(prevEnd)&&mins(prevEnd)-mins(st)<720)out.push({no:no,id:x.id,msg:'前の乗車と時間が重なっています（'+st+' < '+prevEnd+'）'});
@@ -2112,14 +2226,16 @@ function timelineHtml(d,T,EMD,CN){
   return '<ul class="list tl-list">'+ev.map(e=>e.h).join('')+now+'</ul>';
 }
 /* 「いまここ」: kept up to date with the ride card (renderRide) */
+/* how long the car has stood 空車 on the shift in progress (one that started yesterday evening too): since the last drop-off, or 出庫 */
+function idleFor(){if(cur!==defaultDate())return null;const d=days[cur]||{},tr=(d.trips||[]).length?sorted(d).slice(-1)[0]:null,since=tr?(tr.tout||tr.t):d.startTime;if(!since)return null;return {since:since,m:(mins(nowHM())-mins(since)+1440)%1440}}
 function tlNow(){
   const li=$('tl-now');if(!li)return;const st=$('ride').dataset.st||'idle',d=days[cur]||{},t1=$('p-t1').value,t2=$('p-t2').value;
   let lab='空車',sub='乗せたら下の「乗車」';
-  if(st==='on'){lab='乗車中';sub=t1+'から '+((mins(nowHM())-mins(t1)+1440)%1440)+'分'}
+  if(st==='on'){lab='乗車中';sub=t1+'から '+durTxt((mins(nowHM())-mins(t1)+1440)%1440)}
   else if(st==='done'){lab='降車済み';sub=(t1||'—')+'→'+t2+'　料金と支払いを入れます'}
   else if(st==='brk'){const br=openBreak();lab='休憩中';sub=br?br.s+'から '+durTxt(brkLen(br,true)):''}
   else if(st==='pre'){lab='出庫前';sub='まず下の「出庫」'}
-  else{const tr=(d.trips||[]).length?sorted(d).slice(-1)[0]:null,since=tr?(tr.tout||tr.t):d.startTime;if(since){const m=(mins(nowHM())-mins(since)+1440)%1440;sub='空車 '+m+'分（'+since+'から）　乗せたら下の「乗車」'}}
+  else{const ie=idleFor();if(ie)sub='空車 '+durTxt(ie.m)+'（'+ie.since+'から）'+(ie.m>=180?'　帰庫を忘れていませんか？ 帰庫は上の「乗務中」の「帰庫」から':'　乗せたら下の「乗車」')}
   {const cs=getComputedStyle($('ride'));['--c','--cs','--ci'].forEach(k=>li.style.setProperty(k,cs.getPropertyValue(k)))}
   li.innerHTML='<span class="tl-dot" aria-hidden="true"></span><button type="button" class="tl-x tl-here" data-here="1"><span class="tl-tm">'+nowHM()+'</span><span class="tl-lamp">'+lab+'</span><span class="tl-sub">いまここ　'+esc(sub)+'</span></button>';
 }
@@ -2167,6 +2283,8 @@ function renderDay(){
   renderRide();syncBar();
 }
 const topTip=h=>h.indexOf(' best"')>=0?'<div class="hint"><span>緑の数字は、単価がいちばん高い行です。</span></div>':'';
+/* 乗車の時間帯（8時台など）。時刻のない乗車は '' で、どの時間帯にも入れない */
+function hourOf(t){const s=String(t.t||t.tin||'');return /^\d{1,2}:/.test(s)?(+s.split(':')[0]%24)+'時台':''}
 function group(all,keyf){const g={};all.forEach(t=>{const k=keyf(t);if(!k)return;g[k]=g[k]||{n:0,sum:0};g[k].n++;g[k].sum+=t.fare||0});return g}
 function gtable(title,g,order){const ks=order?order.filter(k=>g[k]):Object.keys(g).sort((a,b)=>g[b].sum-g[a].sum);if(!ks.length)return '';let best=null;if(ks.length>1)ks.forEach(k=>{if(best==null||g[k].sum/g[k].n>g[best].sum/g[best].n)best=k});return '<table class="mtable"><thead><tr><th>'+title+'</th><th>回数</th><th>単価</th><th>営収</th></tr></thead><tbody>'+ks.map(k=>'<tr><td class="pl">'+esc(k)+'</td><td class="n pl">'+g[k].n+'</td><td class="n pl'+(k===best?' best':'')+'">'+yen(g[k].sum/g[k].n)+'</td><td class="n pl">'+yen(g[k].sum)+'</td></tr>').join('')+'</tbody></table>'}
 function monthDays(ym){return Object.keys(days).filter(k=>k.slice(0,ym.length)===ym&&days[k].trips&&days[k].trips.length).sort()}
@@ -2185,10 +2303,11 @@ function cmpHtml(title,curL,prevL,A,B,note){
   }).join('')+'</tbody></table><div class="hint"><span>'+(B.n?(note||''):esc(prevL)+'の記録がないため、増減は出していません。')+'</span></div>';
 }
 /* items: [{l: axis label, a: this period, b: the period before (or null), t: full name}] — one scale for both series, bars start at zero */
+function niceTop(max){const raw=max/3,pw=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/pw,step=Math.max(1000,(m<=1?1:m<=2?2:m<=5?5:10)*pw);return {step:step,top:step*Math.ceil(max/step)}}
 function barChart(items,two,desc){
   const W=340,H=176,L=36,R=4,T=10,B=22,n=items.length;if(!n)return '';
   let max=1;items.forEach(x=>{max=Math.max(max,x.a||0,two?(x.b||0):0)});
-  const raw=max/3,pw=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/pw,step=Math.max(1000,(m<=1?1:m<=2?2:m<=5?5:10)*pw),top=step*Math.ceil(max/step);
+  const {step,top}=niceTop(max);
   const y=v=>T+(H-T-B)*(1-v/top),band=(W-L-R)/n,ax=v=>v>=10000?(Math.round(v/1000)/10)+'万':yen(v);
   let g='';for(let v=0;v<=top+1;v+=step)g+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/><text x="'+(L-5)+'" y="'+(y(v)+3.5).toFixed(1)+'" text-anchor="end">'+ax(v)+'</text>';
   const bw=two?Math.max(2,Math.min(13,band*0.36)):Math.max(3,Math.min(22,band*0.62)),every=Math.ceil(n/12);
@@ -2200,6 +2319,45 @@ function barChart(items,two,desc){
   });
   return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(desc)+'">'+g+'</svg>';
 }
+/* 前年・複数年の比べ: the same days shifted back by whole years */
+const NYS=[3,5,10],curNy=()=>NYS.indexOf(ui.nyears)>=0?ui.nyears:5;
+const shiftY=(k,n)=>(+k.slice(0,4)+n)+k.slice(4);
+const anyRec=()=>Object.keys(days).some(k=>days[k].trips&&days[k].trips.length);
+const cmpChips=(opts,cur)=>'<div class="chips cmpsel" role="group" aria-label="比べる相手">'+opts.map(o=>'<button type="button" class="chip" data-cm="'+o[0]+'" aria-pressed="'+(o[0]===cur)+'">'+o[1]+'</button>').join('')+'</div>';
+const nyChips=()=>'<div class="chips cmpsel" role="group" aria-label="比べる年数">'+NYS.map(n=>'<button type="button" class="chip" data-ny="'+n+'" aria-pressed="'+(n===curNy())+'">'+n+'年分</button>').join('')+'</div>';
+/* one row per year for the same period (newest first); 前年比 is against the row one year older */
+function multiYearHtml(from,to,label,short,note,bars){
+  const n=curNy(),rows=[];
+  for(let i=0;i<n;i++)rows.push({i:i,l:label(i),s:short(i),S:statOf(keysIn(shiftY(from,-i),shiftY(to,-i)))});
+  const has=rows.filter(r=>r.S.n);
+  if(!has.length)return '<div class="hint"><span>この'+n+'年間の同じ期間には、記録がありません。</span></div>';
+  const shown=rows.filter(r=>r.i===0||r.S.n);
+  const tb='<table class="mtable my"><thead><tr><th>年</th><th>営収</th><th>前年比</th><th>出番</th><th>1出番平均</th><th>単価</th></tr></thead><tbody>'+shown.map(r=>{
+    const p=rows[r.i+1],pc=p&&p.S.n&&r.S.n?Math.round((r.S.sum-p.S.sum)/p.S.sum*100):null,S=r.S;
+    return '<tr'+(r.i===0?' class="sel"':'')+'><td class="pl">'+esc(r.l)+'</td><td class="n pl">'+(S.n?yen(S.sum):'—')+'</td><td class="n pl'+(pc==null?'':pc>0?' up':pc<0?' down':'')+'">'+(pc==null?'—':(pc>0?'+':pc<0?'−':'±')+Math.abs(pc)+'%')+'</td><td class="n pl">'+(S.n?S.d:'—')+'</td><td class="n pl">'+(S.d?yen(S.sum/S.d):'—')+'</td><td class="n pl">'+(S.n?yen(S.sum/S.n):'—')+'</td></tr>';
+  }).join('')+'</tbody></table>';
+  const only=has.length===1&&has[0].i===0;
+  const hint='<div class="hint"><span>'+(only?'前の年の同じ期間の記録がまだないため、比べる年がありません。記録がたまると、ここに年ごとに並びます。':'前年比は、すぐ下の行（1年前）と比べた営収の増減です。記録のない年は出していません。'+(note?note:''))+'</span></div>';
+  const ch=bars&&has.length>1?'<div class="chart"><div class="ctitle" style="margin-top:12px">年ごとの営収</div>'+barChart(shown.slice().reverse().map(r=>({l:r.s,t:r.l,a:r.S.sum})),false,'年ごとの営収')+'</div>':'';
+  return tb+hint+ch;
+}
+/* months across, one line per year: this year thick in the accent, older years in fading ink */
+function lineChart(labels,ser,desc){
+  const W=340,H=190,L=36,R=30,T=12,B=22,n=labels.length;if(!n||!ser.length)return '';
+  let max=0,min=Infinity;ser.forEach(s=>s.v.forEach(v=>{if(v==null)return;if(v>max)max=v;if(v<min)min=v}));if(!isFinite(min))min=0;if(max<=min)max=min+1000;
+  const span=(max-min)/4,pw=Math.pow(10,Math.floor(Math.log10(span))),m=span/pw,step=Math.max(1000,(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*pw),bot=Math.max(0,Math.floor(min/step)*step),top=Math.ceil(max/step)*step;
+  const x=i=>n===1?L+(W-L-R)/2:L+(W-L-R)*i/(n-1),y=v=>T+(H-T-B)*(1-(v-bot)/(top-bot||1)),ax=v=>v>=10000?(Math.round(v/1000)/10)+'万':yen(v);
+  let g='';for(let v=bot;v<=top+1;v+=step)g+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/><text x="'+(L-5)+'" y="'+(y(v)+3.5).toFixed(1)+'" text-anchor="end">'+ax(v)+'</text>';
+  const every=Math.ceil(n/12);labels.forEach((l,i)=>{if(i%every===0)g+='<text x="'+x(i).toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle">'+esc(l)+'</text>'});
+  ser.slice().sort((a,b)=>b.i-a.i).forEach(s=>{
+    const c=Math.min(s.i,4);let d='',pen=false,last=-1;
+    s.v.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true;last=i});
+    if(d)g+='<path class="ly ly'+c+'" d="'+d+'"/>';
+    s.v.forEach((v,i)=>{if(v==null)return;g+=(s.i===0?'<circle class="dt0" cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="3.2"/>':'')+'<circle class="hit" cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="8"><title>'+esc(s.l+' '+labels[i]+'月 '+yen(v)+'円')+'</title></circle>'});
+    if(last>=0&&s.i===0)g+='<text class="el" x="'+(x(last)+6).toFixed(1)+'" y="'+(y(s.v[last])+3.5).toFixed(1)+'">'+esc(s.s)+'</text>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(desc)+'">'+g+'</svg>';
+}
 function renderMonth(){
   const a=curMonth.split('-');$('mlabel').textContent=a[0]+'年'+(+a[1])+'月';
   const ks=monthDays(curMonth);let all=[];ks.forEach(k=>all=all.concat(days[k].trips));
@@ -2208,11 +2366,16 @@ function renderMonth(){
   $('mm-avg').textContent=yen(ks.length?T.sum/ks.length:0);$('mm-net').textContent=yen(T.sum/1.1);
   $('mm-pays').innerHTML=paysHtml(T.pay);
   goalUI('mm',settings.monthGoal,T.sum);
-  {/* this month against the month before; while the month is still running, the month before is cut at the same day */
-   const t=ymd(new Date()),live=t.slice(0,7)===curMonth,pd=new Date(+a[0],+a[1]-2,1),pym=pd.getFullYear()+'-'+pad(pd.getMonth()+1);
-   const A=statOf(keysIn(curMonth+'-01',live?t:curMonth+'-31')),B=statOf(keysIn(pym+'-01',live?pym+'-'+t.slice(8):pym+'-31'));
-   const ch=cmpHtml('前月との比較',(+a[1])+'月',(+pym.slice(5))+'月',A,B,live?'今月はまだ途中のため、前月も'+(+t.slice(8))+'日までの分で比べています。':'');
-   $('m-cmp').innerHTML=ch;$('m-cmp').hidden=!ch;
+  {/* this month against the month before, the same month a year ago, or the same month over several years; while the month is still running, the others are cut at the same day */
+   const t=ymd(new Date()),live=t.slice(0,7)===curMonth,y=+a[0],mo=+a[1],cm=['prev','yoy','multi'].indexOf(ui.mcmp)>=0?ui.mcmp:'prev';
+   const from=curMonth+'-01',to=live?t:curMonth+'-31',dd=(+t.slice(8))+'日';
+   let body='';
+   if(cm==='multi')body=multiYearHtml(from,to,i=>(y-i)+'年',i=>String(y-i).slice(2)+'年',live?'今月はまだ途中のため、どの年も'+dd+'までの分で比べています。':'',true);
+   else if(cm==='yoy')body=cmpHtml(mo+'月 前年同月比',y+'年',(y-1)+'年',statOf(keysIn(from,to)),statOf(keysIn(shiftY(from,-1),shiftY(to,-1))),live?'今月はまだ途中のため、前年の同じ月も'+dd+'までの分で比べています。':'');
+   else{const pd=new Date(y,mo-2,1),pym=pd.getFullYear()+'-'+pad(pd.getMonth()+1);
+     body=cmpHtml('前月との比較',mo+'月',(+pym.slice(5))+'月',statOf(keysIn(from,to)),statOf(keysIn(pym+'-01',live?pym+'-'+t.slice(8):pym+'-31')),live?'今月はまだ途中のため、前月も'+dd+'までの分で比べています。':'')}
+   const any=anyRec();
+   $('m-cmp').innerHTML=any?cmpChips([['prev','前月'],['yoy','前年の同じ月'],['multi','複数年']],cm)+(cm==='multi'?nyChips():'')+(body||'<div class="hint"><span>比べる記録がありません。</span></div>'):'';$('m-cmp').hidden=!any;
    const items=ks.map(k=>({l:String(+k.slice(8)),t:(+k.slice(5,7))+'月'+(+k.slice(8))+'日',a:totals(days[k].trips).sum}));
    $('m-trend').hidden=items.length<2;
    $('m-trend').innerHTML=items.length<2?'':'<div class="ctitle">出番ごとの営収の推移</div>'+barChart(items,false,(+a[1])+'月の出番ごとの営収')+'<div class="hint"><span>横は日付、縦は営収（税込）です。出番のあった日だけを並べています。</span></div>';
@@ -2220,7 +2383,7 @@ function renderMonth(){
   $('mm-km-w').hidden=!T.km;$('mm-km').textContent=Math.round(T.km*10)/10;
   {let bm=0;ks.forEach(k=>{bm+=brkTotal(k)});$('mm-brk-w').hidden=!bm;$('mm-brk').textContent=hmTxt(bm)}
   {let rk=0,rd=0;ks.forEach(k=>{const d=days[k],km=(d.odoStart!=null&&d.odoEnd!=null)?d.odoEnd-d.odoStart:0,tk=totals(d.trips).km;if(km>0&&tk>0){rk+=tk;rd+=km}});$('mm-rate-w').hidden=!rd;if(rd)$('mm-rate').textContent=Math.round(rk/rd*100)+'%'}
-  {const gh={},gw={};ks.forEach(k=>{const wk=WD[fromYmd(k).getDay()]+'曜';days[k].trips.forEach(t=>{const hk=(+String(t.t||'0').slice(0,2))+'時台';[[gh,hk],[gw,wk]].forEach(([g,key])=>{g[key]=g[key]||{n:0,sum:0};g[key].n++;g[key].sum+=t.fare||0})})});
+  {const gh={},gw={};ks.forEach(k=>{const wk=WD[fromYmd(k).getDay()]+'曜';days[k].trips.forEach(t=>{const hk=hourOf(t);[[gh,hk],[gw,wk]].forEach(([g,key])=>{if(!key)return;g[key]=g[key]||{n:0,sum:0};g[key].n++;g[key].sum+=t.fare||0})})});
    const ho=[];for(let i=5;i<29;i++)ho.push((i%24)+'時台');
    const h=gtable('時間帯別',gh,ho)+gtable('曜日別',gw,['月曜','火曜','水曜','木曜','金曜','土曜','日曜']);const rt=rateTable(ks,ho);$('timecard').innerHTML=h+topTip(h)+rt;$('timecard').hidden=!(h||rt)}
   {const h=gtable('客層別',group(all,t=>SEGNAME[t.seg]))+gtable('きっかけ別',group(all,t=>SRCNAME[t.src]))+gtable('天気別',group(all,t=>t.wx&&t.wx.w));$('segcard').innerHTML=h+topTip(h);$('segcard').hidden=!h}
@@ -2228,14 +2391,15 @@ function renderMonth(){
     const t=totals(days[k].trips),dt=fromYmd(k),r=dayRate(k);
     return '<tr class="'+(dt.getDay()===0?'sun':'')+'"><td><button data-go="'+k+'">'+dt.getDate()+'日('+WD[dt.getDay()]+')</button></td><td class="n"><button data-go="'+k+'">'+t.n+'</button></td><td class="n"><button data-go="'+k+'">'+(t.km?Math.round(t.km*10)/10:'')+'</button></td><td class="n"><button data-go="'+k+'">'+yen(t.sum/t.n)+'</button></td><td class="n"><button data-go="'+k+'">'+yen(t.sum)+'</button></td><td class="n"><button data-go="'+k+'">'+(r==null?'':r+'%')+'</button></td></tr>';
   }).join('')+'</tbody></table><div class="hint"><span>日付を押すと、その日の日報を開きます。距離は、乗車ごとに記録した距離のその日の合計です。実車率は、その距離をメーターの走行距離（帰庫−出庫）で割ったもので、出庫・帰庫メーターを入れた日だけ出ます。</span></div>':'<div class="hint"><span>この月の記録はまだありません。日報で乗車を記録すると、ここに日ごとの営収が並びます。</span></div>';
+  anaView('m',ks,'day');
 }
 const QN=['年間','1〜3月','4〜6月','7〜9月','10〜12月'];
 const qMonths=q=>q?[q*3-2,q*3-1,q*3]:[1,2,3,4,5,6,7,8,9,10,11,12];
 /* 年集計 works on one of three kinds of period: a calendar year (1〜12月), a fiscal year (4月〜翌3月), or any two dates. */
 const LSY='taxi-nippo-yr-v1',YMODES=[['cal','年（1〜12月）'],['fy','年度（4〜翌3月）'],['range','期間を指定']],QNF=['年度','4〜6月','7〜9月','10〜12月','翌1〜3月'];
-let yMode='cal',yFrom='',yTo='';
-try{const j=JSON.parse(localStorage.getItem(LSY)||'null');if(j&&typeof j==='object'){if(YMODES.some(x=>x[0]===j.mode))yMode=j.mode;if(/^\d{4}-\d\d-\d\d$/.test(j.from||''))yFrom=j.from;if(/^\d{4}-\d\d-\d\d$/.test(j.to||''))yTo=j.to}}catch(e){}
-const saveY=()=>{try{localStorage.setItem(LSY,JSON.stringify({mode:yMode,from:yFrom,to:yTo}))}catch(e){}};
+let yMode='cal',yFrom='',yTo='',yCmp='prev';
+try{const j=JSON.parse(localStorage.getItem(LSY)||'null');if(j&&typeof j==='object'){if(['prev','yoy','multi'].indexOf(j.cmp)>=0)yCmp=j.cmp;if(YMODES.some(x=>x[0]===j.mode))yMode=j.mode;if(/^\d{4}-\d\d-\d\d$/.test(j.from||''))yFrom=j.from;if(/^\d{4}-\d\d-\d\d$/.test(j.to||''))yTo=j.to}}catch(e){}
+const saveY=()=>{try{localStorage.setItem(LSY,JSON.stringify({mode:yMode,from:yFrom,to:yTo,cmp:yCmp}))}catch(e){}};
 const fyOf=ym=>String(+ym.slice(0,4)-(+ym.slice(5,7)<4?1:0));
 const yRangeOk=()=>!!yFrom&&!!yTo&&yFrom<=yTo;
 const qName=q=>(yMode==='fy'?QNF:QN)[q];
@@ -2290,23 +2454,39 @@ function renderYear(){
   }).join('')+'</tbody></table><div class="hint"><span>月を押すと、その月の集計を開きます。'+(rg?'期間の途中から始まる月・途中で終わる月は、期間に入る日だけを数えています。':'')+'</span></div>':'<div class="hint"><span>'+(rg?'この期間':q?'この四半期':yMode==='fy'?'この年度':'この年')+'の記録はまだありません。</span></div>';
   const h=gtable('曜日別',gw,['月曜','火曜','水曜','木曜','金曜','土曜','日曜'])+gtable('客層別',group(all,t=>SEGNAME[t.seg]))+gtable('きっかけ別',group(all,t=>SRCNAME[t.src]))+gtable('天気別',group(all,t=>t.wx&&t.wx.w));
   {/* the chosen period against the one before it: the year or fiscal year before (cut at the same day while this one is running), or the same number of days just before a chosen range */
-   const t=ymd(new Date());let from='',to='',pF='',pT='',curL='',prevL='',note='';
-   if(rg){if(yRangeOk()){const len=Math.round((fromYmd(yTo)-fromYmd(yFrom))/86400000)+1;from=yFrom;to=yTo;pT=shift(yFrom,-1);pF=shift(pT,-(len-1));curL='この期間';prevL='直前の'+len+'日';note='比べているのは '+slash(pF)+' 〜 '+slash(pT)+' です。'}}
+   const t=ymd(new Date()),cm=rg?yCmp:(yCmp==='multi'?'multi':'prev');let from='',to='',pF='',pT='',curL='',prevL='',note='',title='前の期間との比較';
+   if(rg){if(yRangeOk()){const len=Math.round((fromYmd(yTo)-fromYmd(yFrom))/86400000)+1;from=yFrom;to=yTo;
+     if(cm==='yoy'){pF=shiftY(yFrom,-1);pT=shiftY(yTo,-1);curL='この期間';prevL='前年の同じ期間';title='前年の同じ期間との比較'}
+     else{pT=shift(yFrom,-1);pF=shift(pT,-(len-1));curL='この期間';prevL='直前の'+len+'日'}
+     note='比べているのは '+slash(pF)+' 〜 '+slash(pT)+' です。'}}
    else if(yms.length){
      from=yms[0]+'-01';to=yms[yms.length-1]+'-31';const live=t>=from&&t<=to;if(live)to=t;
      const py=k=>(+k.slice(0,4)-1)+k.slice(4);pF=py(from);pT=py(to);
      curL=q?qName(q):curYear+(yMode==='fy'?'年度':'年');prevL=(yMode==='fy'?'前年度':'前年')+(q?'の同期':'');
      note=live?'この期間はまだ途中のため、'+prevL+'も同じ日（'+(+t.slice(5,7))+'月'+(+t.slice(8))+'日）までの分で比べています。':'';
    }
-   const ch=from?cmpHtml('前の期間との比較',curL,prevL,statOf(keysIn(from,to)),statOf(keysIn(pF,pT)),note):'';
-   $('y-cmp').innerHTML=ch;$('y-cmp').hidden=!ch;
+   const lv=!rg&&from&&t>=from&&t<=yms[yms.length-1]+'-31';
+   const yl=i=>rg?(+yFrom.slice(0,4)-i)+'年':(+curYear-i)+(yMode==='fy'?'年度':'年')+(q?' '+qName(q):'');
+   let body='';
+   if(cm==='multi')body=from?multiYearHtml(from,to,yl,i=>String(+(rg?yFrom.slice(0,4):curYear)-i).slice(2)+(yMode==='fy'&&!rg?'年度':'年'),rg?'どの年も '+(+yFrom.slice(5,7))+'/'+(+yFrom.slice(8))+'〜'+(+yTo.slice(5,7))+'/'+(+yTo.slice(8))+' の分を比べています。':lv?'この期間はまだ途中のため、どの年も同じ日（'+(+t.slice(5,7))+'月'+(+t.slice(8))+'日）までの分で比べています。':'',rg):'';
+   else body=from?cmpHtml(title,curL,prevL,statOf(keysIn(from,to)),statOf(keysIn(pF,pT)),note):'';
+   const any=anyRec(),opts=rg?[['prev','直前の期間'],['yoy','前年の同じ期間'],['multi','複数年']]:[['prev',yMode==='fy'?'前年度':'前年'],['multi','複数年']];
+   $('y-cmp').innerHTML=any?cmpChips(opts,cm)+(cm==='multi'?nyChips():'')+(body||'<div class="hint"><span>比べる記録がありません。</span></div>'):'';$('y-cmp').hidden=!any;
    const mSum=ks=>{let v=0;ks.forEach(k=>{days[k].trips.forEach(x=>{v+=x.fare||0})});return v};
    const items=yms.map(ym=>({l:String(+ym.slice(5)),t:ym.slice(0,4)+'年'+(+ym.slice(5))+'月',a:mSum(yDaysOf(ym)),b:rg?null:mSum(monthDays((+ym.slice(0,4)-1)+ym.slice(4)))}));
    const two=!rg&&items.some(x=>x.b>0),show=items.length>1&&items.some(x=>x.a>0||x.b>0),pl=yMode==='fy'?'前年度':'前年';
-   $('y-trend').hidden=!show;
-   $('y-trend').innerHTML=!show?'':'<div class="ctitle">月ごとの営収の推移</div>'+(two?'<div class="lg"><span><i class="a"></i>'+(rg?'この期間':curYear+(yMode==='fy'?'年度':'年'))+'</span><span><i class="b"></i>'+pl+'の同じ月</span></div>':'')+barChart(items,two,'月ごとの営収'+(two?'と'+pl+'の同じ月':''))+'<div class="hint"><span>横は月、縦は営収（税込）です。'+(two?'薄い棒が'+pl+'の同じ月で、月全体の金額です。':'')+'</span></div>';
+   let multiChart='';
+   if(cm==='multi'&&!rg&&yms.length){
+     const nowYm=t.slice(0,7),ser=[];
+     for(let i=0;i<curNy()&&ser.length<5;i++){const v=yms.map(ym=>{const s=shiftY(ym+'-01',-i).slice(0,7);return s>=nowYm?null:mSum(monthDays(s))});if(i===0||v.some(x=>x>0))ser.push({i:i,l:yl(i),s:String(+curYear-i).slice(2)+(yMode==='fy'?'年度':'年'),v:v})}
+     if(ser.length>1){const more=[...Array(curNy()).keys()].filter(i=>i>=ser[ser.length-1].i+1&&yms.some(ym=>mSum(monthDays(shiftY(ym+'-01',-i).slice(0,7)))>0)).length;
+       multiChart='<div class="ctitle">月ごとの営収（年ごと）</div><div class="lg">'+ser.map(s=>'<span><i class="ln l'+Math.min(s.i,4)+'"></i>'+esc(s.l)+'</span>').join('')+'</div>'+lineChart(yms.map(ym=>String(+ym.slice(5))),ser,'月ごとの営収を年ごとに重ねた折れ線')+'<div class="hint"><span>横は月、縦は営収（税込）です。太い線が'+esc(ser[0].l)+'で、薄い線ほど前の年です。縦の目盛りは0から始まっていません。'+(yms.indexOf(nowYm)>=0?'今月はまだ途中のため、今年の線は先月までです。':'')+(more?'グラフは新しい5年分だけです。':'')+'</span></div>'}
+   }
+   $('y-trend').hidden=!(show||multiChart);
+   $('y-trend').innerHTML=multiChart?multiChart:!show?'':'<div class="ctitle">月ごとの営収の推移</div>'+(two?'<div class="lg"><span><i class="a"></i>'+(rg?'この期間':curYear+(yMode==='fy'?'年度':'年'))+'</span><span><i class="b"></i>'+pl+'の同じ月</span></div>':'')+barChart(items,two,'月ごとの営収'+(two?'と'+pl+'の同じ月':''))+'<div class="hint"><span>横は月、縦は営収（税込）です。'+(two?'薄い棒が'+pl+'の同じ月で、月全体の金額です。':'')+'</span></div>';
   }
   $('ygcard').innerHTML=h+topTip(h);$('ygcard').hidden=!h;
+  anaView('y',yKeys(),'month');
 }
 const LCOLS=[['tin','乗車時刻','n'],['tout','降車時刻','n'],['from','乗車地','pl'],['to','降車地','pl'],['fare','料金','n'],['pay','支払',''],['pax','人数','n'],['o1','乗車時km','n'],['o2','降車時km','n'],['empty','空車km','n'],['km','距離km','n'],['toll','高速代','n'],['mukae','迎車',''],['seg','客層',''],['src','きっかけ',''],['wx','天気',''],['note','メモ','pl']];
 function renderList(){
@@ -2475,9 +2655,10 @@ function rideCheck(){
   const gx=k=>geoErr[k]&&!parsed[k];
   add('from','乗車地',f||(gx('from')?'未入力（位置が取れませんでした・任意）':'未入力'),f?'ok':gx('from')?'opt':'warn');
   add('to','降車地',to||(gx('to')?'未入力（位置が取れませんでした・任意）':'未入力'),to?'ok':gx('to')?'opt':'warn');
-  if(usesOdo()){const a=parseOdo($('p-o1').value),b=parseOdo($('p-o2').value);
-    add('o1','乗車メーター',a!=null?fmtO(a)+' km':'未入力',a!=null?'ok':'warn');
-    add('o2','降車メーター',b!=null?fmtO(b)+' km'+(a!=null&&b<a?'　乗車より小さい':''):'未入力',b!=null&&!(a!=null&&b<a)?'ok':'warn')}
+  const odoReq=ui.odo!=='end';
+  if(usesOdo()&&(odoReq||$('p-o1').value||$('p-o2').value)){const a=parseOdo($('p-o1').value),b=parseOdo($('p-o2').value),miss=odoReq?'warn':'opt';
+    add('o1','乗車メーター',a!=null?fmtO(a)+' km':odoReq?'未入力':'未入力（任意）',a!=null?'ok':miss);
+    add('o2','降車メーター',b!=null?fmtO(b)+' km'+(a!=null&&b<a?'　乗車より小さい':''):odoReq?'未入力':'未入力（任意）',b!=null?(a!=null&&b<a?'warn':'ok'):miss)}
   const km=curKm();add('km','距離',km!=null?km+' km':'未入力（任意）',km!=null?'ok':'opt');
   const ex=[];ex.push(curPax()+'名');if(curMukae())ex.push('迎車');if(curToll())ex.push('高速 '+yen(curToll())+'円');add('pax','人数など',ex.join('・'),'ok');
   const sg=segOverride!=null?segOverride:(parsed.seg||''),sr=srcOverride!=null?srcOverride:(parsed.src||'');
@@ -2548,6 +2729,177 @@ function csvFor(ym){
   const rows=[['日付','曜日','案件No','時刻','乗車時刻','降車時刻','乗車地','降車地','人数','料金','高速代','乗車時メーター','降車時メーター','空車km','実車km','支払方法','客層','きっかけ','天気','迎車','メモ','乗車緯度','乗車経度','降車緯度','降車経度']];
   (Array.isArray(ym)?ym:monthDays(ym)).forEach(k=>{const dt=fromYmd(k),EM=emptyKm(days[k]);sorted(days[k]).forEach((t,i)=>rows.push([k.replace(/-/g,'/'),WD[dt.getDay()],caseNo(k,i+1),t.t,t.tin||'',t.tout||'',t.from,t.to,t.pax||1,t.fare||0,t.toll||0,t.o1!=null?t.o1:'',t.o2!=null?t.o2:'',EM[t.id]!=null?EM[t.id]:'',t.km!=null?t.km:'',PAYNAME[t.pay]||'現金',SEGNAME[t.seg]||'',SRCNAME[t.src]||'',(t.wx&&t.wx.w)||'',t.mukae?'あり':'',t.note||'',t.g1?t.g1[0]:'',t.g1?t.g1[1]:'',t.g2?t.g2[0]:'',t.g2?t.g2[1]:'']))});
   return {n:rows.length-1,text:'﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')+'\r\n'};
+}
+/* ===== 分析 =====
+   月集計 and 年集計 each switch between 集計 (the totals) and 分析 with the chips under the date bar. 分析 covers the same period as the
+   page: the month on 月集計; the year, quarter, fiscal year or chosen dates on 年集計.
+   Whatever is measured in time (稼働時間, 時間あたり営収, 待ち時間, 1回の時間) uses only days with both 出庫 and 帰庫 entered. */
+const AWD=['月','火','水','木','金','土','日'],awi=k=>(fromYmd(k).getDay()+6)%7;
+const AHO=[];for(let i=5;i<29;i++)AHO.push((i%24)+'時台');
+const minTxt=m=>Math.round(m)+'分';
+const perHour=(sum,m)=>m>0?sum/m*60:0;
+const mdw=k=>{const d=fromYmd(k);return (d.getMonth()+1)+'/'+d.getDate()+'('+WD[d.getDay()]+')'};
+/* the municipality a place name starts with: 調布市布田一丁目 → 調布市, 横浜市中区本町 → 横浜市中区; a name without one stays whole */
+function muniOf(s){s=String(s||'').trim().replace(/^(東京都|北海道|(?:京都|大阪)府|\S{2,3}県)/,'');if(!s)return '';
+  for(const c of ['四日市市','廿日市市','野々市市'])if(s.startsWith(c))return c;
+  let m=s.match(/^(.+?郡.+?[町村])/);if(m)return m[1];
+  const i=s.indexOf('区',1),j=s.indexOf('市',1);
+  if(j>0&&(i<0||j<i)){const w=s.slice(j+1).match(/^[^市区町村0-9０-９]{1,4}区/);return s.slice(0,j+1)+(w?w[0]:'')}
+  if(i>0)return s.slice(0,i+1);
+  m=s.match(/^(.+?[町村])/);return m?m[1]:s}
+/* One shift laid out in minutes, or null when 出庫 or 帰庫 is missing.
+   work: 帰庫−出庫−休憩. band: minutes worked in each clock hour. occ: minutes with a passenger (rides with both times).
+   waits: drop-off → next pickup, leaving out gaps with a break in them. cost: per ride, the minutes from the drop-off before it
+   (出庫 for the first) to its own drop-off, less breaks — the time that ride took, search included. */
+function dayClock(k){
+  const d=days[k];if(!d||!d.startTime||!d.endTime||!d.trips||!d.trips.length)return null;
+  const s=mins(d.startTime),pos=hm=>{let m=mins(hm);if(m<s)m+=1440;return m},e=pos(d.endTime);if(!(e>s)||e-s>1320)return null;
+  const brs=(Array.isArray(d.breaks)?d.breaks:[]).filter(b=>b&&b.s&&b.e).map(b=>{const a=pos(b.s);let z=pos(b.e);if(z<a)z+=1440;return [Math.max(a,s),Math.min(z,e)]}).filter(x=>x[1]>x[0]);
+  const brkIn=(a,z)=>brs.reduce((m,b)=>m+Math.max(0,Math.min(z,b[1])-Math.max(a,b[0])),0);
+  const work=e-s-brkIn(s,e);if(work<=0)return null;
+  const band={};for(let m=Math.floor(s/60)*60;m<e;m+=60){const a=Math.max(s,m),z=Math.min(e,m+60),w=z-a-brkIn(a,z);if(w>0){const l=(Math.floor(m/60)%24)+'時台';band[l]=(band[l]||0)+w}}
+  const tr=sorted(d).map(t=>{const a=t.tin||t.t,pa=a?pos(a):null;let pb=t.tout?pos(t.tout):null;if(pb!=null&&pa!=null&&pb<pa)pb+=1440;return {t:t,a:pa,b:pb}});
+  let occ=0,nOcc=0;tr.forEach(r=>{if(r.a!=null&&r.b!=null&&r.b-r.a<600){occ+=r.b-r.a;nOcc++}});
+  const waits=[];for(let i=1;i<tr.length;i++){const p=tr[i-1],n=tr[i];if(p.b==null||n.a==null)continue;const g=n.a-p.b;if(g<0||g>300||brkIn(p.b,n.a)>0)continue;waits.push({from:p.t,to:n.t,m:g})}
+  const cost={};let prev=s;tr.forEach(r=>{const end=r.b!=null?r.b:r.a;if(end==null||end<prev||end>e+60)return;const c=end-prev-brkIn(prev,end);if(c>0&&c<600)cost[r.t.id]=c;prev=end});
+  return {k:k,work:work,occ:occ,full:nOcc===tr.length,waits:waits,band:band,cost:cost,sum:totals(d.trips).sum};
+}
+const aMaps={};
+function anaView(p,ks,unit){
+  const on=(p==='m'?ui.mview:ui.yview)==='ana',sec=$(p==='m'?'v-month':'v-year'),box=$(p+'-ana');
+  sec.classList.toggle('anaon',on);
+  $(p+'-view').innerHTML=[['sum','集計'],['ana','分析']].map(x=>'<button type="button" class="chip" data-av="'+x[0]+'" aria-pressed="'+((x[0]==='ana')===on)+'">'+x[1]+'</button>').join('');
+  if(aMaps[p]){try{aMaps[p].remove()}catch(e){}aMaps[p]=null}
+  /* built only while it is on screen: render() runs on every recorded ride */
+  if(!on||sec.hidden){box.innerHTML='';return}
+  box.innerHTML=anaHtml(p,ks,unit);
+  if(ui.aopen[2])anaMap(p,ks);
+}
+function anaHtml(p,ks,unit){
+  if(!ks.length)return '<div class="card"><div class="hint"><span>'+(p==='m'?'この月':'この期間')+'の記録はまだありません。日報で乗車を記録すると、ここに分析が出ます。</span></div></div>';
+  const C=ks.map(dayClock).filter(Boolean);
+  /* each card shows its point first; the tables and notes open with the button under it (remembered per card) */
+  const fold=(h,i)=>{const at=h.indexOf('<!--B-->');if(at<0)return h;const op=!!ui.aopen[i];
+    return h.slice(0,at)+'<button type="button" class="atog" data-aopen="'+i+'" aria-expanded="'+op+'">'+(op?'表をたたむ':'表と説明を見る')+'</button><div class="abody"'+(op?'':' hidden')+'>'+h.slice(at+8)+'</div>'};
+  return [aTime(ks,C,unit),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C)].map((h,i)=>'<div class="card" id="'+p+'-a'+i+'">'+fold(h,i)+'</div>').join('');
+}
+const noClock='出庫と帰庫の時刻が両方入った日がないため、まだ出せません。日報で「出庫」と「帰庫」を押すと時刻が入ります。';
+function aTime(ks,C,unit){
+  const t='<div class="ctitle">時間の使い方</div>';
+  if(!C.length)return t+'<div class="hint"><span>'+noClock+'</span></div>';
+  let W=0,S=0,OW=0,O=0;const ws=[];C.forEach(c=>{W+=c.work;S+=c.sum;if(c.full){OW+=c.work;O+=c.occ}c.waits.forEach(x=>ws.push(x.m))});
+  const wait=ws.length?ws.reduce((a,b)=>a+b,0)/ws.length:null;
+  const tile=(l,v,s)=>'<div><span>'+l+'</span><b>'+v+'</b><i>'+s+'</i></div>';
+  let h=t+'<div class="astat">'+tile('稼働時間',hmTxt(Math.round(W)),'1出番 平均 '+hmTxt(Math.round(W/C.length)))+tile('時間あたり営収','¥'+yen(perHour(S,W)),'営収 ÷ 稼働時間')
+    +tile('実車時間率',OW?Math.round(O/OW*100)+'%':'—','乗せていた時間の割合')+tile('次のお客さんまで',wait!=null?minTxt(wait):'—','降車から次の乗車まで')+'</div><!--B-->';
+  const rows=[];
+  if(unit==='day')C.forEach(c=>rows.push({l:(+c.k.slice(8))+'日('+WD[fromYmd(c.k).getDay()]+')',w:c.work,s:c.sum,ow:c.full?c.work:0,o:c.full?c.occ:0,sun:fromYmd(c.k).getDay()===0}));
+  else{const g={},multi=C[0].k.slice(0,4)!==C[C.length-1].k.slice(0,4);C.forEach(c=>{const ym=c.k.slice(0,7),r=g[ym]=g[ym]||{l:(multi?ym.slice(2,4)+'年':'')+(+ym.slice(5))+'月',w:0,s:0,ow:0,o:0};r.w+=c.work;r.s+=c.sum;if(c.full){r.ow+=c.work;r.o+=c.occ}});Object.keys(g).sort().forEach(k=>rows.push(g[k]))}
+  let best=null;if(rows.length>1)rows.forEach(r=>{if(!best||perHour(r.s,r.w)>perHour(best.s,best.w))best=r});
+  h+='<table class="mtable a5 a5t'+(unit==='day'?' dt':'')+'"><thead><tr><th>'+(unit==='day'?'日付':'月')+'</th><th>稼働</th><th>営収</th><th>時間あたり</th><th>実車時間率</th></tr></thead><tbody>'+rows.map(r=>'<tr'+(r.sun?' class="sun"':'')+'><td class="pl">'+r.l+'</td><td class="n pl">'+hmTxt(Math.round(r.w))+'</td><td class="n pl">'+yen(r.s)+'</td><td class="n pl'+(r===best?' best':'')+'">'+yen(perHour(r.s,r.w))+'</td><td class="n pl">'+(r.ow?Math.round(r.o/r.ow*100)+'%':'—')+'</td></tr>').join('')+'</tbody></table>';
+  const skip=ks.length-C.length;
+  h+='<div class="hint"><span>稼働時間は、帰庫−出庫から休憩を引いた時間です。'+(best?'緑の数字は、時間あたり営収がいちばん高い'+(unit==='day'?'日':'月')+'です。営収の多い日と、効率よく稼げた日が同じとは限りません。':'')
+    +'実車時間率は、どの乗車にも乗車・降車の時刻が入っている日だけで出しています。'+(skip?'時間を計算できない'+skip+'日（出庫か帰庫の時刻がない日、22時間を超える日）は入れていません。':'')+'</span></div>';
+  return h;
+}
+function aHeat(C){
+  const t='<div class="ctitle">曜日×時間帯</div>';
+  if(!C.length)return t+'<div class="hint"><span>'+noClock+'</span></div>';
+  const g={},at=(w,h)=>g[w+'|'+h]=g[w+'|'+h]||{m:0,s:0};
+  C.forEach(c=>{const w=awi(c.k);for(const h in c.band)at(w,h).m+=c.band[h];days[c.k].trips.forEach(x=>{const h=hourOf(x);if(h)at(w,h).s+=x.fare||0})});
+  const val=(w,h)=>{const x=g[w+'|'+h];return x&&x.m>=30?x.s/x.m*60:null};
+  const hs=AHO.filter(h=>AWD.some((_,w)=>val(w,h)!=null));
+  if(!hs.length)return t+'<div class="hint"><span>どの時間帯も、働いた時間がまだ30分に足りません。</span></div>';
+  let mx=0,top='';hs.forEach(h=>AWD.forEach((_,w)=>{const v=val(w,h);if(v!=null&&v>mx){mx=v;top=w+'|'+h}}));
+  const cell=(w,h)=>{const v=val(w,h);if(v==null)return '<td class="nx"></td>';const r=mx?v/mx:0;
+    return '<td class="'+(r>.5?'hi':'')+(w+'|'+h===top?' top':'')+'" style="background:color-mix(in srgb,var(--accent) '+Math.round(8+r*82)+'%,var(--surface))" title="'+AWD[w]+'曜 '+h+'　1時間あたり ¥'+yen(v)+'">'+(v/1000).toFixed(1)+'</td>'};
+  const tp=top.split('|');
+  return t+'<p class="asum">'+(mx>0?'いちばん稼げたのは <b>'+AWD[tp[0]]+'曜 '+tp[1]+'</b>（1時間 ¥'+yen(mx)+'）':'営収の入った時間帯がまだありません')+'</p><!--B--><div class="hwrap"><table class="htable"><thead><tr><th>時間</th>'+AWD.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+hs.map(h=>'<tr><th scope="row">'+h.replace('時台','時')+'</th>'+AWD.map((_,w)=>cell(w,h)).join('')+'</tr>').join('')+'</tbody></table></div>'
+    +'<div class="hint"><span>数字は1時間あたりの営収（千円）で、色が濃いほど稼げた時間です。枠のついたところがいちばん高い時間です。働いた時間が30分に満たないところは空けています。日付をまたいだ深夜は、出庫した日の曜日に入れています。</span></div>';
+}
+function aPlace(p,ks,C){
+  const lv=ui.aplace==='name'?'name':'muni',pl=s=>lv==='name'?String(s||'').trim():muniOf(s);
+  const t='<div class="ctitle">場所</div>';let h='<div class="chips cmpsel" role="group" aria-label="場所のまとめ方">'+[['muni','市区町村ごと'],['name','地名ごと']].map(x=>'<button type="button" class="chip" data-apl="'+x[0]+'" aria-pressed="'+(x[0]===lv)+'">'+x[1]+'</button>').join('')+'</div>';
+  const g={};let all=0,named=0;ks.forEach(k=>days[k].trips.forEach(t=>{all++;const n=pl(t.from);if(!n)return;named++;const r=g[n]=g[n]||{n:0,s:0};r.n++;r.s+=t.fare||0}));
+  const ps=Object.keys(g).sort((a,b)=>g[b].n-g[a].n||g[b].s-g[a].s);
+  if(!ps.length)return t+'<div class="hint"><span>乗車地の入った記録がないため、まだ出せません。'+(SOLO?'乗車地は、「乗車」を押したときの位置から自動で入ります。':'乗車を記録するときに場所を話すと入ります。')+'</span></div>';
+  h+='<table class="mtable a4"><thead><tr><th>乗車の多い場所</th><th>回数</th><th>単価</th><th>営収</th></tr></thead><tbody>'+ps.slice(0,10).map(n=>'<tr><td class="pl">'+esc(n)+'</td><td class="n pl">'+g[n].n+'</td><td class="n pl">'+yen(g[n].s/g[n].n)+'</td><td class="n pl">'+yen(g[n].s)+'</td></tr>').join('')+'</tbody></table>';
+  if(ps.length>10||named<all)h+='<div class="hint"><span>'+(ps.length>10?'回数の多い順に10か所です（全部で'+ps.length+'か所）。':'')+(named<all?'乗車地のない'+(all-named)+'件は入れていません。':'')+'</span></div>';
+  const wg={};C.forEach(c=>c.waits.forEach(x=>{const n=pl(x.from.to);if(!n)return;const r=wg[n]=wg[n]||{n:0,m:0,nx:{}};r.n++;r.m+=x.m;const q=pl(x.to.from);if(q)r.nx[q]=(r.nx[q]||0)+1}));
+  const ds=Object.keys(wg).filter(n=>wg[n].n>=2).sort((a,b)=>wg[a].m/wg[a].n-wg[b].m/wg[b].n);
+  if(ds.length)h+='<table class="mtable a4w"><thead><tr><th>降車地</th><th>回数</th><th>次まで</th><th>次の乗車が多い場所</th></tr></thead><tbody>'+ds.slice(0,10).map(n=>{const r=wg[n],nx=Object.keys(r.nx).sort((a,b)=>r.nx[b]-r.nx[a])[0];return '<tr><td class="pl">'+esc(n)+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+minTxt(r.m/r.n)+'</td><td class="pl">'+esc(nx||'—')+'</td></tr>'}).join('')+'</tbody></table>'
+    +'<div class="hint"><span>「次まで」は、そこで降ろしてから次のお客さんを乗せるまでの平均で、短い順に並べています。同じ降車地が2回以上あるところだけです。休憩をはさんだ分は入れていません。</span></div>';
+  else h+='<div class="hint"><span>降車地ごとの「次のお客さんまでの時間」は、同じ降車地が2回以上あり、出庫・帰庫と降車・次の乗車の時刻が入っていると出ます。</span></div>';
+  if(SOLO){const n=ks.reduce((a,k)=>a+days[k].trips.filter(t=>okLL(t.g1)).length,0);
+    if(n)h+='<div class="ctitle sub">乗車した地点（'+n+'件）</div><div class="amap" id="'+p+'-amap" role="region" aria-label="乗車した地点の地図"></div><div class="hint"><span id="'+p+'-amap-h">点が重なって濃いところほど、お客さんを多く乗せた場所です。</span></div>'}
+  const sum='<p class="asum">乗車がいちばん多い場所 <b>'+esc(ps[0])+'</b>（'+g[ps[0]].n+'回）'+(ds.length?'<br>降ろしてから次がいちばん早い場所 <b>'+esc(ds[0])+'</b>（平均'+minTxt(wg[ds[0]].m/wg[ds[0]].n)+'）':'')+'</p>';
+  return t+sum+'<!--B-->'+h;
+}
+function anaMap(p,ks){
+  const el=$(p+'-amap');if(!el)return;
+  const pts=[];ks.forEach(k=>days[k].trips.forEach(t=>{if(okLL(t.g1))pts.push(t.g1)}));
+  loadLeaflet().then(()=>{
+    if(!el.isConnected)return;
+    const m=L.map(el,{preferCanvas:true,zoomControl:true,attributionControl:true,tap:false});m.attributionControl.setPrefix(false);aMaps[p]=m;
+    L.tileLayer(BASES[mapBase].u,BASES[mapBase].o).addTo(m);
+    const ac=(getComputedStyle(document.documentElement).getPropertyValue('--accent')||'#0a7f4f').trim();
+    pts.forEach(g=>L.circleMarker(g,{radius:7,stroke:false,fillColor:ac,fillOpacity:.3,interactive:false}).addTo(m));
+    if(pts.length===1)m.setView(pts[0],15);else m.fitBounds(L.latLngBounds(pts),{padding:[24,24],maxZoom:16});
+  }).catch(()=>{const h=$(p+'-amap-h');if(h)h.textContent='地図を読み込めませんでした。電波のあるところで、アプリを開き直してください。';el.hidden=true});
+}
+const BANDS=[[1000,'〜1,000円'],[2000,'〜2,000円'],[5000,'〜5,000円'],[9999,'〜9,999円'],[Infinity,'1万円以上']];
+function aBand(ks){
+  const tr=[];ks.forEach(k=>days[k].trips.forEach(x=>tr.push({t:x,k:k})));
+  const g=BANDS.map(b=>({l:b[1],n:0,s:0}));let N=0,S=0;tr.forEach(r=>{const f=r.t.fare||0;if(f<=0)return;const i=BANDS.findIndex(b=>f<=b[0]);g[i].n++;g[i].s+=f;N++;S+=f});const nf=tr.length-N;
+  const pc=(a,b)=>b?Math.round(a/b*100)+'%':'—';let mx=null;g.forEach(r=>{if(r.n&&(!mx||r.s>mx.s))mx=r});
+  const Lg=tr.filter(r=>(r.t.fare||0)>=10000);
+  if(!N)return '<div class="ctitle">料金帯</div><div class="hint"><span>この期間は、料金の入った乗車がありません。</span></div>';
+  let h='<div class="ctitle">料金帯</div><p class="asum">営収がいちばん多い料金帯 <b>'+mx.l+'</b>（営収の'+pc(mx.s,S)+'）<br>ロング（1万円以上） <b>'+Lg.length+'回</b></p><!--B--><table class="mtable a5b"><thead><tr><th>料金</th><th>回数</th><th>割合</th><th>営収</th><th>割合</th></tr></thead><tbody>'+g.map(r=>'<tr><td class="pl">'+r.l+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+pc(r.n,N)+'</td><td class="n pl">'+yen(r.s)+'</td><td class="n pl'+(r===mx?' best':'')+'">'+pc(r.s,S)+'</td></tr>').join('')+'</tbody></table>'
+    +'<div class="hint"><span>割合は、回数と営収のそれぞれで全体に占める割合です。緑の数字は、営収をいちばん多く占める料金帯です。料金に高速代は入っていません。'+(nf?'料金の入っていない'+nf+'件は入れていません。':'')+'</span></div>';
+  h+='<div class="ctitle sub">ロング（1万円以上）'+(Lg.length?Lg.length+'回':'')+'</div>';
+  if(!Lg.length)return h+'<div class="hint"><span>この期間にロングはありません。</span></div>';
+  const lt=Lg.map(r=>r.t);
+  {const gt=gtable('時間帯',group(lt,hourOf),AHO)+gtable('きっかけ',group(lt,x=>SRCNAME[x.src]));h+=gt+topTip(gt)}
+  Lg.sort((a,b)=>b.k<a.k?-1:b.k>a.k?1:sortKey(days[b.k],b.t)-sortKey(days[a.k],a.t));
+  h+='<ul class="alist">'+Lg.slice(0,5).map(r=>'<li><b>'+mdw(r.k)+' '+esc(r.t.t)+'</b><span>'+esc(r.t.from||'—')+' → '+esc(r.t.to||'—')+'</span><em>¥'+yen(r.t.fare)+'</em></li>').join('')+'</ul>'
+    +(Lg.length>5?'<div class="hint"><span>新しい順に5件です（全部で'+Lg.length+'件）。</span></div>':'');
+  return h;
+}
+function aCond(ks,C){
+  const c=['src','seg','wx'].includes(ui.acond)?ui.acond:'src',key=c==='src'?x=>SRCNAME[x.src]:c==='seg'?x=>SEGNAME[x.seg]:x=>x.wx&&x.wx.w,nm=c==='src'?'きっかけ':c==='seg'?'客層':'天気';
+  const cost={};C.forEach(d=>Object.assign(cost,d.cost));
+  const t='<div class="ctitle">条件別の効率</div>';let h='<div class="chips cmpsel" role="group" aria-label="比べる条件">'+[['src','きっかけ'],['seg','客層'],['wx','天気']].map(x=>'<button type="button" class="chip" data-acd="'+x[0]+'" aria-pressed="'+(x[0]===c)+'">'+x[1]+'</button>').join('')+'</div>';
+  const g={};ks.forEach(k=>days[k].trips.forEach(x=>{const n=key(x);if(!n)return;const r=g[n]=g[n]||{n:0,s:0,cn:0,cm:0,cs:0};r.n++;r.s+=x.fare||0;if(cost[x.id]!=null){r.cn++;r.cm+=cost[x.id];r.cs+=x.fare||0}}));
+  const order=c==='src'?SRCS.map(x=>x[1]):c==='seg'?SEGS.map(x=>x[1]):WXS,rs=order.filter(n=>g[n]).concat(Object.keys(g).filter(n=>order.indexOf(n)<0));
+  if(!rs.length)return t+h+'<div class="hint"><span>この期間は、'+nm+'を入れた乗車がありません。乗車を記録するときに'+nm+'を選ぶと、ここで比べられます。</span></div>';
+  const ph=r=>r.cm>0?r.cs/r.cm*60:null;let best=null;if(rs.filter(n=>ph(g[n])!=null).length>1)rs.forEach(n=>{if(ph(g[n])!=null&&(best==null||ph(g[n])>ph(g[best])))best=n});
+  {let top=rs[0];rs.forEach(n=>{if(g[n].s/g[n].n>g[top].s/g[top].n)top=n});
+   h=t+'<p class="asum">'+(best?'時間あたりがいちばん高い'+nm+' <b>'+esc(best)+'</b>（1時間 ¥'+yen(ph(g[best]))+'）':'単価がいちばん高い'+nm+' <b>'+esc(top)+'</b>（¥'+yen(g[top].s/g[top].n)+'）')+'</p><!--B-->'+h}
+  h+='<table class="mtable a5 a5e"><thead><tr><th>'+nm+'</th><th>回数</th><th>単価</th><th>1回の時間</th><th>時間あたり</th></tr></thead><tbody>'+rs.map(n=>{const r=g[n];return '<tr><td class="pl">'+esc(n)+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+yen(r.s/r.n)+'</td><td class="n pl">'+(r.cn?minTxt(r.cm/r.cn):'—')+'</td><td class="n pl'+(n===best?' best':'')+'">'+(r.cn?yen(ph(r)):'—')+'</td></tr>'}).join('')+'</tbody></table>'
+    +'<div class="hint"><span>1回の時間は、前の降車（その日の最初は出庫）から、その乗車の降車までの平均です。お客さんを探した時間や付け待ちの時間も入ります。時間あたりは、営収をその時間で割ったものです。'+(best?'緑の数字は、時間あたりがいちばん高い'+nm+'です。':'')+'時間は、出庫・帰庫の時刻が両方入った日の分だけで出しています。</span></div>';
+  return h;
+}
+function aDays(ks,C){
+  const t='<div class="ctitle">良い日・悪い日</div>';
+  if(ks.length<4)return t+'<div class="hint"><span>出番が4日以上ある期間で出ます（この期間は'+ks.length+'日）。</span></div>';
+  const ck={};C.forEach(c=>{ck[c.k]=c});
+  const D=ks.map(k=>{const tr=days[k].trips,T=totals(tr),w={};tr.forEach(x=>{const v=x.wx&&x.wx.w;if(v)w[v]=(w[v]||0)+1});return {k:k,s:T.sum,n:T.n,wx:Object.keys(w).sort((a,b)=>w[b]-w[a])[0]||'',st:days[k].startTime||'',c:ck[k]||null}});
+  const n=ks.length>=10?5:Math.floor(ks.length/2),by=D.slice().sort((a,b)=>b.s-a.s||(a.k<b.k?-1:1)),good=by.slice(0,n),bad=by.slice(-n).reverse();
+  const tb=(cap,Ls)=>'<table class="mtable a5 a5g dt"><thead><tr><th>'+cap+'</th><th>営収</th><th>天気</th><th>出庫</th><th>稼働</th></tr></thead><tbody>'+Ls.map(d=>{const b='<button type="button" data-go="'+d.k+'">';
+    return '<tr'+(fromYmd(d.k).getDay()===0?' class="sun"':'')+'><td>'+b+mdw(d.k)+'</button></td><td class="n">'+b+yen(d.s)+'</button></td><td class="c">'+b+esc(d.wx||'—')+'</button></td><td class="n">'+b+esc(d.st||'—')+'</button></td><td class="n">'+b+(d.c?hmTxt(Math.round(d.c.work)):'—')+'</button></td></tr>'}).join('')+'</tbody></table>';
+  const mode=(Ls,f,u)=>{const g={};Ls.forEach(d=>{const v=f(d);if(v)g[v]=(g[v]||0)+1});const o=Object.keys(g).sort((a,b)=>g[b]-g[a]);if(!o.length)return '—';if(g[o[0]]<2&&Ls.length>1)return 'ばらばら';const tops=o.filter(x=>g[x]===g[o[0]]);return tops.join('・')+u+'（'+(tops.length>1?'各':'')+g[o[0]]+'日）'};
+  const avg=(Ls,f)=>{const v=Ls.map(f).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null};
+  const sumOf=(Ls,f)=>Ls.reduce((a,d)=>a+f(d),0);
+  const R=[['営収の平均',Ls=>'¥'+yen(avg(Ls,d=>d.s))],
+    ['多い曜日',Ls=>mode(Ls,d=>WD[fromYmd(d.k).getDay()],'曜')],
+    ['多い天気',Ls=>mode(Ls,d=>d.wx,'')],
+    ['出庫の平均',Ls=>{const v=avg(Ls,d=>d.st?mins(d.st):null);return v==null?'—':hmTxt(Math.round(v))}],
+    ['稼働の平均',Ls=>{const v=avg(Ls,d=>d.c?d.c.work:null);return v==null?'—':hmTxt(Math.round(v))}],
+    ['時間あたり',Ls=>{const v=Ls.filter(d=>d.c),w=sumOf(v,d=>d.c.work);return w?'¥'+yen(perHour(sumOf(v,d=>d.s),w)):'—'}],
+    ['回数の平均',Ls=>(Math.round(avg(Ls,d=>d.n)*10)/10)+'回'],
+    ['単価',Ls=>{const c=sumOf(Ls,d=>d.n);return c?'¥'+yen(sumOf(Ls,d=>d.s)/c):'—'}]];
+  return t+'<p class="asum">良い日の営収 平均 <b>¥'+yen(avg(good,d=>d.s))+'</b><br>悪い日の営収 平均 <b>¥'+yen(avg(bad,d=>d.s))+'</b></p><!--B-->'+tb('良い日',good)+tb('悪い日',bad)+'<div class="ctitle sub">共通点</div><table class="mtable a3"><thead><tr><th>項目</th><th>良い日</th><th>悪い日</th></tr></thead><tbody>'+R.map(r=>'<tr><td class="pl">'+r[0]+'</td><td class="pl">'+r[1](good)+'</td><td class="pl">'+r[1](bad)+'</td></tr>').join('')+'</tbody></table>'
+    +'<div class="hint"><span>良い日は営収の多い'+n+'日、悪い日は少ない'+n+'日です。日付を押すと、その日の日報を開きます。「多い曜日」「多い天気」は、その'+n+'日のなかでいちばん多いものです。</span></div>';
 }
 function route(){
   const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#set'?'set':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
@@ -2632,6 +2984,7 @@ function npRender(){
   const el=$('np-v');el.textContent=v?(c.yen?'¥'+yen(Number(v)||0):v):'—';el.classList.toggle('empty',!v);el.classList.toggle('fresh',npFresh&&!!v);
   $('np-hint').textContent=c.hint?$(c.hint).textContent:fk?(v?'支払方法を押すと記録します':'料金を入れて、支払方法を押すと記録'):c.yen?(v?'「確定」で決まります':'金額を入れて「確定」'):'';
   const x=$('np-x');x.dataset.k=c.dot?'.':'00';x.textContent=c.dot?'.':'00';
+  $('np-skip').hidden=!(f.id==='r-o1'||f.id==='r-o2');
 }
 /* After 確定 on the fare: the payment, big, and a tap records the ride (with the check before recording, if anything is missing). */
 let npPayOn=false;
@@ -2647,7 +3000,7 @@ function npOpen(f){
   if(npPayOn&&f!==npF)npPayOff();
   if(!$('toast').hidden&&$('toast-b').hidden){clearTimeout(toastTimer);$('toast').hidden=true}
   npF=f;npFresh=!!f.value;const pad=$('np');const was=pad.hidden;if(was)npAt=Date.now();pad.hidden=false;document.body.classList.add('np-open');
-  document.documentElement.style.setProperty('--nph',(pad.offsetHeight+16)+'px');npRender();
+  npRender();document.documentElement.style.setProperty('--nph',(pad.offsetHeight+16)+'px');
   requestAnimationFrame(()=>{const r=f.getBoundingClientRect(),room=innerHeight-pad.offsetHeight;if(r.top<70||r.bottom>room-12)window.scrollBy({top:r.top-Math.max(80,room*0.35),behavior:was?'auto':'smooth'})});
 }
 function npClose(){npF=null;npPayOff();$('np').hidden=true;document.body.classList.remove('np-open');syncBar()}
@@ -2843,7 +3196,7 @@ function vcHandle(heard){
     if(st==='closed'){vsDone('この日報は帰庫済みです。画面の確認から乗車してください');return}
     rideTapAt=0;$('ride-b').click();const n=numIn(m[1]);
     if(n!=null){setMeter('r-o1',n);vsDone('乗車しました');return}
-    if(usesOdo()&&!$('p-o1').value)return vsAsk('o1','乗車しました。メーターは？','例：230（下3桁でよい）、なし');
+    if(ui.odo!=='end'&&usesOdo()&&!$('p-o1').value)return vsAsk('o1','乗車しました。メーターは？','例：230（下3桁でよい）、なし');
     blurAll();vsDone('乗車しました');return}
   if((m=t.match(/^(?:降車|降ろし(?:た|ました)|降り(?:た|ました))(.*)$/))&&(st==='on'||st==='idle')){
     if(st==='on'){rideTapAt=0;$('ride-b').click()}
@@ -2897,10 +3250,10 @@ $('ride-b').addEventListener('click',()=>{
   }
   rideTapAt=now;
   {const br=!t1&&!t2?openBreak():null;if(br){br.e=nowHM();const len=brkLen(br);if(len<1){const d=days[cur];d.breaks=d.breaks.filter(x=>x!==br)}persist(cur);render();toast(len<1?'1分未満だったので、休憩は残しませんでした':'休憩終了　'+durTxt(len),false);return}}
-  if(!t1&&!t2){$('p-t1').value=nowHM();saveTm();capture('from');toast('乗車 '+$('p-t1').value,false);if(!$('p-o1').value&&(usesOdo()||odoBase()!=null))$('r-o1').focus();return}
+  if(!t1&&!t2){$('p-t1').value=nowHM();saveTm();capture('from');toast('乗車 '+$('p-t1').value,false);if(ui.odo!=='end'&&!$('p-o1').value&&(usesOdo()||odoBase()!=null))$('r-o1').focus();return}
   if(t1&&!t2){$('p-t2').value=nowHM();saveTm();capture('to');
     /* a pickup reading asks for the drop-off one; otherwise straight to the fare */
-    if($('p-o1').value&&!$('p-o2').value){$('r-o2').focus();return}
+    if(ui.odo!=='end'&&$('p-o1').value&&!$('p-o2').value){$('r-o2').focus();return}
     toFare();return}
   const f=$('p-fare');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'});
 });
@@ -3020,21 +3373,14 @@ $('p-toll').addEventListener('blur',()=>{renderX();syncBar()});
 $('xrow').addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(!b)return;
   if(b.dataset.x==='mukae')xo.mukae=!curMukae();else xo.pax=Math.min(9,Math.max(1,curPax()+(+b.dataset.x)));
   renderX();layoutCmp();syncBar();if(npF)npRender()});
-/* the row under the big button: 休憩 and 帰庫 within reach of the thumb; 帰庫 asks once more before it closes the day */
-let kikoArmed=0;
+/* the row under the big button: 休憩 and 話す within reach of the thumb (帰庫 is on the 乗務中 card, away from them) */
 function dockRow(){
-  const st=$('ride').dataset.st||'idle',d=days[cur]||{},kb=$('d-kiko');
+  const st=$('ride').dataset.st||'idle';
   $('d-brk').classList.toggle('off',st!=='idle');
-  const kOk=(st==='idle'||st==='brk')&&!!d.startTime&&!d.endTime;kb.classList.toggle('off',!kOk);
-  if(!kOk||Date.now()-kikoArmed>3500){kikoArmed=0;kb.classList.remove('armed');kb.textContent=d.endTime?'帰庫済み':'帰庫'}
 }
 $('d-brk').addEventListener('click',()=>{const st=$('ride').dataset.st;
   if(st==='idle'){$('brk-b').click();return}
   toast(st==='on'?'乗車中は休憩にできません':st==='done'?'先に料金と支払いを入れて記録してください':st==='brk'?'休憩中です。終わるときは上の「休憩終了」を押します':st==='pre'?'先に出庫してください':'帰庫済みです',false)});
-$('d-kiko').addEventListener('click',()=>{const st=$('ride').dataset.st,d=days[cur]||{},kb=$('d-kiko');
-  if(kb.classList.contains('off')){toast(d.endTime?'もう帰庫しています':!d.startTime?'まだ出庫していません':'乗車の記録が終わってから帰庫してください',false);return}
-  if(!kikoArmed||Date.now()-kikoArmed>3500){kikoArmed=Date.now();kb.textContent='もう一度押すと帰庫';kb.classList.add('armed');setTimeout(dockRow,3600);return}
-  kikoArmed=0;kb.classList.remove('armed');$('sh-b').click()});
 $('q-text').addEventListener('click',()=>{manualIn=true;layoutCmp();const f=$('say');f.focus();f.scrollIntoView({block:'center',behavior:'smooth'})});
 $('q-fare').addEventListener('click',()=>{manualIn=true;layoutCmp();const f=$('p-fare');f.focus()});
 $('reset').addEventListener('click',()=>{
@@ -3055,6 +3401,15 @@ const go=d=>{navigated=true;cur=d;renderDay()};
 $('bar-go').addEventListener('click',()=>record());
 $('m-more').addEventListener('click',()=>{ui.pays=!ui.pays;saveUi();renderDay()});
 function mFold(){const big=!!ui.mbig;$('meterp').classList.toggle('fold',!big);const b=$('m-fold');b.textContent=big?'小さくする':'大きく表示';b.setAttribute('aria-expanded',String(big));if(!big)$('m-more').hidden=true}
+/* the short label over the big button on short screens: 「乗車中 1時間12分」 instead of 「いま 乗車中　1時間12分」, which is cut there */
+{const rb=$('ride-b'),ss=()=>{const v=(rb.dataset.s||'').replace(/^いま /,'').replace(/　/,' ').replace(/ 料金を入れます$/,'');if(rb.dataset.ss!==v)rb.dataset.ss=v};
+ new MutationObserver(ss).observe(rb,{attributes:true,attributeFilter:['data-s']});ss()}
+function odoChips(){[...$('odochips').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.odo===ui.odo))}
+function setOdoMode(m){ui.odo=m;saveUi();odoChips();layoutCmp()}
+$('odochips').addEventListener('click',e=>{const b=e.target.closest('[data-odo]');if(!b)return;setOdoMode(b.dataset.odo);toast(ui.odo==='end'?'メーターは出庫・帰庫のときだけ入れます':'メーターは乗車・降車のたびに入れます',false)});
+/* on the number pad for a ride meter: stop asking for it on every ride */
+$('np-skip').addEventListener('click',()=>{const f=npF;if(f)f.blur();npClose();setOdoMode('end');toast('メーターは出庫・帰庫のときだけにしました。設定で戻せます',false)});
+odoChips();
 $('themechips').addEventListener('click',e=>{const b=e.target.closest('[data-theme-set]');if(!b)return;ui.theme=b.dataset.themeSet;saveUi();applyTheme();render()});
 $('m-fold').addEventListener('click',()=>{ui.mbig=!ui.mbig;saveUi();renderDay()});
 $('daywarn-b').addEventListener('click',()=>go(defaultDate()));
@@ -3067,6 +3422,14 @@ $('prev').addEventListener('click',()=>go(shift(cur,-1)));
 $('next').addEventListener('click',()=>go(shift(cur,1)));
 $('today').addEventListener('click',()=>go(ymd(new Date())));
 const mshift=n=>{const a=curMonth.split('-').map(Number);const d=new Date(a[0],a[1]-1+n,1);curMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);$('csvbox').hidden=true;renderMonth()};
+['m','y'].forEach(p=>{
+  $(p+'-view').addEventListener('click',e=>{const b=e.target.closest('[data-av]');if(!b)return;ui[p==='m'?'mview':'yview']=b.dataset.av;saveUi();if(p==='m')renderMonth();else renderYear()});
+  $(p+'-ana').addEventListener('click',e=>{
+    const a=e.target.closest('[data-apl],[data-acd],[data-go],[data-aopen]');if(!a)return;
+    if(a.dataset.aopen){const i=a.dataset.aopen;if(ui.aopen[i])delete ui.aopen[i];else ui.aopen[i]=true;saveUi();if(p==='m')renderMonth();else renderYear();const b=$(p+'-ana').querySelector('[data-aopen="'+i+'"]');if(b)b.focus({preventScroll:true});return}
+    if(a.dataset.go){navigated=true;cur=a.dataset.go;location.hash='#day';renderDay();return}
+    if(a.dataset.apl)ui.aplace=a.dataset.apl;else ui.acond=a.dataset.acd;saveUi();if(p==='m')renderMonth();else renderYear()});
+});
 $('mprev').addEventListener('click',()=>mshift(-1));$('mnext').addEventListener('click',()=>mshift(1));
 $('mcard').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;navigated=true;cur=b.dataset.go;location.hash='#day';renderDay()});
 [['f-start','startTime',0],['f-end','endTime',0],['f-odo1','odoStart',1],['f-odo2','odoEnd',1]].forEach(([id,key,num])=>{
@@ -3132,6 +3495,8 @@ $('ypre').addEventListener('click',e=>{
   saveY();$('y-csvbox').hidden=true;renderYear();
 });
 $('yqcard').addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(b)setQ(+b.dataset.q)});
+$('y-cmp').addEventListener('click',e=>{const b=e.target.closest('[data-cm],[data-ny]');if(!b)return;if(b.dataset.cm){yCmp=b.dataset.cm;saveY()}else{ui.nyears=+b.dataset.ny;saveUi()}renderYear()});
+$('m-cmp').addEventListener('click',e=>{const b=e.target.closest('[data-cm],[data-ny]');if(!b)return;if(b.dataset.cm)ui.mcmp=b.dataset.cm;else ui.nyears=+b.dataset.ny;saveUi();renderMonth()});
 $('ycard').addEventListener('click',e=>{const b=e.target.closest('[data-ym]');if(!b)return;pendMonth=b.dataset.ym;location.hash='#month'});
 $('y-csv-copy').addEventListener('click',()=>{
   const c=csvFor(yKeys()),msg=$('y-csv-msg').firstElementChild;
