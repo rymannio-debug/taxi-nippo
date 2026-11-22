@@ -78,7 +78,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <tr>
 <td>地図</td>
 <td>走った場所を見る</td>
-<td>その日の乗車地・降車地のピンと順路の線（単体版だけ）</td>
+<td>その日の乗車地・降車地のピンと順路の線。GPXを読み込むと実際に走った道（単体版だけ）</td>
 </tr>
 <tr>
 <td>設定</td>
@@ -1090,6 +1090,14 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>線を出す・消す</td>
 </tr>
 <tr>
+<td>走った道（GPX）を読み込む</td>
+<td>GPS記録アプリが書き出したGPXで、実際に走った道を引く（下の「走った道を読み込む」）</td>
+</tr>
+<tr>
+<td>走った道</td>
+<td>読み込んだ道を出す・消す（読み込んだ日だけ出るボタン）</td>
+</tr>
+<tr>
 <td>右上の「大きく」</td>
 <td>地図を画面いっぱいに広げる。「元に戻す」で戻る</td>
 </tr>
@@ -1099,7 +1107,46 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tr>
 </tbody>
 </table></div>
-<p>ピンを押すと、案件番号・時刻・場所・料金・支払方法が出ます。線は地点をまっすぐ結んだもので、実際に走った道ではありません。位置が残っていない乗車は地図に出ません。</p>
+<p>ピンを押すと、案件番号・時刻・場所・料金・支払方法が出ます。順路の線は地点をまっすぐ結んだもので、実際に走った道ではありません。位置が残っていない乗車は地図に出ません。</p>
+<h4 id="gpx">走った道を読み込む（GPX）</h4>
+<p>iPhoneのGPS記録アプリ（GPXを書き出せるもの）で1日の走行を記録しておくと、実際に走った道を地図に引けます。</p>
+<ol>
+<li>出庫のときにGPS記録アプリで記録を始め、帰庫したら止める</li>
+<li>記録アプリで、その日の記録を「GPX」で書き出し、「ファイルに保存」する</li>
+<li>このアプリの「地図」で、上の ‹ › でその日にする</li>
+<li>「走った道を読み込む（GPX）」を押し、保存したGPXを選ぶ</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>見えるもの</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>緑の線</td>
+<td>お客様を乗せて走った道（乗車時刻〜降車時刻）</td>
+</tr>
+<tr>
+<td>灰色の線</td>
+<td>空車で走った道</td>
+</tr>
+<tr>
+<td>説明の「走った道：合計○km（実車○km・空車○km）」</td>
+<td>読み込んだ道から出した距離</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>取り込むのは、その日の出庫〜帰庫（前後30分）のあいだだけです。違う日のGPXを選ぶと、何日の記録かを教えてくれます</li>
+<li>実車と空車は、日報の乗車時刻と降車時刻で分けます。降車時刻のない乗車は空車に数えます。時刻を直すと、線と距離もすぐ変わります</li>
+<li>‹ › で1件ずつ見ると、その案件の空車と実車の道だけが濃くなります</li>
+<li>電波が切れて10分以上とんだ所は線をつなぎません（距離にも入れません）</li>
+<li>読み込んだ道はこの端末にだけ残り、バックアップには入りません。GPXは記録アプリに残るので、読み込み直せます</li>
+<li>「読み込んだ道を消す」を2回押すと消えます。日報の記録はそのままです</li>
+<li>「この日の地図とまとめを画像で保存」の地図は、これまでどおり直線の順路です</li>
+</ul>
 <h3 id="list">一覧</h3>
 <p>「一覧」では、乗車記録を紙の日報のような表で見て、マスごとに直せます。</p>
 <ul>
@@ -1543,6 +1590,14 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>位置が残っていない乗車は出ない。日付が合っているかも確かめる</td>
 </tr>
 <tr>
+<td>GPXを読み込めない</td>
+<td>記録アプリで「GPX」の形で書き出す。「○月○日の記録のようです」と出たら、地図の ‹ › でその日にしてから読み込む</td>
+</tr>
+<tr>
+<td>走った道が全部灰色（空車）になる</td>
+<td>乗車時刻・降車時刻が入っているか確かめる。GPXに時刻が入っていないと、実車と空車に分けられない</td>
+</tr>
+<tr>
 <td>保存した画像の地図が欠けている</td>
 <td>電波が弱かった。電波のあるところで「画像で保存」を押し直す</td>
 </tr>
@@ -1705,7 +1760,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v90（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v91（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

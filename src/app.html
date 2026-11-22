@@ -620,6 +620,11 @@ details.card summary{min-height:44px}
 .mplg .ln{display:inline-block;width:22px;border-top:2px dashed var(--muted);margin-right:6px;vertical-align:3px}
 .mplg .ln-on{border-top:3px solid var(--accent)}
 .mplg.noroute .rt{display:none}
+.mplg.trkon .ln{border-top-style:solid;border-top-width:3px;opacity:.75}
+.mplg.trkon .ln-on{opacity:1;border-top-width:4px}
+.trkbox{margin:10px 0}
+.trkbox #trk-msg{margin-top:8px}
+.trkbox .btnrow{flex-wrap:wrap}
 .arw{pointer-events:none}
 .arw svg{display:block}
 .no{font-family:var(--num);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.02em}
@@ -1398,6 +1403,11 @@ body.driving #stpill,body.driving #toast{display:none!important}
     </div>
     <div class="lg mplg" id="mp-lg"><span><b class="pin pin-from mini">1</b>乗車地</span><span><b class="pin pin-to mini">1</b>降車地</span><span class="rt"><b class="ln ln-on"></b>お客様を乗せていた区間</span><span class="rt"><b class="ln"></b>空車で次の乗車地へ</span></div>
     <div class="hint"><span id="mp-sum"></span></div>
+    <div class="trkbox" id="trk">
+      <div class="btnrow"><button type="button" class="btn" id="trk-load">走った道を読み込む（GPX）</button><button type="button" class="btn" id="trk-del" hidden>読み込んだ道を消す</button></div>
+      <input type="file" id="trk-file" hidden>
+      <div class="hint" id="trk-msg" hidden><span></span></div>
+    </div>
     <ul class="list" id="mp-list"></ul>
     <button type="button" class="btn" id="mp-img" hidden>この日の地図とまとめを画像で保存</button>
     <div class="hint" id="mp-img-msg" hidden><span></span></div>
@@ -2294,7 +2304,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v90',APP_DATE='2026-11-22';
+const APP_VER='v91',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -2387,21 +2397,26 @@ const okLL=g=>Array.isArray(g)&&g.length===2&&isFinite(g[0])&&isFinite(g[1])&&Ma
 function mapNote(t){const n=$('map-note');n.textContent=t||'';n.hidden=!t}
 function renderMap(){
   const k=mapDay||cur,dt=fromYmd(k),d=days[k],tr=d&&d.trips?sorted(d):[];
+  if(trkMem[k]===undefined&&STORE.loaded){trkMem[k]=null;trkGet(k).then(t=>{if(t){trkMem[k]=t;if(location.hash==='#map'&&(mapDay||cur)===k)renderMap()}})}
+  const trk=trkMem[k]||null,showTrk=!!(trk&&trkOn);
   $('mplabel').textContent=(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）';
   $('mptoday').hidden=k===defaultDate();
-  $('mpf').innerHTML=[['both','乗車と降車'],['from','乗車だけ'],['to','降車だけ']].map(x=>'<button type="button" class="chip" data-mpf="'+x[0]+'" aria-pressed="'+(x[0]===mapF)+'">'+x[1]+'</button>').join('')+(mapF==='both'?'<button type="button" class="chip" data-mpr aria-pressed="'+mapRoute+'">順路の線</button>':'');
-  $('mp-lg').classList.toggle('noroute',!(mapRoute&&mapF==='both'));
+  $('mpf').innerHTML=[['both','乗車と降車'],['from','乗車だけ'],['to','降車だけ']].map(x=>'<button type="button" class="chip" data-mpf="'+x[0]+'" aria-pressed="'+(x[0]===mapF)+'">'+x[1]+'</button>').join('')+(trk?'<button type="button" class="chip" data-mpk aria-pressed="'+trkOn+'">走った道</button>':'')+(mapF==='both'&&!showTrk?'<button type="button" class="chip" data-mpr aria-pressed="'+mapRoute+'">順路の線</button>':'');
+  $('mp-lg').classList.toggle('noroute',!(showTrk||(mapRoute&&mapF==='both')));$('mp-lg').classList.toggle('trkon',showTrk);
+  $('mp-lg').querySelectorAll('.rt').forEach((el,i)=>{el.lastChild.textContent=showTrk?(i?'空車で走った道':'お客様を乗せて走った道'):(i?'空車で次の乗車地へ':'お客様を乗せていた区間')});
+  renderTrkBox(k,trk);
   const rides=tr.map((t,i)=>({t:t,n:i+1,a:okLL(t.g1)?t.g1:null,b:okLL(t.g2)?t.g2:null}));
   const withPos=rides.filter(r=>r.a||r.b),na=rides.filter(r=>r.a).length,nb=rides.filter(r=>r.b).length,none=rides.length-withPos.length;
-  $('mp-sum').textContent=!rides.length?'この日の乗車の記録はありません。':!withPos.length?'この日の乗車'+rides.length+'件には、位置の記録がありません。':
-    '乗車 '+na+'地点・降車 '+nb+'地点。ピンの数字は案件番号の末尾（その日に乗せた順番）です。'+(mapRoute&&mapF==='both'?'線は地点を順番に直線で結んだもので、実際に走った道ではありません。':'')+(none?'位置のない乗車が'+none+'件あり、地図には出ていません。':'')+'› で1件ずつ順番に見られます。下の一覧を押すと、その案件に移ります。';
+  $('mp-sum').textContent=(!rides.length?'この日の乗車の記録はありません。':!withPos.length?'この日の乗車'+rides.length+'件には、位置の記録がありません。':
+    '乗車 '+na+'地点・降車 '+nb+'地点。ピンの数字は案件番号の末尾（その日に乗せた順番）です。'+(showTrk?'線は読み込んだGPXの、実際に走った道です。':mapRoute&&mapF==='both'?'線は地点を順番に直線で結んだもので、実際に走った道ではありません。':'')+(none?'位置のない乗車が'+none+'件あり、地図には出ていません。':'')+'› で1件ずつ順番に見られます。下の一覧を押すと、その案件に移ります。')+(trk?trkSumText(trkStats(k,trk)):'');
   $('mp-list').innerHTML=rides.map(r=>{const t=r.t,has=r.a||r.b;
     return '<li><button type="button" class="trip'+(has?'':' nos')+'" data-mpt="'+esc(t.id)+'"'+(has?'':' disabled')+'><span class="t"><span class="no">'+caseNo(k,r.n)+'</span>'+esc(t.t)+'</span><span class="r">'+esc(t.from||'—')+'<i>→</i>'+esc(t.to||'—')+'</span><span class="f">'+yen(t.fare)+'</span><span class="m"><span>'+(r.a?'乗車地あり':'乗車地なし')+'</span><span>'+(r.b?'降車地あり':'降車地なし')+'</span><span>'+esc(payLabel(t))+'</span></span></button></li>'}).join('');
   $('mp-list').hidden=!rides.length;$('mp-img').hidden=!dlNs||!rides.length;$('mp-img-msg').hidden=true;
-  $('mapbox').hidden=!withPos.length;$('mp-lg').hidden=!withPos.length;
-  if(!withPos.length)return;
+  const any=withPos.length||showTrk;
+  $('mapbox').hidden=!any;$('mp-lg').hidden=!any;
+  if(!any)return;
   mapNote('地図を読み込んでいます…');
-  loadLeaflet().then(()=>{mapNote('');drawMap(rides,k)}).catch(()=>mapNote('地図を読み込めませんでした。電波のあるところで、アプリを開き直してください。'));
+  loadLeaflet().then(()=>{mapNote('');drawMap(rides,k,showTrk?trk:null)}).catch(()=>mapNote('地図を読み込めませんでした。電波のあるところで、アプリを開き直してください。'));
 }
 /* Base maps: 国土地理院の淡色地図 (Japanese labels, quiet colours, so pins and lines stand out) or OpenStreetMap. */
 const BASES={
@@ -2420,14 +2435,14 @@ function setBase(bk,auto){
 }
 function mapBounds(ids){const lls=[];ids.forEach(id=>(mapPins[id]||[]).forEach(m=>lls.push(m.getLatLng())));return lls}
 function fitAll(){
-  const lls=mapBounds(Object.keys(mapPins));
+  const lls=mapBounds(Object.keys(mapPins)).concat(mapLegs.filter(g=>g.lls).flatMap(g=>g.lls));
   if(!lls.length){lmap.setView([35.6812,139.7671],11);return}
   if(lls.length===1)lmap.setView(lls[0],16);else lmap.fitBounds(L.latLngBounds(lls),{padding:[34,34],maxZoom:16});
 }
 /* one case in view: its pickup and drop-off, plus where the car came from (the drop-off before) */
 function fitFocus(){
   const i=mapRides.findIndex(r=>r.t.id===mapFocus);if(i<0)return fitAll();
-  const r=mapRides[i],lls=[r.a,r.b].filter(Boolean),pv=rideBefore(r);if(pv&&pv.b&&r.a)lls.push(pv.b);
+  const r=mapRides[i],lls=[r.a,r.b].filter(Boolean).concat(mapLegs.filter(g=>g.lls&&g.to===mapFocus).flatMap(g=>g.lls)),pv=rideBefore(r);if(pv&&pv.b&&r.a)lls.push(pv.b);
   if(lls.length===1)lmap.setView(lls[0],Math.max(lmap.getZoom(),16));else lmap.fitBounds(L.latLngBounds(lls),{padding:[48,48],maxZoom:17});
 }
 let allRides=[];
@@ -2462,7 +2477,7 @@ function toggleBig(force){
   if(ctlBig)ctlBig.textContent=mapBig?'元に戻す':'大きく';
   if(lmap)setTimeout(()=>{lmap.invalidateSize();if(mapFocus)fitFocus();else fitAll()},60);
 }
-function drawMap(rides,k){
+function drawMap(rides,k,trk){
   if(!lmap){
     lmap=L.map('map',{zoomControl:true,attributionControl:true,tap:false});
     lmap.attributionControl.setPrefix(false);
@@ -2494,7 +2509,12 @@ function drawMap(rides,k){
         html:'<svg width="18" height="18" viewBox="0 0 18 18" style="transform:rotate('+deg.toFixed(1)+'deg)"><path d="M3 2.5 L16 9 L3 15.5 Z" fill="'+(occ?ac:lc)+'" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>'})}).addTo(lLayer)}
     mapLegs.push({to:toId,occ:occ,op:op,line:line,casing:casing,arrow:arrow});
   };
-  if(mapRoute&&mapF==='both')rides.forEach((r,i)=>{
+  if(trk)trkSegs(k,trk).forEach(sg=>{
+    const occ=sg.occ===true,casing=L.polyline(sg.lls,{color:'#ffffff',weight:occ?8:6,opacity:.95,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(lLayer);
+    const op=occ?.95:.8,line=L.polyline(sg.lls,{color:occ?ac:lc,weight:occ?4.5:3.5,opacity:op,interactive:false,lineCap:'round',lineJoin:'round'}).addTo(lLayer);
+    mapLegs.push({to:sg.to,occ:occ,op:op,line:line,casing:casing,arrow:null,lls:sg.lls});
+  });
+  else if(mapRoute&&mapF==='both')rides.forEach((r,i)=>{
     if(r.a&&r.b)leg(r.a,r.b,true,r.t.id);
     const nx=rides[i+1];if(nx&&r.b&&nx.a)leg(r.b,nx.a,false,nx.t.id);
   });
@@ -2509,6 +2529,7 @@ function drawMap(rides,k){
   });
   setTimeout(()=>{
     lmap.invalidateSize();applyFocus();
+    if(!Object.keys(mapPins).length&&mapLegs.some(g=>g.lls)){mapNote('');fitAll();return}
     if(!Object.keys(mapPins).length){lmap.setView([35.6812,139.7671],11);mapNote('この表示では出す地点がありません。上のボタンで「乗車と降車」を選んでください。');return}
     if(mapFocus)fitFocus();else fitAll();
   },0);
@@ -2518,6 +2539,91 @@ function focusRide(id){
   if(!mapBig)$('mapbox').scrollIntoView({block:'start',behavior:'smooth'});
   setFocus(id,true);
 }
+/* ===== 走った道（GPX） =====
+   iPhoneのGPS記録アプリが書き出した GPX を読み込み、その日の地図に実際に走った道を引く。
+   日報の乗車時刻〜降車時刻のあいだを「実車」（緑の線）、それ以外を「空車」（灰色の線）に分け、それぞれの距離を出す。
+   取り込むのは、その日の出庫〜帰庫（前後30分）の点だけ。時速200kmを超える飛びは捨て、6mより細かい曲がりは間引く。
+   道は IndexedDB に日付ごとに置く（'trk:YYYY-MM-DD'）。記録の本体やバックアップには入れない（GPXは記録アプリに残るので、読み込み直せる）。 */
+let trkOn=true;try{trkOn=localStorage.getItem('taxi-nippo-trkon-v1')!=='0'}catch(e){}
+const trkMem={};let trkDelArm=0,trkBoxDay=null;
+async function trkGet(k){if(!STORE.db)return null;try{const raw=await idbGet('trk:'+k);return raw&&typeof raw==='object'&&Array.isArray(raw.p)?raw:null}catch(e){return null}}
+async function trkPut(k,v){trkMem[k]=v;if(!STORE.db)return false;try{await idbPut('trk:'+k,v);return true}catch(e){return false}}
+async function trkDrop(k){trkMem[k]=null;if(STORE.db){try{await idbDel('trk:'+k)}catch(e){}}}
+const trkHav=(a,b)=>{const R=6371008.8,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r,x=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.min(1,Math.sqrt(x)))};
+/* the day's time frame as clock times: 出庫 (or 0:00) to 帰庫 (or a day later), and a point in time for "HH:MM" of that day */
+function trkClock(k){const d=days[k]||{},b0=fromYmd(k).getTime(),base=d.startTime?mins(d.startTime):300,
+  at=hm=>{let m=mins(hm);if(m<base)m+=1440;return b0+m*60000};
+  const s=d.startTime?at(d.startTime):b0,e=d.endTime?at(d.endTime):(d.startTime?s+86400000:b0+(1440+300)*60000);return {at:at,s:s,e:Math.max(e,s+60000)}}
+function trkParse(text){
+  let doc;try{doc=new DOMParser().parseFromString(text,'application/xml')}catch(e){return null}
+  if(!doc||doc.getElementsByTagName('parsererror').length)return null;
+  let els=[...doc.getElementsByTagNameNS('*','trkpt')];if(!els.length)els=[...doc.getElementsByTagNameNS('*','rtept')];
+  const pts=[];els.forEach(el=>{const la=parseFloat(el.getAttribute('lat')),lo=parseFloat(el.getAttribute('lon'));if(!okLL([la,lo])||(la===0&&lo===0))return;
+    const te=el.getElementsByTagNameNS('*','time')[0],t=te?Date.parse(te.textContent.trim()):NaN;pts.push([la,lo,isFinite(t)?t:null])});
+  return pts}
+/* Douglas–Peucker on local metres, without recursion */
+function trkSimplify(pts,eps){
+  if(pts.length<3)return pts.slice();
+  const c=Math.cos(pts[0][0]*Math.PI/180),X=p=>p[1]*111320*c,Y=p=>p[0]*110540,keep=new Uint8Array(pts.length);keep[0]=keep[pts.length-1]=1;
+  const st=[[0,pts.length-1]];
+  while(st.length){const [i,j]=st.pop();if(j<=i+1)continue;const ax=X(pts[i]),ay=Y(pts[i]),bx=X(pts[j]),by=Y(pts[j]),dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy;let m=-1,md=0;
+    for(let q=i+1;q<j;q++){const px=X(pts[q])-ax,py=Y(pts[q])-ay;let d;if(!L2)d=Math.hypot(px,py);else{const u=Math.max(0,Math.min(1,(px*dx+py*dy)/L2));d=Math.hypot(px-u*dx,py-u*dy)}if(d>md){md=d;m=q}}
+    if(md>eps){keep[m]=1;st.push([i,m],[m,j])}}
+  return pts.filter((p,i)=>keep[i])}
+/* GPX text → what is kept for day k, or {err} */
+function trkFromGpx(k,text,name){
+  const all=trkParse(text);if(!all)return {err:'GPXのファイルとして読めませんでした。GPS記録アプリで「GPX」の形で書き出したファイルを選んでください。'};
+  if(!all.length)return {err:'このファイルには、走った道の点が入っていません。'};
+  const timed=all.filter(p=>p[2]!=null).length>=all.length*0.9;let pts;
+  if(timed){const C=trkClock(k),pad=30*60000;pts=all.filter(p=>p[2]!=null).sort((a,b)=>a[2]-b[2]);const inDay=pts.filter(p=>p[2]>=C.s-pad&&p[2]<=C.e+pad);
+    if(!inDay.length){const cnt={};pts.forEach(p=>{const s=ymd(new Date(p[2]));cnt[s]=(cnt[s]||0)+1});const top=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0],dt=fromYmd(top);
+      return {err:'このGPXは'+(dt.getMonth()+1)+'月'+dt.getDate()+'日の記録のようです。上の ‹ › でその日にしてから読み込んでください。',day:top}}
+    pts=inDay;
+    const out=[pts[0]];for(let i=1;i<pts.length;i++){const a=out[out.length-1],b=pts[i],dt=(b[2]-a[2])/1000;if(dt<=0)continue;if(trkHav(a,b)/dt>55&&trkHav(a,b)>300)continue;out.push(b)}pts=out}
+  else pts=all.map(p=>[p[0],p[1],null]);
+  if(pts.length<2)return {err:'この日の道の点が少なすぎて、線を引けませんでした。'};
+  /* pieces split where the signal was lost (10分以上・1km以上とんだ所); each piece is thinned on its own,
+     keeping a point at least every minute so that a ride's start and end can still be found after the times are corrected */
+  const raw=pts.length,pcs=[[pts[0]]];
+  for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i];if(timed&&b[2]-a[2]>600000&&trkHav(a,b)>1000)pcs.push([]);pcs[pcs.length-1].push(b)}
+  const out=[];pcs.forEach((pc,n)=>{const ks=trkSimplify(pc,6),keep=new Set(ks);
+    if(timed){let last=pc[0];pc.forEach(q=>{if(keep.has(q)){last=q;return}if(q[2]-last[2]>=60000){keep.add(q);last=q}})}
+    pc.filter(q=>keep.has(q)).forEach((q,i)=>out.push([Math.round(q[0]*1e5)/1e5,Math.round(q[1]*1e5)/1e5,q[2]!=null?Math.round(q[2]/1000):null].concat(n&&!i?[1]:[])))});
+  return {v:1,name:String(name||'').slice(0,80),at:Date.now(),timed:timed,raw:raw,p:out}}
+/* each point → whose ride it belongs to: {occ:true,to:id} while a passenger is in, {occ:false,to:next ride} before a ride, {occ:false,to:null} after the last */
+function trkSegs(k,trk){
+  const d=days[k],tr=d&&d.trips?sorted(d):[],C=trkClock(k);
+  const iv=tr.map(t=>{const a=t.tin||t.t,A=a?C.at(a):null;let B=t.tout?C.at(t.tout):null;if(A!=null&&B!=null&&B<A)B+=86400000;return {id:t.id,a:A,b:B!=null?B+60000:null}});
+  const st=ms=>{if(ms==null||!trk.timed)return {occ:null,to:null};for(const r of iv){if(r.a!=null&&r.b!=null&&ms>=r.a&&ms<r.b)return {occ:true,to:r.id}}
+    const nx=iv.find(r=>r.a!=null&&r.a>ms);return {occ:false,to:nx?nx.id:null}};
+  const segs=[];let cur=null,prev=null;
+  trk.p.forEach(p=>{const ms=p[2]!=null?p[2]*1000:null,s=st(ms),ll=[p[0],p[1]];
+    const gap=p[3]===1;
+    if(!cur||gap||cur.occ!==s.occ||cur.to!==s.to){const n={occ:s.occ,to:s.to,lls:[]};if(cur&&!gap&&prev)n.lls.push(prev.ll);segs.push(n);cur=n}
+    cur.lls.push(ll);prev={ms:ms,ll:ll}});
+  return segs.filter(g=>g.lls.length>1)}
+function trkStats(k,trk){const r={all:0,occ:0,emp:0};trkSegs(k,trk).forEach(g=>{let m=0;for(let i=1;i<g.lls.length;i++)m+=trkHav(g.lls[i-1],g.lls[i]);r.all+=m;if(g.occ===true)r.occ+=m;else if(g.occ===false)r.emp+=m});
+  const d=days[k];r.notout=(d&&d.trips?d.trips:[]).filter(t=>!t.tout).length;r.timed=!!trk.timed;return r}
+const trkKm=m=>(Math.round(m/100)/10).toFixed(1);
+function trkSumText(S){return '走った道：合計 '+trkKm(S.all)+'km'+(S.timed?'（実車 '+trkKm(S.occ)+'km・空車 '+trkKm(S.emp)+'km）':'')+'。'+
+  (!S.timed?'GPXに時刻が入っていないので、実車と空車に分けられません。':S.notout?'降車時刻のない乗車が'+S.notout+'件あり、その区間は空車に数えています。':'')}
+function renderTrkBox(k,trk){
+  if(trkBoxDay!==k){trkBoxDay=k;trkMsg('')}
+  $('trk-load').textContent=trk?'GPXを読み込み直す':'走った道を読み込む（GPX）';$('trk-del').hidden=!trk;
+  if(Date.now()>trkDelArm)$('trk-del').textContent='読み込んだ道を消す'}
+function trkMsg(t){const m=$('trk-msg');m.firstChild.textContent=t||'';m.hidden=!t}
+$('trk-load').addEventListener('click',()=>{const f=$('trk-file');f.value='';f.click()});
+$('trk-file').addEventListener('change',async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;const k=mapDay||cur;
+  if(f.size>60*1024*1024){trkMsg('ファイルが大きすぎます（60MBまで）。1日分ずつ書き出してください。');return}
+  trkMsg('読み込んでいます…');let text='';try{text=await f.text()}catch(x){trkMsg('ファイルを開けませんでした。');return}
+  const r=trkFromGpx(k,text,f.name);if(r.err){trkMsg(r.err);return}
+  const saved=await trkPut(k,r);trkOn=true;try{localStorage.setItem('taxi-nippo-trkon-v1','1')}catch(x){}
+  trkMsg('読み込みました（'+r.raw+'点）。距離は上の説明に出ています。'+(saved?'':'この端末に保存できなかったので、アプリを閉じると消えます。'));
+  mapFocus=null;renderMap()});
+$('trk-del').addEventListener('click',async()=>{const b=$('trk-del');
+  if(Date.now()>trkDelArm){trkDelArm=Date.now()+4000;b.textContent='もう一度押すと消します';setTimeout(()=>{if(Date.now()>trkDelArm)b.textContent='読み込んだ道を消す'},4100);return}
+  trkDelArm=0;const k=mapDay||cur;await trkDrop(k);trkMsg('読み込んだ道を消しました。日報の記録はそのままです。');renderMap()});
 /* ===== The day in one picture =====
    After 帰庫 the day's report opens by itself. In the stand-alone build it shows the day's route on a map, and 「画像で保存」 turns the
    numbers, the route and the rides into one PNG to keep (on an iPhone: 共有 →「画像を保存」 puts it in Photos).
@@ -4103,6 +4209,7 @@ $('mpprev').addEventListener('click',()=>{mapDay=shift(mapDay||cur,-1);mapFocus=
 $('mpnext').addEventListener('click',()=>{mapDay=shift(mapDay||cur,1);mapFocus=null;renderMap()});
 $('mptoday').addEventListener('click',()=>{mapDay=defaultDate();renderMap()});
 $('mpf').addEventListener('click',e=>{
+  if(e.target.closest('[data-mpk]')){trkOn=!trkOn;try{localStorage.setItem('taxi-nippo-trkon-v1',trkOn?'1':'0')}catch(x){}renderMap();return}
   if(e.target.closest('[data-mpr]')){mapRoute=!mapRoute;try{localStorage.setItem('taxi-nippo-route-v1',mapRoute?'1':'0')}catch(x){}renderMap();return}
   const b=e.target.closest('[data-mpf]');if(!b||b.dataset.mpf===mapF)return;mapF=b.dataset.mpf;renderMap()});
 $('mp-list').addEventListener('click',e=>{const b=e.target.closest('[data-mpt]');if(b)focusRide(b.dataset.mpt)});
