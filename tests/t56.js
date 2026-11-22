@@ -1,0 +1,124 @@
+// 1 保存先（IndexedDB）・2 走行中の画面・6 押す場所と文字の大きさ・8 版の名前と「ない日だけ足す」
+(async()=>{const {chromium}=require('./pw');const fr=require('./fontroute');const b=await chromium.launch();
+const ok=(c,m)=>console.log((c?'  ✓ ':'  ✗ ')+m);
+const K='2026-11-22',Y='2026-11-21';
+async function page(data,o={}){const ctx=o.ctx||await b.newContext({viewport:o.vp||{width:390,height:844},hasTouch:true,isMobile:true});if(!o.ctx){await fr(ctx);await ctx.route(/nominatim|gsi|tile|open-meteo|cyberjapan/,r=>r.abort())}
+ const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
+ await p.clock.install({time:o.at||new Date(2026,10,22,10,0)});
+ if(o.geo)await p.addInitScript(()=>{window.__w=null;window.__wc=0;window.__gc=0;Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition(cb){window.__w=cb;return 7},clearWatch(){window.__w=null;window.__wc++},getCurrentPosition(ok){window.__gc++;setTimeout(()=>ok({coords:{latitude:35.6518,longitude:139.5442,accuracy:10,speed:null},timestamp:Date.now()}),10)}}})});
+ if(o.pre)await p.addInitScript(o.pre);
+ await p.addInitScript(([sd,set,u])=>{if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();if(sd)localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));if(set)localStorage.setItem('taxi-nippo-set-v1',JSON.stringify(set));if(u)localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify(u))},[data||null,o.set||null,o.ui||null]);
+ await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(900);return p}
+const tapEl=async(p,sel)=>{const r=await p.evaluate(s=>{const e=[...document.querySelectorAll(s)].find(x=>x.getClientRects().length);if(!e)return null;e.scrollIntoView({block:'center'});const q=e.getBoundingClientRect();return [q.left+q.width/2,q.top+q.height/2]},sel);if(!r)return false;await p.touchscreen.tap(r[0],r[1]);await p.waitForTimeout(350);return true};
+const vis=(p,s)=>p.evaluate(s=>{const e=document.querySelector(s);return !!e&&e.getClientRects().length>0},s);
+const txt=(p,s)=>p.evaluate(s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\s+/g,' '):''},s);
+const idb=p=>p.evaluate(()=>new Promise(res=>{const r=indexedDB.open('taxi-nippo',1);r.onsuccess=()=>{const q=r.result.transaction('kv').objectStore('kv').get('days');q.onsuccess=()=>{res(q.result?JSON.parse(q.result):null);r.result.close()};q.onerror=()=>res('ERR')};r.onerror=()=>res('ERR')}));
+const reload=async p=>{await p.reload();await p.waitForTimeout(900)};
+const T=(id,t,f)=>({id,t,tin:t,tout:t,from:'調布市布田一丁目',to:'府中市宮町一丁目',fare:f,pay:'cash',ts:1});
+
+console.log('1. 記録は大きな保存場所（IndexedDB）へ。前の版の記録は、はじめて開いたときに移す');
+const D={[Y]:{type:'day',date:Y,startTime:'07:00',endTime:'17:30',breaks:[],trips:[T('a','08:10',5500),T('b','09:10',2300)]}};
+let p=await page(D,{at:new Date(2026,10,21,18,0)});
+let I=await idb(p);ok(I&&I[Y]&&I[Y].trips.length===2,'前の版の記録（2件）が IndexedDB に入った');
+ok(await p.evaluate(()=>localStorage.getItem('taxi-nippo-v1'))==='{"_moved":"indexeddb"}','小さい保存場所には「移した」印だけが残る');
+ok(/7,800/.test(await txt(p,'#sb-total')),'画面には移した記録が出る');
+ok(!(await vis(p,'#boot')),'読み込みが終わると押せるようになる');
+await reload(p);ok(/7,800/.test(await txt(p,'#sb-total')),'開き直しても IndexedDB から読む');
+await p.evaluate(()=>{const d=days['2026-11-21'];d.trips.push({id:'c',t:'10:00',fare:1000,pay:'cash',ts:2});saveLocal()});await p.waitForTimeout(300);
+I=await idb(p);ok(I[Y].trips.length===3,'記録すると IndexedDB に保存');
+await reload(p);ok(/8,800/.test(await txt(p,'#sb-total')),'開き直しても3件');
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(500);
+ok(/記録の保存先：この端末の大きな保存場所。記録の大きさ \d+KB（使える量 約[\d.]+(GB|MB)）/.test(await txt(p,'#bk-store')),'設定に保存先と大きさ: '+(await txt(p,'#bk-store')).slice(0,60));
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+
+console.log('2. 保存に失敗したら赤い帯で知らせる（黙って失敗しない）');
+p=await page(D,{at:new Date(2026,10,21,18,0)});
+await p.evaluate(()=>{window.__fail=true;const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(...a){if(window.__fail)throw new DOMException('full','QuotaExceededError');return put.apply(this,a)};
+  const si=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(window.__fail&&k==='taxi-nippo-v1')throw new DOMException('full','QuotaExceededError');return si.call(this,k,v)}});
+await p.evaluate(()=>{days['2026-11-21'].trips.push({id:'d',t:'11:00',fare:900,pay:'cash',ts:3});saveLocal()});await p.waitForTimeout(300);
+ok(await vis(p,'#savebad'),'赤い帯が出る');
+ok(/記録を保存できませんでした（この端末の空きが足りません）/.test(await txt(p,'#savebad')),'理由も出る');
+await tapEl(p,'#savebad-bk');ok(await p.evaluate(()=>location.hash==='#set'&&document.getElementById('bk').open),'「バックアップを保存」で設定のバックアップへ');
+await p.evaluate(()=>{window.__fail=false;saveLocal()});await p.waitForTimeout(300);
+ok(!(await vis(p,'#savebad')),'保存できたら帯は消える');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+
+console.log('3. IndexedDB が使えない端末では、これまでどおり小さい保存場所に');
+p=await page(D,{at:new Date(2026,10,21,18,0),pre:()=>{Object.defineProperty(window,'indexedDB',{configurable:true,value:undefined})}});
+await p.evaluate(()=>{days['2026-11-21'].trips.push({id:'e',t:'12:00',fare:700,pay:'cash',ts:4});saveLocal()});
+ok(await p.evaluate(()=>JSON.parse(localStorage.getItem('taxi-nippo-v1'))['2026-11-21'].trips.length)===3,'localStorage に保存');
+ok(!(await vis(p,'#savebad')),'帯は出ない');
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(400);ok(/小さな保存場所（約5MB）/.test(await txt(p,'#bk-store')),'設定に「小さな保存場所」と出る');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+
+console.log('4. 消した記録の写しも IndexedDB に置き、「戻す」で戻せる／消えにくくする設定を頼む');
+p=await page(D,{at:new Date(2026,10,21,18,0),pre:()=>{window.__pc=0;Object.defineProperty(navigator,'storage',{configurable:true,value:{persisted:async()=>false,persist:async()=>{window.__pc++;return true},estimate:async()=>({usage:1000,quota:2e9})}})}});
+ok(await p.evaluate(()=>window.__pc)===1,'iPhoneに「消さない」と頼む');
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(400);ok(/iPhoneに「消さない」と認められています/.test(await txt(p,'#bk-store')),'認められたと出る');
+await p.evaluate(()=>{document.getElementById('del-from').value='2026-11-21';delCheck();doDelete()});await p.waitForTimeout(400);
+ok(await p.evaluate(()=>localStorage.getItem('taxi-nippo-del-v1'))==='idb','写しは IndexedDB（印だけ小さい保存場所）');
+ok(await p.evaluate(()=>days['2026-11-21'].trips.length)===0,'消えた');
+await p.evaluate(()=>undoDelete());await p.waitForTimeout(400);ok(await p.evaluate(()=>days['2026-11-21'].trips.length)===2,'「消した記録を戻す」で戻る');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+
+console.log('5. 走行中の画面');
+const ON={[K]:{type:'day',date:K,startTime:'07:00',breaks:[],trips:[T('a','08:10',5500)]}};
+p=await page(ON,{geo:1});
+const feed=(p,sp,la,lo,dt)=>p.evaluate(([sp,la,lo,dt])=>{window.__t=(window.__t||Date.now())+(dt||2000);window.__w&&window.__w({coords:{latitude:la||35.6518,longitude:lo||139.5442,accuracy:10,speed:sp},timestamp:window.__t})},[sp,la,lo,dt]);
+ok(await p.evaluate(()=>typeof window.__w==='function'),'乗務中は速さを見はじめる');
+await feed(p,5);ok(!(await vis(p,'#drv')),'速い（時速18km）が1回だけでは出ない');
+await feed(p,5);await p.waitForTimeout(100);ok(await vis(p,'#drv'),'2回続くと走行中の画面');
+ok(/空車/.test(await txt(p,'#drv-st'))&&/5,500/.test(await txt(p,'#drv-sum')),'いまの状態と今日の営収が大きく出る');
+ok(await p.evaluate(()=>document.body.classList.contains('driving')),'走行中の印');
+const cover=await p.evaluate(()=>{const e=document.elementFromPoint(195,780);return !!(e&&e.closest('#drv'))});ok(cover,'下の大きいボタンは隠れて押せない');
+await tapEl(p,'#drv-talk');ok(await vis(p,'#vs'),'［話す］は押せる（声で記録できる）');
+await p.evaluate(()=>{const c=document.getElementById('vs-close')||document.querySelector('.vs-close');c&&c.click()});await p.waitForTimeout(300);
+await feed(p,0);ok(await vis(p,'#drv'),'止まった1回目ではまだ');
+await feed(p,0);await p.waitForTimeout(100);ok(!(await vis(p,'#drv')),'2回続くと元の画面に戻る');
+await feed(p,null,35.6518,139.5442,5000);await feed(p,null,35.6523,139.5442,5000);await feed(p,null,35.6528,139.5442,5000);await p.waitForTimeout(100);
+ok(await vis(p,'#drv'),'速さが来ない端末でも、位置の動き（5秒で約55m）から走行中と分かる');
+await p.clock.runFor(70000);ok(!(await vis(p,'#drv')),'位置が1分来なければ、閉じ込めないよう元に戻す');
+await feed(p,6);await feed(p,6);await p.waitForTimeout(100);ok(await vis(p,'#drv'),'また走ると出る');
+await tapEl(p,'#drv-off');ok(!(await vis(p,'#drv')),'「運転していない」で消える');
+await feed(p,6);await feed(p,6);ok(!(await vis(p,'#drv')),'15分のあいだは出ない');
+await p.clock.runFor(16*60000);await feed(p,0);await feed(p,0);await feed(p,6);await feed(p,6);await p.waitForTimeout(100);ok(await vis(p,'#drv'),'15分たつとまた出る');
+await feed(p,0);await feed(p,0);
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(300);
+ok(/大きく簡単にする/.test(await txt(p,'#drvchips [aria-pressed="true"]')),'設定の「走行中の画面」ははじめ「大きく簡単にする」');
+await tapEl(p,'#drvchips [data-drv="0"]');ok(await p.evaluate(()=>window.__w===null),'「いつもの画面のまま」で速さを見るのをやめる');
+await tapEl(p,'#drvchips [data-drv="1"]');ok(await p.evaluate(()=>typeof window.__w==='function'),'戻すとまた見る');
+await p.evaluate(()=>{location.hash='#day';route()});await p.waitForTimeout(300);
+await tapEl(p,'#ride-b');await p.waitForTimeout(500);ok(await p.evaluate(()=>window.__gc)>=1&&await p.evaluate(()=>typeof window.__w==='function'),'乗車の位置を取るあいだだけ止め、そのあと見なおす');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+p=await page({[Y]:D[Y]},{geo:1,at:new Date(2026,10,21,18,0)});ok(await p.evaluate(()=>window.__w===null),'帰庫したあとは速さを見ない');await p.context().close();
+p=await page({},{geo:1});ok(await p.evaluate(()=>window.__w===null),'出庫前も見ない');await p.context().close();
+
+console.log('6. 押す場所は44px以上・文字の大きさ');
+p=await page(ON);
+const small=async()=>p.evaluate(()=>{const out=[];document.querySelectorAll('button,a[href],input:not([type=hidden]),select,summary,label.btn').forEach(e=>{if(!e.getClientRects().length)return;const q=e.getBoundingClientRect();if(q.width<2)return;if(e.closest('.leaflet-control-attribution,.leaflet-control-zoom,p,.hint span,.disp-n'))return;if(q.height<43.5||(q.width<43.5&&!e.closest('.mtable')))out.push((e.id||e.className||e.tagName)+' '+Math.round(q.width)+'x'+Math.round(q.height))});return out});
+for(const h of ['#day','#list','#month','#year','#set']){await p.evaluate(h=>{location.hash=h;route()},h);await p.waitForTimeout(300);const s=await small();ok(!s.length,h+' の押す場所は全部44px以上 '+s.join(','))}
+const fz=()=>p.evaluate(()=>[parseFloat(getComputedStyle(document.querySelector('#coset .disp-n')).fontSize),parseFloat(getComputedStyle(document.getElementById('sb-total')).fontSize)]);
+const f0=await fz();
+await tapEl(p,'#fschips [data-fs="1.3"]');const f1=await fz();
+ok(Math.abs(f1[0]/f0[0]-1.3)<0.02,'「特大」で説明の文字が1.3倍（'+f0[0]+'→'+f1[0]+'px）');
+ok(f1[1]===f0[1],'営収の大きい数字はそのまま');
+ok(await p.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth),'横にはみ出さない');
+await reload(p);ok(await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--fs').trim())==='1.3','開き直しても特大');
+ok(await p.evaluate(()=>Math.min(...[...document.querySelectorAll('.chart svg text')].map(e=>parseFloat(getComputedStyle(e).fontSize)),99))>=11,'グラフの文字も11px以上');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+
+console.log('7. 版の名前と、Claude版の記録を「ない日だけ足す」');
+p=await page({[Y]:D[Y]},{at:new Date(2026,10,21,18,0),set:{dayGoal:40000}});
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(300);
+ok(/iPhone版（本番）\s*v\d+（\d{4}\/\d\d\/\d\d）/.test(await txt(p,'#ab-ver')),'設定に版の名前と番号: '+await txt(p,'#ab-ver'));
+ok(!(await vis(p,'#ed-badge')),'iPhone版には「試し用」の札は出ない');
+const bk={app:'taxi-nippo',version:1,settings:{dayGoal:99999},days:{[Y]:{type:'day',date:Y,trips:[T('x','08:00',100)]},'2026-11-19':{type:'day',date:'2026-11-19',startTime:'07:00',endTime:'16:00',trips:[T('y','09:00',3000)]}}};
+await p.evaluate(t=>offerRestore(t),JSON.stringify(bk));
+ok(await vis(p,'#bk-confirm [data-bk="add"]'),'重なる日があると「ない日だけ足す」が出る');
+await tapEl(p,'#bk-confirm [data-bk="add"]');await p.waitForTimeout(300);
+ok(await p.evaluate(()=>days['2026-11-19']&&days['2026-11-19'].trips.length===1),'ない日（11/19）が足された');
+ok(await p.evaluate(()=>days['2026-11-21'].trips.length===2&&days['2026-11-21'].trips[0].fare===5500),'ある日（11/21）はそのまま');
+ok(await p.evaluate(()=>settings.dayGoal===40000),'設定もそのまま');
+ok(/1日分を足しました/.test(await txt(p,'#bk-msg')),'「1日分を足しました」');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+await b.close()})();

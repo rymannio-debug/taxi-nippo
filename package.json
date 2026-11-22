@@ -1,0 +1,16 @@
+{
+  "name": "taxi-nippo",
+  "private": true,
+  "description": "タクシー売上日報（iPhoneのホーム画面で使うWebアプリ）",
+  "scripts": {
+    "build": "python3 tools/build.py",
+    "test": "node tests/run.js",
+    "test:webkit": "BROWSER=webkit node tests/run.js"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "@fontsource/dela-gothic-one": "5.3.0",
+    "@fontsource/biz-udpgothic": "5.3.0",
+    "@fontsource/biz-udgothic": "5.3.0"
+  }
+}

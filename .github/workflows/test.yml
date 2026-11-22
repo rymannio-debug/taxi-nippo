@@ -1,0 +1,60 @@
+# 自動テストと公開
+#   dev に入れる → 組み立ての確認 → テスト（Chromium と WebKit、それぞれ4つに分けて同時に）→ 全部通ったら main へ反映 → GitHub Pages が公開
+#   main に直接入れたときや、プルリクエストのときは、テストだけ走らせる
+name: テストと公開
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-check:
+    name: 組み立ての確認
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/build.py --check
+  test:
+    name: テスト（${{ matrix.browser }} ${{ matrix.shard }}/4）
+    needs: build-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.browser }}
+      - run: node tests/run.js
+        env:
+          BROWSER: ${{ matrix.browser }}
+          SHARD: ${{ matrix.shard }}/4
+          TZ: Asia/Tokyo
+  publish:
+    name: 公開（main へ反映）
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: dev を main へ（main が先に進んでいたら止める）
+        run: git push origin HEAD:main
+      - name: GitHub Pages の公開を頼む
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages の公開は自動で始まります"
