@@ -8,3 +8,5 @@ tests/*.png
 /_*.png
 tests/*.json
 __pycache__/
+/*.png
+!/icon-*.png
