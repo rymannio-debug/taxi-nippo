@@ -1752,13 +1752,21 @@ function dayLastOdo(d){
   return best?(best.o2!=null?best.o2:best.o1):null;
 }
 /* The reading the next pickup is measured from: this day's last ride, else 出庫メーター, else where the previous shift ended. */
+/* 下3桁を補うもとは、その日の読みだけ（出庫メーター・乗車ごとのメーター）。乗務ごとに車が変わることがあるので、
+   前の日の帰庫メーターからは補わない。出庫メーターは毎回全部の桁を入れる */
 function odoBase(){
   const d=days[cur],v=dayLastOdo(d);if(v!=null)return v;
   if(d&&d.odoStart!=null)return d.odoStart;
+  return null;
+}
+/* 前の日の最後の読み（出庫の案内に「前回の帰庫」として出すだけ。補うのには使わない） */
+function prevOdo(){
   const ks=Object.keys(days).filter(k=>k<cur).sort().reverse();
   for(const k of ks){const p=days[k];if(!p)continue;if(p.odoEnd!=null)return p.odoEnd;const w=dayLastOdo(p);if(w!=null)return w;if(p.odoStart!=null)return p.odoStart}
   return null;
 }
+/* 出庫メーターを下3桁ほどで入れたらしいとき（前に4桁以上の読みがあるのに、整数が3桁以下） */
+const shortStart=str=>{const ip=String(str||'').normalize('NFKC').replace(/[,\s]/g,'').split('.')[0].replace(/\D/g,''),p=prevOdo();return !!ip&&ip.length<=3&&p!=null&&p>=1000};
 const odoBase2=()=>{const a=parseOdo($('p-o1').value);return a!=null?a:odoBase()};
 /* more than this far from the last reading is most likely a mistyped 下3桁 (a wrong digit sends it up to 999 km away) */
 const ODO_GAP=60,ODO_RIDE=150;  /* the same limits as the 3-digit auto-close below */
@@ -1920,9 +1928,16 @@ function emptyKm(d){
 const sumVals=o=>Math.round(Object.keys(o).reduce((a,k)=>a+o[k],0)*10)/10;
 let shAsk='';
 function shHint(){
-  const base=odoBase(),v=resolveOdo($('sh-odo').value,base),h=$('sh-oh');
-  if(v==null)h.textContent=base!=null?'前回 '+fmtO(base)+' km。下3桁だけ入れれば、残りの桁を補います。入れずに閉じてもかまいません':'全部の桁を入れます。入れずに閉じてもかまいません';
-  else h.textContent=fmtO(v)+' km'+(base!=null?'　前回から '+(v>=base?'+':'−')+fmtO(Math.abs(Math.round((v-base)*10)/10))+' km':'');
+  const h=$('sh-oh');h.classList.remove('bad');
+  if(shAsk==='start'||(!shAsk&&$('sh-ol').textContent.startsWith('出庫'))){
+    const val=$('sh-odo').value,v=resolveOdo(val,null),p=prevOdo();
+    if(v==null)h.textContent='出庫は、メーターの全部の桁を入れます（乗務ごとに車が変わることがあるため）。入れずに閉じてもかまいません';
+    else if(shortStart(val)){h.textContent=fmtO(v)+' km？ 出庫は全部の桁を入れてください（例：45230）';h.classList.add('bad')}
+    else h.textContent=fmtO(v)+' km'+(p!=null&&Math.abs(v-p)<=ODO_GAP?'　前回の帰庫から '+(v>=p?'+':'−')+fmtO(Math.abs(Math.round((v-p)*10)/10))+' km':'');
+    return}
+  const base=odoBase(),v=resolveOdo($('sh-odo').value,base);
+  if(v==null)h.textContent=base!=null?'出庫 '+fmtO(base)+' km。下3桁だけ入れれば、残りの桁を補います。入れずに閉じてもかまいません':'全部の桁を入れます。入れずに閉じてもかまいません';
+  else h.textContent=fmtO(v)+' km'+(base!=null?'　出庫から '+(v>=base?'+':'−')+fmtO(Math.abs(Math.round((v-base)*10)/10))+' km':'');
 }
 function renderShift(){
   const d=days[cur]||{},st=d.endTime?'end':d.startTime?'on':'pre',b=$('sh-b');
@@ -2260,7 +2275,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v88',APP_DATE='2026-11-22';
+const APP_VER='v89',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -3680,7 +3695,7 @@ document.querySelectorAll('[data-say]').forEach(b=>b.addEventListener('click',()
    the fare, after the fare the bottom 「記録」. A key pressed first replaces what was in the field. */
 const NP={'r-o1':{l:'乗車時メーター（下3桁でよい）',dot:1,hint:'r-o1-h'},'r-o2':{l:'降車時メーター（下3桁でよい）',dot:1,hint:'r-o1-h'},
   'p-fare':{l:'料金',yen:1},'p-toll':{l:'高速代',yen:1},'p-km':{l:'距離（km）',dot:1},
-  'mt-n':{l:'営業回数（メーターの集計）',next:'mt-lk'},'mt-lk':{l:'実車キロ（メーターの集計）',dot:1,next:'mt-fare'},'mt-fare':{l:'運収（メーターの集計） 円',yen:1},'ca-in':{l:'手元の現金 円',yen:1},'ca-ch':{l:'釣り銭の準備金 円（毎日同じ額）',yen:1},'sh-odo':{l:()=>$('sh-ol').textContent+'（下3桁でよい）',dot:1,hint:'sh-oh'}};
+  'mt-n':{l:'営業回数（メーターの集計）',next:'mt-lk'},'mt-lk':{l:'実車キロ（メーターの集計）',dot:1,next:'mt-fare'},'mt-fare':{l:'運収（メーターの集計） 円',yen:1},'ca-in':{l:'手元の現金 円',yen:1},'ca-ch':{l:'釣り銭の準備金 円（毎日同じ額）',yen:1},'sh-odo':{l:()=>$('sh-ol').textContent+(shAsk==='start'?'（全部の桁）':'（下3桁でよい）'),dot:1,hint:'sh-oh'}};
 let npF=null,npFresh=false,npAt=0;
 Object.keys(NP).forEach(id=>{const f=$(id);if(f){f.setAttribute('inputmode','none')}});
 /* Payments in order of use over the last 60 working days (ties keep the usual order: 現金, カード, …). */
@@ -3886,7 +3901,8 @@ function vcHandle(heard){
     if(step==='o1'||step==='o2'||step==='shodo'){
       const skip=SKIP.test(t),n=skip?null:numIn(t);
       if(n==null&&!skip){vsAsk(step,'数字が聞き取れませんでした。メーターは？','例：236、なし');return}
-      if(step==='shodo'){$('sh-odo').value=n||'';$('sh-odo').blur();if(VC.sh==='end'){vsHide();speakJa(kikoMsg())}else vsDone('出庫しました');return}
+      if(step==='shodo'){if(VC.sh!=='end'&&n!=null&&shortStart(String(n))){vsAsk('shodo','出庫メーターは、全部の数字で言ってください','例：45230、なし');return}
+        $('sh-odo').value=n||'';$('sh-odo').blur();if(VC.sh==='end'){vsHide();speakJa(kikoMsg())}else vsDone('出庫しました');return}
       if(n!=null)setMeter(step==='o1'?'r-o1':'r-o2',n);else blurAll();
       if(step==='o1'){vsDone('入れました');return}
       return nextAfterDrop()}
@@ -3905,8 +3921,8 @@ function vcHandle(heard){
     if(d&&d.startTime){vsDone('もう出庫しています');return}
     VC.sh='start';$('sh-b').click();const n=numIn(m[1]);
     if(!shAsk){blurAll();vsDone('出庫しました');return}
-    if(n!=null){$('sh-odo').value=n;$('sh-odo').blur();vsDone('出庫しました');return}
-    return vsAsk('shodo','出庫メーターは？','例：190（下3桁でよい）、なし')}
+    if(n!=null&&!shortStart(String(n))){$('sh-odo').value=n;$('sh-odo').blur();vsDone('出庫しました');return}
+    return vsAsk('shodo',n!=null?'出庫メーターは、全部の数字で言ってください':'出庫メーターは？','例：45230（全部の数字）、なし')}
   if((m=t.match(/^帰庫(?:\s*(?:メーター|メータ)?\s*(.*))?$/))){
     if(!d||!d.startTime){vsDone('まだ出庫していません');return}
     if(d.endTime){vsDone('もう帰庫しています');return}
@@ -4042,7 +4058,9 @@ $('sh-x').addEventListener('click',()=>{const d=day(cur);d.endTime='';shAsk='';p
 $('sh-odo').addEventListener('input',shHint);
 $('sh-odo').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();$('sh-odo').blur()}});
 $('sh-odo').addEventListener('blur',()=>{
-  if(!shAsk)return;const v=resolveOdo($('sh-odo').value,odoBase()),d=day(cur);
+  if(!shAsk)return;
+  if(shAsk==='start'&&shortStart($('sh-odo').value)){shHint();toast('出庫メーターは全部の桁を入れてください',false);setTimeout(()=>{if(shAsk==='start')$('sh-odo').focus()},60);return}
+  const v=resolveOdo($('sh-odo').value,shAsk==='start'?null:odoBase()),d=day(cur);
   if(v!=null){d[shAsk==='start'?'odoStart':'odoEnd']=v;persist(cur)}
   const was=shAsk;shAsk='';$('sh-odo').value='';render();
   if(was==='end')setTimeout(afterKiko,250);

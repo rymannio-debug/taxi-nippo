@@ -65,7 +65,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <tr>
 <td>出庫したとき</td>
 <td>下の大きいボタンの「出庫」</td>
-<td>出庫メーター</td>
+<td>出庫メーター（全部の桁）</td>
 </tr>
 <tr>
 <td>お客様を乗せたとき</td>
@@ -89,7 +89,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tr>
 </tbody>
 </table></div>
-<p>時刻と、乗車地・降車地の地名は自動で入ります。メーターは出庫・帰庫のときだけで、下3桁だけ入れれば残りの桁はアプリが補います（45,230なら「230」）。初めての1回だけ、全部の桁を入れてください。乗車のたびにもメーターを入れたいときは、「設定」の「メーターを入れるとき」で「乗車・降車のたび」を選びます。</p>
+<p>時刻と、乗車地・降車地の地名は自動で入ります。メーターは出庫・帰庫のときだけです。<strong>出庫メーターは毎回、全部の桁を入れます</strong>（45,230なら「45230」）。乗務ごとに車が変わることがあるためです。その日の帰庫メーターは、下3桁だけ入れれば残りの桁をアプリが補います（「520」なら45,520）。乗車のたびにもメーターを入れたいときは、「設定」の「メーターを入れるとき」で「乗車・降車のたび」を選びます。</p>
 <h2 id="ride">お客様1人を記録する</h2>
 <p>停車してから操作します。数字は、画面の下に出る大きな数字キーで入れます。</p>
 <ol>
@@ -223,7 +223,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>画面を見ながら覚えるときは<a href="zukai.html">図解マニュアル</a>、地図・集計・記録を消すなど、ここにない使い方は<a href="tsukaikata.html">使い方マニュアル</a>を見てください。</p>
 <nav class="others"><a href="zukai.html">図解マニュアル</a><a href="tsukaikata.html">使い方マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v88（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v89（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

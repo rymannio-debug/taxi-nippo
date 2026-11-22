@@ -326,7 +326,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <tr>
 <td>出庫したとき</td>
 <td>出庫</td>
-<td>出庫メーター（下3桁）</td>
+<td>出庫メーター（全部の桁）</td>
 <td>出庫時刻、出庫地点（単体版）</td>
 </tr>
 <tr>
@@ -440,10 +440,11 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <li>高速代：押すと高速代の数字キーになる。金額を入れて「確定」を押すと、料金の数字キーに戻る</li>
 </ul>
 <p>これらを押しても、料金の数字キーは開いたままです。記録すると元に戻ります。</p>
-<h3 id="s37915">メーターは下3桁でよい</h3>
-<p>メーターは車の走行距離計の数字です。45,230 kmなら「230」と入れれば、上の桁は前回の数字からアプリが補います。欄の下に「45,230 km　前回から +12 km」と出るので、その場で確かめられます。</p>
+<h3 id="s37915">メーターは下3桁でよい（出庫は全部の桁）</h3>
+<p>メーターは車の走行距離計の数字です。<strong>出庫メーターだけは、毎回全部の桁を入れます</strong>（45,230 kmなら「45230」）。乗務ごとに違う車に乗ることがあるので、前の日の数字からは補いません。下3桁ほどで入れると「出庫は全部の桁を入れてください」と出て、入れ直しになります。</p>
+<p>その日の帰庫メーターと乗車・降車のメーターは、下3桁でかまいません。45,520 kmなら「520」と入れれば、上の桁はその日の出庫メーター（や直前の読み）からアプリが補います。欄の下に「45,520 km　出庫から +290 km」のように出るので、その場で確かめられます。</p>
 <ul>
-<li>最初の1回だけは、全部の桁を入れる</li>
+<li>出庫メーターを入れずに乗務を始めたときは、その日に最初に入れるメーターを全部の桁で入れる</li>
 <li>乗車時メーターは、前回から60km以内なら3桁目で自動で閉じる。離れているときは「確定」を押す</li>
 <li>全部の桁を打つ人は、4桁目を打った時点でアプリが覚え、自動では閉じなくなる。また3桁で入れると元に戻る</li>
 <li>補われた数字が違うときは、全部の桁を入れ直す</li>
@@ -526,7 +527,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <tbody>
 <tr>
 <td>出庫</td>
-<td>「出庫」「出庫 190」</td>
+<td>「出庫」「出庫 45230」（メーターは全部の数字）</td>
 <td>出庫メーターは？</td>
 </tr>
 <tr>
@@ -754,7 +755,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <h3 id="s42095">出庫</h3>
 <ol>
 <li>出庫したら、下の大きいボタンの「出庫」を押す。出庫時刻が入り、札が「空車」になる</li>
-<li>出庫メーターを聞かれるので、下3桁を入れて「確定」を押す。入れずに閉じてもよい</li>
+<li>出庫メーターを聞かれるので、全部の桁（例：45230）を入れて「確定」を押す。入れずに閉じてもよい</li>
 </ol>
 <p>単体版で位置情報をオンにしていると、出庫・帰庫を押した場所の地名が出庫地点・帰庫地点に入ります。Claude版では「乗務情報・目標」で入れます。前に入れた地点が候補に出るので、営業所なら選ぶだけです。</p>
 <h3 id="s42182">帰庫</h3>
@@ -1670,7 +1671,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v88（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v89（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();
