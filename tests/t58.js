@@ -1,4 +1,4 @@
-// AIに聞く（Claude版だけ）: 単体版には出ない。Claude版では、質問に近いマニュアルの章を Claude に渡し、答えと章へのリンクを出す
+// AIに聞く: Claude版は Claude、単体版はキーがあれば Gemini（無料枠）、なければ近い章を出すだけ。どちらも答えと根拠の章へのリンクを出す
 (async()=>{const {chromium}=require('./pw');const fr=require('./fontroute');const b=await chromium.launch();
 const ok=(c,m)=>console.log((c?'  ✓ ':'  ✗ ')+m);
 const PUB='https://rymannio-debug.github.io/taxi-nippo/manual/';
@@ -18,13 +18,45 @@ async function page(fake){const ctx=await b.newContext({viewport:{width:390,heig
   await p.goto(APP);await p.waitForTimeout(900);return p}
 const open=async p=>{await p.locator('#man-b').tap();await p.waitForTimeout(300)};
 
-console.log('1. 単体版には出ない');
-let p=await page(null);await open(p);
-ok(await p.locator('#ai').isHidden(),'「AIに聞く」は出ない');ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+console.log('1. 単体版: キーがなければ、近い章を出すだけ');
+let p=await page(null);const G=[];
+await p.context().route(/generativelanguage\.googleapis\.com/,async r=>{const u=r.request().url(),k=r.request().headers()['x-goog-api-key'];G.push({u,k,body:r.request().postData()});
+  if(k==='bad')return r.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:{code:400,message:'API key not valid. Please pass a valid API key.',status:'INVALID_ARGUMENT'}})});
+  if(k==='busy')return r.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:{code:429,message:'quota',status:'RESOURCE_EXHAUSTED'}})});
+  if(k==='old'&&/gemini-flash-latest/.test(u))return r.fulfill({status:404,contentType:'application/json',body:'{"error":{"code":404}}'});
+  if(/\/models\?/.test(u))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({models:[{name:'models/gemini-9.0-flash-lite',supportedGenerationMethods:['generateContent']},{name:'models/gemini-9.0-flash',supportedGenerationMethods:['generateContent']},{name:'models/gemini-9.0-flash-image',supportedGenerationMethods:['generateContent']},{name:'models/text-embedding',supportedGenerationMethods:['embedContent']}]})});
+  r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({candidates:[{content:{parts:[{text:'**設定**の「会社の決まり」で入れます。\n[[tsukaikata#co]]'}]},finishReason:'STOP'}]})})});
+await open(p);
+ok(await p.locator('#ai').isVisible(),'「AIに聞く」が出る');
+ok(/設定でGeminiのキー/.test(await p.textContent('#ai-note')),'キーを入れるとAIが答える、と案内する');
+await p.locator('#ai-q').fill('足切りの額はどこで入れるの？');await p.locator('#ai-go').tap();await p.waitForTimeout(800);
+let L=await p.evaluate(()=>[...document.querySelectorAll('#ai-a a')].map(a=>a.getAttribute('href')));
+ok(L.length>=2&&L.length<=4&&L.includes('manual/tsukaikata.html#co')&&!G.length,'近い章を出す（Geminiには送らない）: '+L.join(' '));
+console.log('2. 単体版: 設定でキーを入れる');
+await p.locator('#mv-close').tap();await p.evaluate(()=>{location.hash='#set'});await p.waitForTimeout(400);
+ok(await p.locator('#aiset').isVisible(),'設定に「AIに聞く（Gemini・無料）」');
+await p.locator('#ai-key').fill('bad');await p.locator('#ai-key-save').tap();await p.waitForTimeout(500);
+ok(/使えませんでした/.test(await p.textContent('#ai-key-st'))&&!(await p.evaluate(()=>localStorage.getItem('taxi-nippo-ai-key'))),'使えないキーは保存しない');
+await p.locator('#ai-key').fill('good');await p.locator('#ai-key-save').tap();await p.waitForTimeout(500);
+ok(/保存しました/.test(await p.textContent('#ai-key-st'))&&await p.evaluate(()=>localStorage.getItem('taxi-nippo-ai-key'))==='good','使えるキーは保存する（この端末だけ）');
+ok(G.length===2&&G.every(g=>!/key=/.test(g.u)),'キーはアドレスに入れず、ヘッダーで送る');
+G.length=0;await open(p);await p.locator('#ai-q').fill('足切りの額はどこで入れるの？');await p.locator('#ai-go').tap();await p.waitForTimeout(800);
+let A=await p.evaluate(()=>({t:document.getElementById('ai-a').innerText,L:[...document.querySelectorAll('#ai-a a')].map(a=>a.getAttribute('href'))}));
+ok(/会社の決まり/.test(A.t)&&!/\*\*|\[\[/.test(A.t)&&A.L.length===1&&A.L[0]==='manual/tsukaikata.html#co','Geminiの答えと根拠の章（記号は消す）');
+const sent=G[0]&&JSON.parse(G[0].body).contents[0].parts[0].text;
+ok(sent&&/足切り/.test(sent)&&/\[\[tsukaikata#co\]\]/.test(sent)&&!/85100|5500/.test(sent),'質問とマニュアルだけを送る（記録は送らない）');
+console.log('3. 単体版: 回数の上限・古い名前・消す');
+await p.evaluate(()=>localStorage.setItem('taxi-nippo-ai-key','busy'));await p.locator('#ai-go').tap();await p.waitForTimeout(800);
+ok(/無料で使える回数/.test(await p.textContent('#ai-a'))&&await p.locator('#ai-a a').count()>0,'上限のときは、そう伝えて近い章を出す');
+await p.evaluate(()=>localStorage.setItem('taxi-nippo-ai-key','old'));G.length=0;await p.locator('#ai-go').tap();await p.waitForTimeout(800);
+ok(/会社の決まり/.test(await p.textContent('#ai-a'))&&G.some(g=>/gemini-9\.0-flash:generateContent/.test(g.u)),'名前が使えないときは、使える Flash を選ぶ');
+await p.locator('#mv-close').tap();await p.evaluate(()=>{location.hash='#set'});await p.waitForTimeout(300);
+await p.locator('#ai-key-del').tap();ok(!(await p.evaluate(()=>localStorage.getItem('taxi-nippo-ai-key')))&&(await p.inputValue('#ai-key'))==='','「キーを消す」で消える');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
 
-console.log('2. Claude版: 聞くと、答えと根拠の章へのリンク');
+console.log('4. Claude版: 聞くと、答えと根拠の章へのリンク');
 p=await page('ok');await open(p);
-ok(await p.locator('#ai').isVisible(),'マニュアルの画面のいちばん上に「AIに聞く」');
+ok(await p.locator('#ai').isVisible()&&!(await p.locator('#aiset').isVisible()),'マニュアルの画面のいちばん上に「AIに聞く」（Geminiの設定は出ない）');
 await p.locator('#ai-q').fill('足切りの額はどこで入れるの？');await p.locator('#ai-go').tap();await p.waitForTimeout(1500);
 const a=await p.evaluate(()=>({t:document.getElementById('ai-a').innerText,links:[...document.querySelectorAll('#ai-a a')].map(x=>({h:x.getAttribute('href'),t:x.textContent,tg:x.target}))}));
 ok(/会社の決まり/.test(a.t)&&!/\[\[/.test(a.t),'答えが出て、[[…]] の印は文の中に残らない');
@@ -34,7 +66,7 @@ ok(asked&&/足切り/.test(asked.input)&&/\[\[tsukaikata#co\]\]/.test(asked.inpu
 ok(asked&&asked.o.modelTier==='quick','早く答える設定');
 ok(await p.locator('#ai-go').isEnabled()&&await p.locator('#ai-stop').isHidden(),'終わると「聞く」に戻る');
 
-console.log('3. 止める');
+console.log('5. Claude版: 止める');
 await p.evaluate(()=>{window.__asked=[]});
 await p.context().close();p=await page('slow');await open(p);
 await p.locator('#ai-q').fill('休憩の取り消し');await p.locator('#ai-go').tap();await p.waitForTimeout(500);
@@ -43,12 +75,12 @@ await p.locator('#ai-stop').tap();await p.waitForTimeout(700);
 ok(/止めました/.test(await p.textContent('#ai-a')),'止めると「止めました」');
 ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
 
-console.log('4. 断られたら隠す');
+console.log('6. Claude版: 断られたら隠す');
 p=await page('deny');await open(p);await p.locator('#ai-q').fill('バックアップ');await p.locator('#ai-q').press('Enter');await p.waitForTimeout(600);
 ok(await p.locator('#ai').isHidden(),'使えないと答えが来たら、欄を隠す');
 ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
 
-console.log('5. 小さい画面（SE）');
+console.log('7. 小さい画面（SE）');
 p=await page('ok');await p.setViewportSize({width:320,height:568});await open(p);
 ok(await p.evaluate(()=>{const s=document.querySelector('#mv .sheet');return s.scrollWidth<=s.clientWidth+1}),'横にはみ出さない');
 const hb=await p.evaluate(()=>document.getElementById('ai-go').getBoundingClientRect().height);ok(hb>=44,'「聞く」は押しやすい大きさ '+hb);

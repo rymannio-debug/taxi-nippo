@@ -24,9 +24,10 @@ h=hashlib.sha256(out['index.html'].encode()+open(P('leaflet.js'),'rb').read())
 for f in sorted(out):
     if f.startswith('manual/'):h.update(out[f].encode())
 for f in imgs:h.update(open(P('manual','img',f),'rb').read())
+for f in sorted(os.listdir(P('manual','src'))):h.update(open(P('manual','src',f),'rb').read())
 ver=h.hexdigest()[:10]
 out['manifest.webmanifest']=json.dumps({"name":"タクシー売上日報","short_name":"売上日報","lang":"ja","start_url":"./","scope":"./","display":"standalone","background_color":"#fff3c4","theme_color":"#fff3c4","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}]},ensure_ascii=False,indent=1)
-mfiles=[f for f in sorted(out) if f.startswith('manual/')]+['manual/img/'+f for f in imgs]
+mfiles=[f for f in sorted(out) if f.startswith('manual/')]+['manual/img/'+f for f in imgs]+['manual/src/'+f for f in sorted(os.listdir(P('manual','src'))) if f.endswith('.md')]
 out['sw.js']=open(P('tools','sw.template.js'),encoding='utf8').read().replace('__VER__',ver).replace("'__MANUAL__'",','.join(json.dumps(f) for f in mfiles))
 if '--check' in sys.argv:
     bad=[f for f,t in out.items() if not os.path.exists(P(f)) or open(P(f),encoding='utf8').read()!=t]

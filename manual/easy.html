@@ -50,7 +50,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <li>ホーム画面のアイコンから開く。位置情報とマイクの確認が出たら「許可」を選ぶ</li>
 </ol>
 <p>次からは、いつもホーム画面のアイコンから開いてください。Safariから開くと、記録が別の場所に分かれることがあります。</p>
-<p>わからないときは、アプリの右上の［？ マニュアル］を押します。「いまの画面の説明」を押すと、この手順書や図解マニュアルが、その説明のところで開きます。Claude版では、その画面のいちばん上の「AIに聞く」に質問を打って「聞く」を押すと、マニュアルをもとにAIが答えます。マニュアルは読むだけのページです。見終わったら、左上の［‹ 戻る］か「完了」を押すとアプリに戻ります。</p>
+<p>わからないときは、アプリの右上の［？ マニュアル］を押します。「いまの画面の説明」を押すと、この手順書や図解マニュアルが、その説明のところで開きます。その画面のいちばん上の「AIに聞く」に質問を打って「聞く」を押すと、近い章が出ます。設定でGeminiのキー（無料）を入れると、AIがマニュアルをもとに答えます（<a href="tsukaikata.html#aiset">キーの入れ方</a>）。マニュアルは読むだけのページです。見終わったら、左上の［‹ 戻る］か「完了」を押すとアプリに戻ります。</p>
 <p>氏名と勤務の形は「設定」の「乗務員と勤務」に、会社の決まり（給与の締め日・釣り銭の準備金・歩率・足切り）は「会社の決まり」に、一度だけ入れておきます。どれも入れなくても使え、入れたものだけが計算に使われます。大和自動車交通で働くときは、「給与の計算」で「大和自動車交通」を選び、採用の区分（試採用・本採用）を選ぶだけで、歩率や足切りは入れなくてよくなります。釣り銭の準備金は、帰庫したときの「現金を数える」でも直せます。</p>
 <h2 id="flow">1日の流れ</h2>
 <div class="tw"><table>
@@ -211,6 +211,10 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>拘束時間の上限（日勤13時間・隔日勤務22時間）が近いか超えた。帰庫の準備をする</td>
 </tr>
 <tr>
+<td>「AIに聞く」で「無料で使える回数を超えました」</td>
+<td>Geminiの無料枠の上限。しばらく（長いときは翌日）待つ。出てきた章のボタンでマニュアルを見る</td>
+</tr>
+<tr>
 <td>画面の上に赤い帯「記録を保存できませんでした」</td>
 <td>すぐ帯の「バックアップを保存」を押す。iPhoneの空きを増やしてから開き直す</td>
 </tr>
@@ -219,7 +223,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>画面を見ながら覚えるときは<a href="zukai.html">図解マニュアル</a>、地図・集計・記録を消すなど、ここにない使い方は<a href="tsukaikata.html">使い方マニュアル</a>を見てください。</p>
 <nav class="others"><a href="zukai.html">図解マニュアル</a><a href="tsukaikata.html">使い方マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v82（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v83（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

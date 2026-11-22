@@ -146,7 +146,34 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tbody>
 </table></div>
 <p>帰庫したときの日報、修正画面、設定の「会社の決まり」にも、その説明へのボタンがあります。マニュアルは別の画面で開き、押した説明の見出しへ自動で移ります。マニュアルは読むだけのページで、書き換えはできません（内容の直しはClaudeが行います）。マニュアルの中の青い字を押すと、ほかの章やほかのマニュアルへ移ります。アプリに戻るときは、マニュアルの左上の［‹ 戻る］を押します。iPhoneのホーム画面に置いた版から開いたときは「完了」を押すと戻ります（Safariでアプリのアドレスを開くと、記録の入っていない別の画面になります）。Claude版から開いたときは、［‹ 戻る］でClaude版に戻ります。</p>
-<p><strong>AIに聞く（Claude版だけ）</strong>　［？ マニュアル］の画面のいちばん上に「AIに聞く」の欄があります。「足切りはどこで入れるの？」のように打って「聞く」を押すと、マニュアルをもとにAI（Claude）が短く答え、その下に根拠にした章へのボタンが出ます。押すと、その章の見出しへ移ります。考えるのに数秒かかります。途中でやめるときは「止める」を押します。答えはまちがうこともあるので、章のボタンでマニュアルを確かめてください。あなたのClaudeの利用枠を使います。初めて使うときは、Claudeを使ってよいかの確認が出ます。走行中は使わないでください。単体版（iPhoneのホーム画面の版）には、この欄はありません。</p>
+<p><strong>AIに聞く</strong>　［？ マニュアル］の画面のいちばん上に「AIに聞く」の欄があります。「足切りはどこで入れるの？」のように打って「聞く」を押すと、答えと、根拠にした章へのボタンが出ます。ボタンを押すと、その章の見出しへ移ります。途中でやめるときは「止める」を押します。走行中は使わないでください。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>版</th>
+<th>答え方</th>
+<th>費用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>単体版（キーなし）</td>
+<td>質問に近いマニュアルの章を4つまで出す（AIは使わない。圏外でも使える）</td>
+<td>なし</td>
+</tr>
+<tr>
+<td>単体版（Geminiのキーあり）</td>
+<td>マニュアルをもとにAI（GoogleのGemini）が短く答え、根拠の章を出す</td>
+<td>なし（無料枠。使いすぎると止まるだけ）</td>
+</tr>
+<tr>
+<td>Claude版</td>
+<td>マニュアルをもとにAI（Claude）が短く答え、根拠の章を出す</td>
+<td>あなたのClaudeの利用枠</td>
+</tr>
+</tbody>
+</table></div>
+<p>AIの答えはまちがうこともあるので、章のボタンでマニュアルを確かめてください。Geminiのキーの入れ方は「14. 設定」の「AIに聞く（Gemini）」にあります。</p>
 <h2 id="day">3. 日報の画面の見方</h2>
 <p>いちばん使うのは「日報」の画面です。次に押すボタンは、いつも画面のいちばん下に大きく出ます。画面を下へ動かしても、下のボタンは同じ場所にあります。</p>
 <p>日報の画面の文字は、読みやすさを優先したUD（ユニバーサルデザイン）書体のBIZ UDPゴシックです。時刻・地名・金額は大きく濃くし、今日の流れでは降車地を「→」の下の行に出しています。</p>
@@ -1364,6 +1391,21 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>「このアプリ」に、いま使っている版と番号（例：iPhone版（本番） v80）が出ます。変更の中身は、版の番号ごとに記録しています。本番はiPhoneのホーム画面の版で、Claude版は試し用です。</p>
 <h3 id="s62285">走行中の画面の設定</h3>
 <p>「乗務中の画面」の「走行中の画面」で、「大きく簡単にする」（はじめ）か「いつもの画面のまま」を選びます（3章「走行中の画面」）。この端末だけの設定です。</p>
+<h3 id="aiset">AIに聞く（Gemini）</h3>
+<p>単体版だけの設定です。GoogleのGeminiのキー（無料）を入れると、［？ マニュアル］の「AIに聞く」で、AIがマニュアルをもとに答えるようになります。入れなくても、質問に近い章は出ます。</p>
+<ol>
+<li>パソコンかiPhoneで <a href="https://aistudio.google.com/apikey">Google AI Studio</a> を開き、Googleのアカウントでログインする</li>
+<li>「APIキーを作成」を押し、出てきた文字（AIza…で始まる）をコピーする</li>
+<li>
+<p>アプリの「設定」の「AIに聞く（Gemini・無料）」の欄に貼り付けて、「保存して試す」を押す。「保存しました」と出れば使える</p>
+</li>
+<li>
+<p>料金の登録（クレジットカード）はしないでください。しなければ無料のままで、1日に使える回数を超えたときは止まるだけです（翌日にまた使えます）</p>
+</li>
+<li>キーはこのiPhoneの中だけに残り、バックアップには入りません。機種を変えたら、もう一度入れます</li>
+<li>Geminiに送るのは、質問とマニュアルの文だけです。売上や場所などの記録は送りません。無料枠では、送った内容がGoogleのサービス改善に使われることがあります</li>
+<li>やめるときは「キーを消す」を押します</li>
+</ol>
 <h3 id="backup">バックアップを取る（月に1回）</h3>
 <ol>
 <li>「設定」の「バックアップを保存」を押す</li>
@@ -1581,8 +1623,8 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tr>
 <tr>
 <td>AIに聞く（マニュアルの質問）</td>
-<td>できない</td>
-<td>できる</td>
+<td>近い章を出す。Geminiのキーを入れるとAIが答える（無料）</td>
+<td>Claudeが答える</td>
 </tr>
 </tbody>
 </table></div>
@@ -1628,7 +1670,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v82（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v83（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

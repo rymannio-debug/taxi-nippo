@@ -1021,7 +1021,7 @@ body.driving #stpill,body.driving #toast{display:none!important}
 .mv-a::after{content:"開く ›";flex:none;font-size:calc(13px*var(--fs,1));font-weight:700;color:var(--muted)}
 .mv-docs .mv-a{background:var(--surface);border-width:2px}
 #mv .c-head .btn{flex:0 0 auto;white-space:nowrap;min-height:44px}
-/* AIに聞く (Claude版だけ): 質問とマニュアルの抜き出しを Claude に送り、答えと根拠の章へのリンクを出す */
+/* AIに聞く: 質問とマニュアルの抜き出しを AI (Claude版は Claude、単体版は Gemini) に送り、答えと根拠の章へのリンクを出す */
 .ai textarea{width:100%;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--field);font-size:calc(16px*var(--fs,1));resize:vertical}
 .ai .btnrow{display:flex;gap:8px}
 .ai-a{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:calc(15px*var(--fs,1));line-height:1.65;white-space:normal;overflow-wrap:anywhere}
@@ -1242,6 +1242,14 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <div class="chips" id="fschips" role="group" aria-label="文字の大きさ"><button type="button" class="chip" data-fs="1">標準</button><button type="button" class="chip" data-fs="1.15">大</button><button type="button" class="chip" data-fs="1.3">特大</button></div>
       <span class="disp-n">説明や表の小さい文字が大きくなります。料金や大きいボタンの文字は、はじめから大きいので変わりません。この端末だけの設定です。</span>
     </div>
+    <div class="card" id="aiset" hidden>
+      <b class="disp-h">AIに聞く（Gemini・無料）</b>
+      <span class="disp-n">［？ マニュアル］の「AIに聞く」は、キーがなくても、質問に近いマニュアルの章を出します。GoogleのGeminiのキー（無料）を入れると、AIがマニュアルをもとに答えます。</span>
+      <label class="f">Geminiのキー<input type="password" id="ai-key" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…で始まる文字"></label>
+      <div class="btnrow"><button type="button" class="btn" id="ai-key-del">キーを消す</button><button type="button" class="btn pri" id="ai-key-save">保存して試す</button></div>
+      <span class="disp-n" id="ai-key-st"></span>
+      <span class="disp-n">キーの作り方：パソコンかiPhoneで <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> を開き、Googleのアカウントでログインして「APIキーを作成」を押し、出てきた文字をコピーしてここに貼ります。料金の登録（クレジットカード）はしないでください。しなければ無料のままで、使いすぎたときは止まるだけです。キーはこのiPhoneの中だけに残り、バックアップには入りません。Geminiに送るのは質問とマニュアルの文だけで、記録は送りません。無料枠では、送った内容がGoogleのサービス改善に使われることがあります。</span>
+    </div>
     <div class="card about" id="about">
       <b class="disp-h">このアプリ</b>
       <span id="ab-ver"></span>
@@ -1461,11 +1469,11 @@ body.driving #stpill,body.driving #toast{display:none!important}
 <div class="ov" id="mv" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mv-h">
     <div class="c-head"><div><h3 id="mv-h">マニュアル</h3><span>押すと、マニュアルがその説明のところで開きます（別の画面）。見終わったら、このアプリに戻ってください。</span></div><button type="button" class="btn x" id="mv-close">閉じる</button></div>
-    <div class="mv-sec ai" id="ai" hidden><b>AIに聞く（Claude版だけ）</b>
+    <div class="mv-sec ai" id="ai" hidden><b>AIに聞く</b>
       <textarea id="ai-q" rows="2" maxlength="300" placeholder="例：足切りはどこで入れるの？" aria-label="AIに聞きたいこと"></textarea>
       <div class="btnrow"><button type="button" class="btn" id="ai-stop" hidden>止める</button><button type="button" class="btn pri" id="ai-go">聞く</button></div>
       <div class="ai-a" id="ai-a" aria-live="polite" hidden></div>
-      <small class="ai-note">マニュアルをもとにAI（Claude）が答えます。まちがうこともあるので、下のリンクのマニュアルで確かめてください。あなたのClaudeの利用枠を使います。走行中は使わないでください。</small>
+      <small class="ai-note" id="ai-note"></small>
     </div>
     <div class="mv-sec"><b id="mv-here-h">この画面の説明</b><div class="mv-links" id="mv-here"></div></div>
     <div class="mv-sec"><b>3つのマニュアル</b><div class="mv-docs" id="mv-docs"></div></div>
@@ -2249,7 +2257,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v82',APP_DATE='2026-11-22';
+const APP_VER='v83',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4363,7 +4371,7 @@ function wireDownloads(dl){
       });
     });
 }
-/* AIに聞く (Claude版だけ): マニュアルの原稿 (manual/src/*.md、Claude版と一緒に置く) を章に分け、
+/* AIに聞く: マニュアルの原稿 (manual/src/*.md、Claude版と一緒に置く) を章に分け、
    質問に近い章だけを Claude に渡して答えさせる。答えの [[doc#id]] は、その章へのリンクにする */
 const AI={s:null,secs:null,ctl:null},AIDOC={easy:'かんたん手順書',zukai:'図解マニュアル',tsukaikata:'使い方マニュアル'};
 async function aiSecs(){if(AI.secs)return AI.secs;const out=[];
@@ -4383,25 +4391,67 @@ function aiShow(text,secs,done){const a=$('ai-a');a.hidden=false;a.classList.tog
   const used=[];let h=esc(text||'考えています…').replace(/\[\[(easy|zukai|tsukaikata)#([\w-]+)\]\]/g,(m,d,id)=>{const x=(secs||[]).find(y=>y.doc===d&&y.id===id);if(!x)return '';if(!used.includes(x))used.push(x);return ''}).replace(/\n{2,}/g,'\n').trim().replace(/\n/g,'<br>');
   if(done&&used.length)h+='<div class="ai-src">'+used.map(x=>'<a class="mv-a" href="'+aiLink(x.doc,x.id)+'" target="_blank" rel="noopener"><span><b>'+esc(x.title)+'</b><small>'+AIDOC[x.doc]+'</small></span></a>').join('')+'</div>';
   a.innerHTML=h}
-async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-stop');if(!q||!AI.s){$('ai-q').focus();return}
+/* 単体版: Gemini（Google）の無料枠。キーはこの端末の localStorage だけ（バックアップには入れない）。キーがなければ、近い章を出すだけ */
+const AIKEY='taxi-nippo-ai-key',GEM='https://generativelanguage.googleapis.com/v1beta/';
+const aiKey=()=>{try{return localStorage.getItem(AIKEY)||''}catch(e){return ''}};
+let gemModel='';
+async function gemCall(key,prompt,signal){
+  const ask=m=>fetch(GEM+'models/'+m+':generateContent',{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},
+    body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:2048}})});
+  let m=gemModel||'gemini-flash-latest',r=await ask(m);
+  if(r.status===404){ // 名前が使えないとき: このキーで使えるモデルから Flash を選ぶ
+    const L=await fetch(GEM+'models?pageSize=200',{signal,headers:{'x-goog-api-key':key}});
+    if(L.ok){const j=await L.json(),ok=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')&&/flash/.test(x.name)&&!/image|tts|audio|live|preview|exp/.test(x.name)).map(x=>x.name.replace(/^models\//,'')).sort().reverse();
+      if(ok.length){m=ok.find(x=>!/lite/.test(x))||ok[0];r=await ask(m)}}}
+  if(!r.ok){let j={};try{j=await r.json()}catch(e){}const msg=((j.error||{}).message||'')+' '+((j.error||{}).status||'');
+    const e=new Error(msg);e.code=r.status===429?'rate_limited':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
+  gemModel=m;const j=await r.json(),c=(j.candidates||[])[0];
+  const t=c&&c.content&&(c.content.parts||[]).map(x=>x.text||'').join('').trim();
+  if(!t){const e=new Error('empty');e.code=c&&c.finishReason==='SAFETY'?'refused':'empty_completion';throw e}
+  return t}
+function aiNote(){const n=$('ai-note');if(!n)return;
+  n.innerHTML=!SOLO?'マニュアルをもとにAI（Claude）が答えます。まちがうこともあるので、下のボタンのマニュアルで確かめてください。あなたのClaudeの利用枠を使います。走行中は使わないでください。'
+   :aiKey()?'マニュアルをもとにAI（Gemini・無料枠）が答えます。まちがうこともあるので、下のボタンのマニュアルで確かめてください。走行中は使わないでください。'
+   :'いまは、質問に近いマニュアルの章を出します。<a href="#set" id="ai-to-set">設定でGeminiのキー（無料）を入れる</a>と、AIが答えます。走行中は使わないでください。'}
+function aiList(secs,head){const a=$('ai-a');a.hidden=false;a.classList.remove('wait');
+  a.innerHTML=esc(head)+(secs.length?'<div class="ai-src">'+secs.slice(0,4).map(x=>'<a class="mv-a" href="'+aiLink(x.doc,x.id)+'" target="_blank" rel="noopener"><span><b>'+esc(x.title)+'</b><small>'+AIDOC[x.doc]+'</small></span></a>').join('')+'</div>':'')}
+async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-stop');if(!q){$('ai-q').focus();return}
+  const key=SOLO?aiKey():'';if(!SOLO&&!AI.s)return;
   go.disabled=true;stop.hidden=false;aiShow('',null,false);let secs=[];
   try{secs=aiPick(q,await aiSecs())}catch(e){aiShow('マニュアルを読み込めませんでした。上の「3つのマニュアル」から開いてください。',null,true);go.disabled=false;stop.hidden=true;return}
+  if(SOLO&&!key){aiList(secs,secs.length?'近いマニュアルの章です。押すと、その見出しへ移ります。':'近い章が見つかりませんでした。言葉を変えるか、下の「3つのマニュアル」から探してください。');go.disabled=false;stop.hidden=true;return}
   const here=manHere().map(k=>MS[k][2]).join('、'),scr={'#list':'一覧','#month':'月集計','#year':'年集計','#map':'地図','#set':'設定'}[location.hash]||'日報';
   const prompt='あなたはスマホアプリ「タクシー売上日報」のヘルプ係です。タクシー運転手の質問に、下の「マニュアルの抜き出し」だけを根拠にして日本語で答えてください。\n'
-   +'決まり:\n- やさしい言葉で、3〜7行。手順は 1. 2. のように番号を付ける。ボタンや欄の名前はマニュアルの表記どおり「」で書く。\n- 最後の行に、根拠にした節の印を [[easy#ride]] の形で1〜3個だけ書く（抜き出しにある印だけ）。\n- 抜き出しに答えがないときは「マニュアルには書かれていません」と書き、近い節の印を示す。マニュアルにない操作や機能を作らない。\n- 走行中に画面を操作することは勧めない。\n\n'
+   +'決まり:\n- やさしい言葉で、3〜7行。手順は 1. 2. のように番号を付ける。ボタンや欄の名前はマニュアルの表記どおり「」で書く。太字などの記号（** や #）は使わない。\n- 最後の行に、根拠にした節の印を [[easy#ride]] の形で1〜3個だけ書く（抜き出しにある印だけ）。\n- 抜き出しに答えがないときは「マニュアルには書かれていません」と書き、近い節の印を示す。マニュアルにない操作や機能を作らない。\n- 走行中に画面を操作することは勧めない。\n\n'
    +'いま開いている画面: '+scr+'（この画面に合う説明: '+here+'）\n質問: '+q+'\n\n--- マニュアルの抜き出し ---\n'
    +(secs.length?secs.map(x=>'[['+x.doc+'#'+x.id+']] '+AIDOC[x.doc]+' › '+x.title+'\n'+x.text.trim().slice(0,2500)).join('\n\n'):'（質問に近い節が見つかりませんでした）');
-  AI.ctl=new AbortController();
-  try{const r=await AI.s(prompt,{modelTier:'quick',signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true)}
-  catch(e){const c=e&&e.code;
-    if(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared'){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
-    else aiShow((e&&e.text?e.text+'\n\n':'')+({cancelled:'止めました。',rate_limited:'いまは混み合っています。少し待ってからもう一度押してください。',prompt_too_large:'質問を短くしてください。'}[c]||'答えを出せませんでした。もう一度押すか、下のマニュアルから探してください。'),secs,true)}
-  finally{AI.ctl=null;go.disabled=false;stop.hidden=true}}
+  AI.ctl=new AbortController();const to=SOLO?setTimeout(()=>{AI.timeout=true;AI.ctl&&AI.ctl.abort()},30000):0;AI.timeout=false;
+  try{
+    if(SOLO){const t=await gemCall(key,prompt,AI.ctl.signal);aiShow(t.replace(/\*\*/g,''),secs,true)}
+    else{const r=await AI.s(prompt,{modelTier:'quick',signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true)}}
+  catch(e){const c=e&&(e.code||(e.name==='AbortError'?(AI.timeout?'timeout':'cancelled'):navigator.onLine===false?'offline':SOLO?'network':''));
+    if(!SOLO&&(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared')){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
+    else{const m={cancelled:'止めました。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',
+      prompt_too_large:'質問を短くしてください。',bad_key:'Geminiのキーが使えませんでした。設定の「AIに聞く」でキーを確かめてください。',timeout:'答えが返ってきませんでした。',offline:'電波がないので、AIに聞けません。',network:'Geminiにつながりませんでした。'}[c]||'答えを出せませんでした。';
+      if(SOLO&&c!=='cancelled')aiList(secs,m+(secs.length?'近いマニュアルの章です。':''));
+      else aiShow((e&&e.text?e.text+'\n\n':'')+m+(c==='cancelled'?'':' 下のマニュアルから探してください。'),secs,true)}}
+  finally{clearTimeout(to);AI.ctl=null;go.disabled=false;stop.hidden=true}}
 $('ai-go').addEventListener('click',aiAsk);
 $('ai-stop').addEventListener('click',()=>{if(AI.ctl)AI.ctl.abort()});
 $('ai-q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();aiAsk()}});
+$('ai-note').addEventListener('click',e=>{if(e.target.id==='ai-to-set'){e.preventDefault();closeMan();location.hash='#set';setTimeout(()=>$('aiset').scrollIntoView({block:'start'}),80)}});
+if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();aiNote();
+  const st=t=>{$('ai-key-st').textContent=t};st(aiKey()?'キーが入っています。':'キーは入っていません（近い章を出すだけ）。');
+  $('ai-key-save').addEventListener('click',async()=>{const k=$('ai-key').value.trim();if(!k){st('キーを貼り付けてから押してください。');return}
+    st('確かめています…');$('ai-key-save').disabled=true;
+    try{await gemCall(k,'「はい」とだけ答えてください。',undefined);try{localStorage.setItem(AIKEY,k)}catch(e){}st('保存しました。［？ マニュアル］の「AIに聞く」で使えます。')}
+    catch(e){if(e&&e.code==='rate_limited'){try{localStorage.setItem(AIKEY,k)}catch(x){}st('保存しました（いまは無料で使える回数の上限なので、しばらくしてから使えます）。')}
+      else st(e&&e.code==='bad_key'?'このキーは使えませんでした。コピーした文字を確かめてください。保存していません。':navigator.onLine===false?'電波がないので確かめられませんでした。保存していません。':'Geminiにつながりませんでした。保存していません。')}
+    finally{$('ai-key-save').disabled=false;aiNote()}});
+  $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
+}
 if(window.claude&&window.claude.use){
-  window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;$('ai').hidden=false}).catch(()=>{});
+  window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false}).catch(()=>{});
   window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false}).catch(()=>{});
   window.claude.use('downloads').then(dl=>{if(dl)wireDownloads(dl)}).catch(()=>{});
   window.claude.use('dictation').then(d=>{
