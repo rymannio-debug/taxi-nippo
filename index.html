@@ -4404,7 +4404,7 @@ async function gemCall(key,prompt,signal){
     if(L.ok){const j=await L.json(),ok=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')&&/flash/.test(x.name)&&!/image|tts|audio|live|preview|exp/.test(x.name)).map(x=>x.name.replace(/^models\//,'')).sort().reverse();
       if(ok.length){m=ok.find(x=>!/lite/.test(x))||ok[0];r=await ask(m)}}}
   if(!r.ok){let j={};try{j=await r.json()}catch(e){}const msg=((j.error||{}).message||'')+' '+((j.error||{}).status||'');
-    const e=new Error(msg);e.code=r.status===429?'rate_limited':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
+    const e=new Error(msg);e.status=r.status;e.code=r.status===429?'rate_limited':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
   gemModel=m;const j=await r.json(),c=(j.candidates||[])[0];
   const t=c&&c.content&&(c.content.parts||[]).map(x=>x.text||'').join('').trim();
   if(!t){const e=new Error('empty');e.code=c&&c.finishReason==='SAFETY'?'refused':'empty_completion';throw e}
@@ -4446,7 +4446,7 @@ if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();
     st('確かめています…');$('ai-key-save').disabled=true;
     try{await gemCall(k,'「はい」とだけ答えてください。',undefined);try{localStorage.setItem(AIKEY,k)}catch(e){}st('保存しました。［？ マニュアル］の「AIに聞く」で使えます。')}
     catch(e){if(e&&e.code==='rate_limited'){try{localStorage.setItem(AIKEY,k)}catch(x){}st('保存しました（いまは無料で使える回数の上限なので、しばらくしてから使えます）。')}
-      else st(e&&e.code==='bad_key'?'このキーは使えませんでした。コピーした文字を確かめてください。保存していません。':navigator.onLine===false?'電波がないので確かめられませんでした。保存していません。':'Geminiにつながりませんでした。保存していません。')}
+      else{const d=' （くわしく: '+String((e&&(e.status?'HTTP '+e.status+' ':'')+(e.name||'')+' '+(e.message||''))||'').trim().slice(0,160)+'）';st((e&&e.code==='bad_key'?'このキーは使えませんでした。コピーした文字を確かめてください。保存していません。':navigator.onLine===false?'電波がないので確かめられませんでした。保存していません。':'Geminiにつながりませんでした。保存していません。')+d)}}
     finally{$('ai-key-save').disabled=false;aiNote()}});
   $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
 }
