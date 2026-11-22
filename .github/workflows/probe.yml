@@ -1,0 +1,29 @@
+# 調べ用（手で動かす）: WebKit で tests/probe.js などを走らせて、出力を見る
+name: 調べ用
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: 走らせるファイル（tests/ の中）
+        default: probe
+      browser:
+        default: webkit
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ inputs.browser }}
+      - run: sudo apt-get install -y fonts-noto-cjk
+      - run: |
+          node tests/serve.js > /tmp/port & sleep 2
+          export APP_URL="http://127.0.0.1:$(cat /tmp/port)/index.html"
+          BROWSER=${{ inputs.browser }} node tests/${{ inputs.file }}.js || true
+          MOBILE=1 BROWSER=${{ inputs.browser }} node tests/${{ inputs.file }}.js || true
+        env:
+          TZ: Asia/Tokyo
