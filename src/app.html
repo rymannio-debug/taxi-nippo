@@ -3697,7 +3697,8 @@ function npOpen(f){
 function npClose(){npF=null;npPayOff();$('np').hidden=true;document.body.classList.remove('np-open');syncBar()}
 document.addEventListener('focusin',e=>{if(e.target&&NP[e.target.id])npOpen(e.target)});
 document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(!(a&&NP[a.id]))npClose();else if(a!==npF)npOpen(a)},40));
-$('np').addEventListener('pointerdown',e=>e.preventDefault());
+/* keep the field focused while a key is pressed. A finger's pointerdown is left alone: cancelling it stops the tap's click in some WebKit builds; the mousedown that follows is cancelled instead */
+$('np').addEventListener('pointerdown',e=>{if(e.pointerType!=='touch')e.preventDefault()});
 $('np').addEventListener('mousedown',e=>e.preventDefault());
 /* the row over the fare keys: 迎車 on/off, 人数 1→2→…→5→1, 高速代 opens its keys and comes back to the fare */
 function npX(){const x=$('np-xr');if(!x)return;const on=!!npF&&npF.id==='p-fare'&&!npPayOn;x.hidden=!on;if(!on)return;
@@ -4074,7 +4075,7 @@ $('sumbar').addEventListener('click',()=>{if(!ui.mbig){ui.mbig=true;saveUi();ren
 $('p-toll').addEventListener('input',()=>{const v=$('p-toll').value.replace(/\D/g,'');xo.toll=v?+v:0;layoutCmp();syncBar()});
 $('p-toll').addEventListener('blur',()=>{renderX();syncBar()});
 /* the buttons keep the number pad open: the fare stays in focus while 2名 or 迎車 is pressed */
-['pointerdown','mousedown'].forEach(ev=>$('xrow').addEventListener(ev,e=>{if(e.target.closest('button'))e.preventDefault()}));
+['pointerdown','mousedown'].forEach(ev=>$('xrow').addEventListener(ev,e=>{if(e.target.closest('button')&&!(ev==='pointerdown'&&e.pointerType==='touch'))e.preventDefault()}));
 $('xrow').addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(!b)return;
   if(b.dataset.x==='mukae')xo.mukae=!curMukae();else xo.pax=Math.min(9,Math.max(1,curPax()+(+b.dataset.x)));
   renderX();layoutCmp();syncBar();if(npF)npRender()});

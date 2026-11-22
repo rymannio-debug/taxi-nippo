@@ -1,7 +1,7 @@
 /* Offline support. The page itself is fetched fresh from the network whenever there is a signal (so an update shows on the
    next open), and the saved copy is used only when the network fails. Other files are served from the phone and refreshed in the
    background. Every network fetch skips the browser's own HTTP cache, so an old copy is never saved as the new one. */
-const CACHE='taxi-nippo-e26521c0af';
+const CACHE='taxi-nippo-f3bccf5892';
 const FILES=['./','index.html','manifest.webmanifest','icon-180.png','icon-192.png','leaflet.js','leaflet.css'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('taxi-nippo-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
