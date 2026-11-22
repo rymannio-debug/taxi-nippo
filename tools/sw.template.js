@@ -2,7 +2,7 @@
    next open), and the saved copy is used only when the network fails. Other files are served from the phone and refreshed in the
    background. Every network fetch skips the browser's own HTTP cache, so an old copy is never saved as the new one. */
 const CACHE='taxi-nippo-__VER__';
-const FILES=['./','index.html','manifest.webmanifest','icon-180.png','icon-192.png','leaflet.js','leaflet.css'];
+const FILES=['./','index.html','manifest.webmanifest','icon-180.png','icon-192.png','leaflet.js','leaflet.css','__MANUAL__'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('taxi-nippo-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 const fresh=r=>fetch(new Request(r,{cache:'no-cache'}));

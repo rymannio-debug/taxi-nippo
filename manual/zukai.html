@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#ffd23f"><title>図解マニュアル｜タクシー売上日報</title><style>:root{--bg:#fff8e1;--card:#fffdf6;--ink:#1f1c15;--mute:#5d5546;--line:#2a261d;--soft:#e9dfc4;--acc:#ffd23f;--link:#0b5cad;--hit:#fff1a8}
+@media (prefers-color-scheme:dark){:root{--bg:#1f1c15;--card:#2a261d;--ink:#f5eedc;--mute:#c9bfa6;--line:#8a7f66;--soft:#4a4334;--acc:#ffd23f;--link:#8cc4ff;--hit:#4d4520}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.75 "Hiragino Sans","BIZ UDPGothic","Noto Sans JP",system-ui,sans-serif;overflow-wrap:anywhere}
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:8px 16px;padding-top:max(8px,env(safe-area-inset-top));background:var(--acc);color:#1f1c15;border-bottom:3px solid #1f1c15}
+.bar a.back{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:2px solid #1f1c15;border-radius:12px;background:#fff;color:#1f1c15;font-weight:700;text-decoration:none;white-space:nowrap}
+.bar .t{font-weight:700;font-size:15px;line-height:1.3;min-width:0}
+main{max-width:760px;margin:0 auto;padding:12px 16px 40px}
+h1{font-size:26px;line-height:1.35;margin:14px 0 6px}
+h2{font-size:22px;line-height:1.4;margin:36px 0 10px;padding:6px 12px;border-left:8px solid var(--acc);background:var(--card);border-radius:6px}
+h3{font-size:19px;margin:26px 0 8px}
+h4{font-size:17px;margin:20px 0 6px}
+h2,h3,h4{scroll-margin-top:84px}
+:target{animation:hit 2.4s ease-out}
+@keyframes hit{0%,40%{background:var(--hit)}100%{}}
+a{color:var(--link)}
+p,li{margin:.5em 0}
+ol,ul{padding-left:1.6em}
+img{display:block;max-width:100%;height:auto;margin:14px auto;border:2px solid var(--line);border-radius:10px;background:#fff}
+.tw{overflow-x:auto;margin:12px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px;line-height:1.55;background:var(--card)}
+th,td{border:1px solid var(--soft);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft)}
+.ro.hint{position:sticky;top:64px;z-index:4;margin:0 16px;background:var(--hit);color:var(--ink)}
+.ro{font-size:14px;color:var(--mute);background:var(--card);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;margin:10px 0}
+details.toc{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:4px 14px;margin:14px 0}
+details.toc summary{min-height:44px;display:flex;align-items:center;font-weight:700;cursor:pointer}
+details.toc ol{list-style:none;padding:0;margin:4px 0 10px}
+details.toc li{margin:0}
+details.toc a{display:block;padding:9px 4px;border-top:1px solid var(--soft);text-decoration:none}
+.others{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 0}
+.others a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:2px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;font-weight:700}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0;font-weight:700}
+.flow span{padding:8px 12px;border:2px solid var(--line);border-radius:10px;background:var(--card)}
+.flow .loop{border-style:dashed}
+.flow small{font-weight:400;color:var(--mute)}
+footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14px;border-top:1px solid var(--soft)}</style></head><body>
+<header class="bar"><a class="back" id="back" href="#" role="button">‹ 戻る</a><span class="t">図解マニュアル</span></header>
+<p class="ro hint" id="backhint" hidden>iPhoneのホーム画面のアプリから開いたときは、左上か下の「完了」を押すと、アプリに戻ります。ほかの画面で開いたときは、この画面（タブ）を閉じてください。</p>
+<main>
+<h1>タクシー売上日報 図解マニュアル</h1><p class="ro">このページは読むだけのマニュアルです。書き換えはできません（内容の直しはClaudeが行います）。青い字を押すと、その場所へ移ります。</p><details class="toc"><summary>目次（押すとその章へ）</summary><ol><li><a href="#day">0. 日報の画面</a></li><li><a href="#flow">1. 1日の流れ</a></li><li><a href="#ride">2. ボタンで1件を記録する</a></li><li><a href="#voice">3. 声で記録する</a></li><li><a href="#check">4. 記録前の確認</a></li><li><a href="#fix">5. 今日の流れと直し方</a></li><li><a href="#kiko">6. 帰庫したら</a></li><li><a href="#look">7. 振り返りの画面</a></li><li><a href="#set">8. 設定</a></li><li><a href="#trouble">9. 困ったとき早見表</a></li></ol></details>
+<p>このマニュアルは、実際の画面に赤い番号を付けて説明します。上から順に見ていけば、1日分の操作がひととおりわかります。</p>
+<p><strong>アプリとの行き来</strong>　アプリの右上の［？ マニュアル］を押すと、3つのマニュアルと、いま開いている画面の説明が出ます。説明を押すと、このマニュアルがその章の見出しで開きます。アプリに戻るときは、左上の［‹ 戻る］を押します（iPhoneのホーム画面の版から開いたときは「完了」）。</p>
+<h2 id="day">0. 日報の画面</h2>
+<p>いちばん使う「日報」の画面です。いちばん下の 8 と 9 だけ覚えれば、ほかのボタンを探さなくても記録できます。</p>
+<p><img alt="日報の画面。番号1〜9の場所" src="img/z-day.webp" width="488" height="1046" decoding="async"></p>
+<ol>
+<li><strong>画面の切り替え</strong>　日報・一覧・月集計・年集計・地図・設定。右上の［？ マニュアル］で、いま開いている画面の説明を開ける</li>
+<li><strong>日付</strong>　‹ › で前後の日へ</li>
+<li><strong>営収</strong>　その日の売上と回数。黒い帯に黄色の数字。目標を決めていれば、目標までの残りも出る</li>
+<li><strong>乗務のカード</strong>　出庫前・乗務中・帰庫済みと、出庫の時刻とメーター、拘束時間（上限が近づくと黄色、超えると赤）</li>
+<li><strong>いまの状態</strong>　太い線で囲んだ札と、次にすること</li>
+<li><strong>メーター</strong>　空車中は乗車時メーターの欄だけ（下3桁でよい）。設定が「乗車・降車のたび」のときだけ出る</li>
+<li><strong>文字で入れる・料金から入れる</strong>　ふだんたたんである料金や「話した内容」の欄を開く</li>
+<li><strong>次に押すボタン</strong>　出庫 → 乗車 → 降車 → 料金へ と順に変わる。上の小さい字は、いまの状態</li>
+<li><strong>休憩・話す</strong>　押せないときは薄くなる。帰庫は、話すの隣で押し間違えないように④のカードに置いている。画面の小さいiPhone（SE・8）では、休憩｜乗車｜話す が1列に並ぶ</li>
+</ol>
+<h3 id="states">状態ごとの下のボタン</h3>
+<p>下の大きいボタンは、いまの状態に合わせて文字と色が変わります。押せない小さいボタンは薄くなります。</p>
+<p><img alt="状態ごとの下のボタン" src="img/z-states.webp" width="800" height="765" decoding="async"></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>いま</th>
+<th>大きいボタン</th>
+<th>押すと</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>出庫前</td>
+<td>出庫（緑）</td>
+<td>出庫メーターを聞かれる</td>
+</tr>
+<tr>
+<td>空車</td>
+<td>乗車（緑）</td>
+<td>乗車地と時刻が入る</td>
+</tr>
+<tr>
+<td>乗車中</td>
+<td>降車（赤）</td>
+<td>降車地と時刻が入る</td>
+</tr>
+<tr>
+<td>降車済み</td>
+<td>料金へ（紫）</td>
+<td>料金の数字キーが開く</td>
+</tr>
+<tr>
+<td>休憩中</td>
+<td>休憩終了（だいだい色）</td>
+<td>休憩が終わる</td>
+</tr>
+<tr>
+<td>帰庫済み</td>
+<td>乗車（灰色）</td>
+<td>「この日報は帰庫済みです」と確認が出る</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="flow">1. 1日の流れ</h2>
+<p>出庫から帰庫までのあいだ、乗車から記録までをお客様ごとにくり返します。押すボタンも話す言葉も、この順番です。</p>
+<div class="flow"><span>出庫</span><b>→</b><span class="loop">乗車 → 降車 → 料金・支払い（お客様ごとにくり返す）<br><small>あいだに休憩</small></span><b>→</b><span>帰庫</span></div>
+
+<div class="tw"><table>
+<thead>
+<tr>
+<th>場面</th>
+<th>ボタンで</th>
+<th>声で</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>出庫した</td>
+<td>下の「出庫」→ メーター</td>
+<td>「出庫 190」</td>
+</tr>
+<tr>
+<td>乗せた</td>
+<td>下の「乗車」（「乗車・降車のたび」の設定なら → メーター）</td>
+<td>「乗車 230」</td>
+</tr>
+<tr>
+<td>降ろした</td>
+<td>下の「降車」→ 料金（「乗車・降車のたび」の設定なら先にメーター）</td>
+<td>「降車 236 2400円 カード」</td>
+</tr>
+<tr>
+<td>記録する</td>
+<td>数字キーの右の支払方法（押すと記録）</td>
+<td>「はい」</td>
+</tr>
+<tr>
+<td>休む</td>
+<td>下の［休憩］→「休憩終了」</td>
+<td>「休憩」「休憩終わり」</td>
+</tr>
+<tr>
+<td>帰庫した</td>
+<td>「乗務中」の［帰庫］ → メーター → メーターの集計を写す</td>
+<td>「帰庫 290」</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ride">2. ボタンで1件を記録する</h2>
+<p>画面のいちばん下の大きなボタンを、出てくる順に押していくだけです。数字は、画面の下に出る大きな数字キーで入れます。</p>
+<h3 id="ride-on">① 乗せたら「乗車」</h3>
+<p>緑の「乗車」を押すと、乗車地と時刻が自動で入ります。設定が「乗車・降車のたび」のときは数字キーが開くので、メーターの下3桁を入れます。3桁目で自動で閉じるので、ふだんは「確定」を押す必要はありません。はじめの設定（出庫・帰庫のときだけ）では、数字キーは開きません。</p>
+<p><img alt="乗車を押すとメーターの数字キーが開く" src="img/z-meter.webp" width="568" height="1047" decoding="async"></p>
+<ol>
+<li>入れている欄（乗車時メーター）</li>
+<li>入れた数字と、補った全部の桁</li>
+<li>「確定」。前回から大きく離れているときや、全部の桁を打つときに押す</li>
+</ol>
+<p>上の図は「乗車・降車のたび」の設定のときの画面です。数字キーの右上の「毎回は入れない」を押すと、「出庫・帰庫のときだけ」に戻ります。前回から大きく離れた数字を入れると、赤字で「離れすぎていませんか？」と出ます。下3桁の打ち間違いなので、数字を確かめます。</p>
+<h3 id="ride-off">② 降ろしたら「降車」、料金、支払い</h3>
+<p>下のボタンは赤い「降車」に変わっています。押すと料金の数字キーが開きます（「乗車・降車のたび」の設定では、先に降車メーターを3桁入れます）。料金は「24」「00」で ¥2,400 になります。料金の数字キーには「確定」がなく、右の列が支払方法です。支払いを押すと、料金が決まってそのまま記録されます。</p>
+<p><img alt="料金の数字キー。右の列が支払方法" src="img/z-fare.webp" width="568" height="645" decoding="async"></p>
+<ol>
+<li>料金の表示</li>
+<li>迎車・人数・高速代（下の③）</li>
+<li>いちばんよく使う支払い。押すとそのまま記録</li>
+<li>2番目によく使う支払い</li>
+<li>「その他の支払い」。電子マネー・QR決済・チケットと、配車アプリ（GO・Uber・DiDi・S.RIDE）から選ぶ。「料金に戻る」「記録せずに閉じる」もここ</li>
+</ol>
+<h3 id="extras">③ 2名・迎車・高速代は、支払いの前に</h3>
+<p>料金の数字キーのいちばん上の段で入れます。数字キーに隠れないので、画面を動かさずに押せます。</p>
+<p><img alt="人数・迎車・高速代のボタンと支払いのキー" src="img/z-extras.webp" width="568" height="642" decoding="async"></p>
+<ol>
+<li>迎車（押すと黄色。もう一度押すと消える）</li>
+<li>人数（押すたびに 1名→2名→…→5名→1名）</li>
+<li>高速代（押すと高速代の数字キー。「確定」で料金の数字キーに戻る。料金には入れない）</li>
+<li>最後に支払いを押すと、まとめて記録</li>
+</ol>
+<h2 id="voice">3. 声で記録する</h2>
+<p>いちばん下の真ん中の［話す］を押して、ひとこと言います。足りないものはアプリが声で聞いてきます。</p>
+<h3>① 話す</h3>
+<p>押すとすぐ聞き取りが始まり、話している言葉が大きく出ます。話し終わると約2秒で自動で止まります。</p>
+<p><img alt="聞き取っている画面" src="img/z-listen.webp" width="568" height="524" decoding="async"></p>
+<ol>
+<li>聞いているあいだは赤いマイク</li>
+<li>話している言葉</li>
+<li>すぐ止めたいときは「話し終わった」</li>
+</ol>
+<h3>② 聞いて、見て、「はい」</h3>
+<p>聞き取った内容が大きく出て、「2400円、カード。記録しますか」と読み上げます。「はい」と言うか「これで記録」を押します。</p>
+<p><img alt="聞き取った結果と記録ボタン" src="img/z-result.webp" width="568" height="941" decoding="async"></p>
+<ol>
+<li>料金（違うときは「直す」）</li>
+<li>支払方法（その場で押して変えられる）</li>
+<li>「これで記録」</li>
+<li>声で答える（「はい」「カード」「3000円」など）</li>
+</ol>
+<h3>③ 足りないときは聞かれる</h3>
+<p>「降車」とだけ言うと、「降車メーターは？」「料金は？」「支払いは？」と順に聞かれます。そのまま答えます。聞き取りが始まらないときは「🎤 答える」を押してから答えます。</p>
+<p><img alt="アプリが「降車メーターは？」と聞いている画面" src="img/z-ask.webp" width="568" height="524" decoding="async"></p>
+<ol>
+<li>アプリからの質問</li>
+<li>「🎤 答える」</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>言いたいこと</th>
+<th>話す例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>記録してよい</td>
+<td>「はい」「記録」</td>
+</tr>
+<tr>
+<td>支払・料金を直す</td>
+<td>「カード」「3000円」</td>
+</tr>
+<tr>
+<td>メーターを入れない</td>
+<td>「なし」</td>
+</tr>
+<tr>
+<td>やめる</td>
+<td>「いいえ」「やめる」</td>
+</tr>
+<tr>
+<td>直前の記録を直す</td>
+<td>「さっきのはカード」「取り消し」</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="drive">④ 走ると画面が変わる</h3>
+<p>乗務中に車が走りだすと、画面が大きく簡単になります（GPSの速さで判断。iPhoneのホーム画面の版だけ）。走行中に画面を見続けたり操作したりすることは、法律で禁じられています。止まると、いつもの画面に戻ります。</p>
+<p><img alt="走行中の画面。番号1〜4の場所" src="img/z-drive.webp" width="420" height="899" decoding="async"></p>
+<ol>
+<li><strong>いまの状態</strong>　空車・乗車中・休憩中を、大きな札で</li>
+<li><strong>今日の営収</strong></li>
+<li><strong>話す</strong>　走行中に使えるのはこれだけ。声で記録し、結果は読み上げで確かめる</li>
+<li><strong>運転していない</strong>　同乗しているときだけ。押すと、15分はこの画面を出さない</li>
+</ol>
+<p>打ちかけの料金などは消えずに残っていて、止まってから続きを入れられます。いつもの画面のままにしたいときは、設定の「走行中の画面」で切り替えます。</p>
+<h2 id="check">4. 記録前の確認</h2>
+<p>入れ忘れがあると、記録する前に「記録前の確認」が出ます。黄色の ⚠ を押すと、その欄へ移って直せます。漏れがなければ、この画面は出ずにすぐ記録されます。</p>
+<p><img alt="記録前の確認の一覧" src="img/z-check.webp" width="568" height="1214" decoding="async"></p>
+<ol>
+<li>⚠ 入っていない、またはおかしい項目。押すと直せる</li>
+<li>✓ 入っている項目。－ は任意で、空でもかまわない</li>
+<li>「戻って直す」または「このまま記録」</li>
+</ol>
+<h2 id="fix">5. 今日の流れと直し方</h2>
+<p>日報の画面の下の方には、その日の動きが上から時刻の順に並びます。行を押すと、その記録を直せます。</p>
+<p><img alt="今日の流れ。出庫・乗車・休憩・いまここ" src="img/z-timeline.webp" width="568" height="1028" decoding="async"></p>
+<ol>
+<li><strong>出庫</strong>　押すと「乗務情報・目標」で時刻やメーターを直せる</li>
+<li><strong>乗車</strong>　押すとその記録の修正画面が開く</li>
+<li><strong>休憩</strong>　押すと休憩の時刻を直せる</li>
+<li><strong>いまここ</strong>　いまの状態。空車なら空車の時間が出る（1時間を超えると「1時間20分」のように出る）。3時間を超えると「帰庫を忘れていませんか？」と出る。帰庫すると、いちばん下は「帰庫」になる</li>
+</ol>
+<h3 id="edit">修正画面</h3>
+<p>乗車の行を押すと開きます。直したら「保存」を押します。</p>
+<p><img alt="乗車記録の修正画面" src="img/z-edit.webp" width="568" height="904" decoding="async"></p>
+<ol>
+<li>料金と支払方法</li>
+<li>乗車地と降車地</li>
+<li>乗車時刻と降車時刻</li>
+<li>人数（［−］［＋］）と高速代</li>
+<li>「その他」。距離・メーター・迎車・客層・きっかけ・天気・メモが開く</li>
+<li>「削除」（2回押す）・「閉じる」・「保存」</li>
+</ol>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>こんなとき</th>
+<th>こうする</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>記録した直後</td>
+<td>画面の上に出る「取り消す」を2回（1回目は確認）。直すだけなら「直す」</td>
+</tr>
+<tr>
+<td>直前の記録を声で直す</td>
+<td>「さっきのはカード」→「はい」か「修正する」</td>
+</tr>
+<tr>
+<td>前の記録を直す</td>
+<td>「今日の流れ」でその行を押す → 直して「保存」</td>
+</tr>
+<tr>
+<td>「乗車」「降車」を押し間違えた</td>
+<td>状態の札の下の「取り消す」</td>
+</tr>
+<tr>
+<td>乗車を続けて2回押した</td>
+<td>2秒以内の2回目は自動で無視される</td>
+</tr>
+<tr>
+<td>帰庫したあとに乗せた</td>
+<td>「乗車」→「帰庫を取り消して乗車」</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="kiko">6. 帰庫したら</h2>
+<p>上の「乗務中」のカードの［帰庫］を押して帰庫メーターを入れると、その日の日報が自動で開きます。タクシーメーターの集計を写して、上から順に確かめます。</p>
+<p><img alt="帰庫後に開く日報。番号1〜6の場所" src="img/z-kiko.webp" width="568" height="1713" decoding="async"></p>
+<ol>
+<li>今日の回数と営収、納金（現金・キャッシュレス・チケット）</li>
+<li>タクシーメーターの集計を写す。メーターの集計（日計）の営業回数・実車キロ・運収を入れると、記録と比べて ✓ か ⚠ が出る。実車率もここで出る</li>
+<li>現金を数える。手元の現金を入れると、納金の現金＋釣り銭の準備金と比べて過不足が出る。準備金は右の欄で入れられ、設定にも入る（毎日同じ額）</li>
+<li>1日の点検。漏れがあれば黄色で一覧になり、行を押すと直せる。「チケットの会社名がない」「記録が1回少ない（記録漏れ）」などもここに出る</li>
+<li>1日の順路の地図（緑の丸＝乗車地、赤い四角＝降車地、数字＝乗せた順）</li>
+<li>「画像で保存」。共有の画面で「画像を保存」を選ぶと、写真に1枚で残る</li>
+</ol>
+<p>画像には、日付・営収などの数字・順路の地図・乗車ごとの内容が入ります。</p>
+<h3 id="order">日報は乗務記録と同じ並び</h3>
+<p>地図の下は、会社の乗務記録と同じ順に並んでいます。用紙に写すときは、上から順に読めば済みます。</p>
+<p><img alt="日報の並び。左：乗務・走行距離計・タクシーメーターの集計、右：実車・空車・営収・納金・休憩" src="img/z-order.webp" width="760" height="811" decoding="async"></p>
+<p>いちばん上には運転者（氏名・乗務員番号。設定で入れる）と車番が出ます。出庫地点・帰庫地点・休憩の地点は、単体版では押した場所から自動で入ります。Claude版では「乗務情報・目標」で入れます。納金に高速代を入れるかは、「設定」の「納金に高速代を」で選びます（はじめは「含めない」）。</p>
+<h2 id="look">7. 振り返りの画面</h2>
+<p>上のボタンで切り替えます。どの画面も ‹ › で前後の日・月・年に移ります。</p>
+<p><img alt="一覧・月集計・年集計・地図の画面" src="img/z-screens.webp" width="660" height="1406" decoding="async"></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>画面</th>
+<th>見られるもの</th>
+<th>こんなときに</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>一覧（左上）</td>
+<td>1日分・1か月分の表。マスを押して直せる</td>
+<td>会社の日報に写す、まとめて直す</td>
+</tr>
+<tr>
+<td>月集計（右上）</td>
+<td>月の営収・目標までの残り・出番ごとの推移</td>
+<td>月の成績を見る</td>
+</tr>
+<tr>
+<td>年集計（左下）</td>
+<td>年・年度・好きな期間の営収と月ごとの推移</td>
+<td>1年を振り返る</td>
+</tr>
+<tr>
+<td>地図（右下）</td>
+<td>その日の乗車地・降車地と順路</td>
+<td>どこを走ったか確かめる</td>
+</tr>
+</tbody>
+</table></div>
+<p>地図では、下の › と1件ずつ順に見られ、「全体」で全部の表示に戻ります。緑の実線はお客様を乗せて走った区間、灰色の点線は空車で移った区間です。</p>
+<p>月集計は、設定で給与の締め日を選ぶとその期間（20日締めなら「11月分 10/21〜11/20」）になります。歩率や足切りを入れると給料の見込みと足切りまでの残り、歩率の段階を入れると次の段階までの額も出ます。何も入れていないときは「締め日・給与の計算を設定」のボタンから入れられます。</p>
+<h3 id="comp">前年・複数年と比べる</h3>
+<p><img alt="年集計の「複数年」と月集計の「複数年」の画面" src="img/z-years.webp" width="760" height="834" decoding="async"></p>
+<ol>
+<li>比較のカードの上のボタンで、比べる相手を選ぶ。<ul>
+<li>月集計: 前月／前年の同じ月／複数年</li>
+<li>年集計（年・年度）: 前年（前年度）／複数年</li>
+<li>年集計（期間を指定）: 直前の期間／前年の同じ期間／複数年</li>
+</ul>
+</li>
+<li>「複数年」では「3年分」「5年分」「10年分」から選ぶ。年ごとの営収・前年比・出番・1出番平均・単価が、新しい順に並ぶ。</li>
+<li>
+<p>前年比は、1年前の行と比べた営収の増減。</p>
+</li>
+<li>
+<p>今の月や年がまだ途中のときは、どの年も今日と同じ日までの分で比べる。</p>
+</li>
+<li>年集計の折れ線グラフは新しい5年分。今年の線は先月まで。</li>
+<li>選んだ比べ方は次に開いたときも残る。</li>
+<li>前の年の記録がないうちは「比べる年がありません」と出る。</li>
+</ol>
+<p>記録が期間の途中からの年（使い始めた年など）には、年の横に小さく「＊」が付く。その年の前年比は参考程度に。</p>
+<h3 id="ana">分析で振り返る</h3>
+<p><img alt="月集計の「分析」と、開いた曜日×時間帯の表。番号1〜5の場所" src="img/z-ana.webp" width="1100" height="952" decoding="async"></p>
+<ol>
+<li>月集計か年集計で、いちばん上の「分析」を押す（①）。期間は、その画面で選んでいる月・年・四半期・年度・期間のまま。</li>
+<li>時間の使い方は、稼働時間・時間あたり営収・実車時間率・次のお客さんまでの4つの数字がいつも見える（②）。</li>
+<li>ほかの項目は、はじめは要点だけ（④）。表と説明は「表と説明を見る」を押すと開く（③）。</li>
+<li>
+<p>曜日×時間帯の表（⑤）は、色が濃いほど稼げた時間。数字は1時間あたりの営収（千円）。</p>
+</li>
+<li>
+<p>開いた項目は、次に開いたときも開いたまま。「表をたたむ」で閉じる。</p>
+</li>
+<li>時間を使う数字は、出庫と帰庫の時刻が両方入った日だけで出す。帰庫の押し忘れに注意。</li>
+<li>良い日・悪い日の日付を押すと、その日の日報が開く。</li>
+<li>乗車した地点の地図は、単体版で場所の表を開いたときに出る。</li>
+</ol>
+<h2 id="set">8. 設定</h2>
+<p>上の「設定」で、画面の明るさを選んだり、記録を守ったりします。バックアップは月に1回取ってください。</p>
+<p><img alt="設定の画面。番号1〜4の場所" src="img/z-set.webp" width="568" height="6756" decoding="async"></p>
+<ol>
+<li><strong>画面の明るさ</strong>　自動（iPhoneに合わせる）・昼・夜から選ぶ</li>
+<li><strong>バックアップを保存</strong>　共有メニューの「ファイルに保存」などで残す</li>
+<li><strong>復元する</strong>　保存したファイルを選ぶか、コピーした内容を貼り付けて読み込む</li>
+<li><strong>記録を消す</strong>　消す範囲を選んで「消す記録を確かめる」。消す前に必ずバックアップを取る</li>
+</ol>
+<p>いちばん上の「メーターを入れるとき」では、メーターを出庫・帰庫のときだけにするか、乗車・降車のたびに入れるかを選びます。はじめは「出庫・帰庫のときだけ」で、実車キロ・実車率は帰庫のときに写すメーターの集計で出ます。前から乗車ごとにメーターを入れていた人は、「乗車・降車のたび」のままです。</p>
+<p>2つ目の「納金に高速代を」では、お客様から受け取った高速代を納金に足すかを選びます。会社の決まりに合わせます。「含める」にすると、そのお客様の支払方法（現金・キャッシュレス・チケット）の側に足し、帰庫のカードに「（高速代 1,320円を含む）」のように出ます。営収や集計には、どちらでも高速代は入りません。</p>
+<p>その下の「乗務員と勤務」では、氏名・乗務員番号、勤務の形（拘束時間の上限）、帰庫予定（目標までのペース）を入れます。「会社の決まり」は次の図のとおりです。「乗務中の画面」を「消さない」にすると、乗務中に画面が暗くなりません。「場所の名前」には、修正画面で名前を付けた場所が並びます。</p>
+<p>「乗務中の画面」の「走行中の画面」で、走ると画面を大きく簡単にするかを選びます（3章）。「文字の大きさ」で、説明や表の文字を「大」「特大」にできます。「このアプリ」には版の名前と番号が出ます。iPhoneのホーム画面の版が本番で、Claude版は試し用です（題名の横に「試し用」と出ます）。Claude版で取った記録は、Claude版で「バックアップを保存」し、iPhone版で③から読み込んで「ない日だけ足す」を押すと、iPhone版の記録を変えずに移せます。バックアップのところには、記録の保存先と大きさも出ます。</p>
+<h3 id="co">会社の決まり</h3>
+<p>締め日・釣り銭の準備金・歩率・足切りを、自分の会社に合わせて入れます。どれも入れなくても使え、入れたものだけが計算に使われます。月集計の「締め日・給与の計算を設定」を押しても、ここが開きます。</p>
+<p><img alt="設定の「会社の決まり」。番号1〜5の場所" src="img/z-coset.webp" width="640" height="2237" decoding="async"></p>
+<ol>
+<li><strong>締め日と釣り銭の準備金</strong>　締め日で月集計の期間が変わる。準備金は帰庫の「現金を数える」でも直せる</li>
+<li><strong>税抜か税込か</strong>　歩率をかける営収を選ぶ。はじめは税抜</li>
+<li><strong>歩率と足切り</strong>　足切りを入れると、「1か月の額」か「1乗務あたり」かと、届かない月の歩率の欄が出る。届かない月の歩率を空にすると、歩率は変わらない</li>
+<li><strong>歩率の段階</strong>　「営収○円以上なら歩率○%」を6つまで。届いたいちばん上の段階の歩率を、営収の全額にかける</li>
+<li><strong>今月分で計算すると</strong>　いまの記録での給料の見込み、足切りまでの残り、次の段階までの額。給与明細と比べて確かめる</li>
+</ol>
+<p><strong>大和自動車交通の給与で計算する</strong>　「給与の計算」で「大和自動車交通」を選ぶと、税抜か税込か・歩率と足切り・歩率の段階の欄は隠れます。採用の区分（試採用58%・本採用60%）と足切りの額（乗務ごとに足す・月405,000円）を選ぶと、月集計に「固定給198,873円 ＋（税抜営収 − 足切り）× 歩合率」の給料の見込みと、賞与の見込み（4か月分）が出ます。年集計には、その年の賞与3回分と年収の見込みが出ます。</p>
+<p><strong>給与保証</strong>　未経験で入社した人は、「給与保証」で勤務と交通圏（隔日・特別武三、隔日・北多摩、昼間・夜間）を選び、「保証が始まる月」を入れます。その12か月は、保証額と歩合で計算した額の高いほうが給料の見込みになります。給与明細の固定給が198,873円と違うときは、「固定給」の欄で直します。</p>
+<h3 id="daynight">昼と夜の画面</h3>
+<p>画面はマンガのようなコミック風です。「夜」を選ぶか、「自動」でiPhoneがダークモードのときは、暗い画面になります。</p>
+<p><img alt="昼と夜の画面" src="img/z-daynight.webp" width="760" height="834" decoding="async"></p>
+<h2 id="trouble">9. 困ったとき早見表</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>こんなとき</th>
+<th>こうする</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下の大きなボタンが見えない</td>
+<td>数字キーが開いている。メーターなら「確定」か「閉じる」、料金なら支払いを押すか「その他の支払い」→「記録せずに閉じる」</td>
+</tr>
+<tr>
+<td>支払いを押しても記録されない</td>
+<td>料金が入っていない。先に料金を入れる</td>
+</tr>
+<tr>
+<td>下に［帰庫］がない</td>
+<td>帰庫は上の「乗務中」のカードの［帰庫］から。乗車中は、先に料金を記録してから</td>
+</tr>
+<tr>
+<td>話しても聞き取らない</td>
+<td>マイクを「許可」にする。使えないときは、開いた「話した内容」の欄でキーボードのマイクを使う</td>
+</tr>
+<tr>
+<td>質問のあと聞き取りが始まらない</td>
+<td>「🎤 答える」を押してから答える</td>
+</tr>
+<tr>
+<td>読み上げがうるさい</td>
+<td>話す画面の右上「🔈 読み上げ」を押して消す</td>
+</tr>
+<tr>
+<td>乗車地に地名が入らない</td>
+<td>位置情報を許可する。圏外のときは場所を話して入れる</td>
+</tr>
+<tr>
+<td>昨日の日付が開いている</td>
+<td>入力欄の上の「今の日報へ」</td>
+</tr>
+<tr>
+<td>営収の大きい数字が見えない</td>
+<td>営収のカードの「大きく表示」を押す</td>
+</tr>
+<tr>
+<td>夜に画面がまぶしい</td>
+<td>「設定」の「画面の明るさ」で「夜」か「自動」を選ぶ</td>
+</tr>
+<tr>
+<td>アプリを更新したのに古い</td>
+<td>アプリを完全に閉じて開き直す。これを2回</td>
+</tr>
+<tr>
+<td>帰庫後に「記録漏れがあるかもしれません」</td>
+<td>メーターの営業回数が記録より多い。今日の流れで抜けた乗車を探し、料金だけでも記録する</td>
+</tr>
+<tr>
+<td>乗務中に画面が暗くなる</td>
+<td>設定の「乗務中の画面」を「消さない」にする（iOS 18.4以降）</td>
+</tr>
+<tr>
+<td>月集計の期間が会社の締めと違う</td>
+<td>設定の「給与の締め日」を会社の締め日にする</td>
+</tr>
+<tr>
+<td>給料の見込みが給与明細と合わない</td>
+<td>設定の「会社の決まり」を会社の決まりに合わせる（税抜か税込か・足切りの額の決め方・届かない月の歩率・段階）</td>
+</tr>
+<tr>
+<td>画面の上に赤い帯「記録を保存できませんでした」</td>
+<td>すぐ帯の「バックアップを保存」を押して記録を残す。iPhoneの空きを増やしてから開き直す</td>
+</tr>
+<tr>
+<td>止まっているのに走行中の画面のまま</td>
+<td>位置が届かない場所では、1分たつと戻る。すぐ戻すときは「運転していない」</td>
+</tr>
+</tbody>
+</table></div>
+<p>もっと詳しい説明は<a href="tsukaikata.html">使い方マニュアル</a>、短い手順だけなら<a href="easy.html">かんたん手順書</a>を見てください。</p>
+<nav class="others"><a href="easy.html">かんたん手順書</a><a href="tsukaikata.html">使い方マニュアル</a></nav>
+</main>
+<footer>タクシー売上日報 v81（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
+if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
+b.addEventListener('click',function(e){e.preventDefault();
+ if(history.length>1&&document.referrer&&document.referrer.indexOf(location.origin)===0&&/\/manual\//.test(document.referrer)){history.back();return}
+ try{window.close()}catch(x){}
+ setTimeout(function(){if(c){location.href='https://claude.ai/artifact/6g9yyZ7npMk4AZThAYAykY';return}h.hidden=false;h.scrollIntoView({block:'nearest'})},250)});
+var t=location.hash&&document.getElementById(decodeURIComponent(location.hash.slice(1)));if(t)setTimeout(function(){t.scrollIntoView()},60)})();</script>
+</body></html>

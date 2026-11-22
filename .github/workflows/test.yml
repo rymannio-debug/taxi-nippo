@@ -19,6 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # マニュアルのページ（manual/*.html）を作るのに使う。版を固定して、作るたびに同じものになるように
+      - run: pip install markdown==3.11
       - run: python3 tools/build.py --check
   test:
     name: テスト（${{ matrix.browser }} ${{ matrix.shard }}/4）

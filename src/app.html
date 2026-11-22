@@ -2235,7 +2235,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v80',APP_DATE='2026-11-22';
+const APP_VER='v81',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -3560,11 +3560,12 @@ function aDays(ks,C){
   return t+'<p class="asum">良い日の営収 平均 <b>¥'+yen(avg(good,d=>d.s))+'</b><br>悪い日の営収 平均 <b>¥'+yen(avg(bad,d=>d.s))+'</b></p><!--B-->'+tb('良い日',good)+tb('悪い日',bad)+'<div class="ctitle sub">共通点</div><table class="mtable a3"><thead><tr><th>項目</th><th>良い日</th><th>悪い日</th></tr></thead><tbody>'+R.map(r=>'<tr><td class="pl">'+r[0]+'</td><td class="pl">'+r[1](good)+'</td><td class="pl">'+r[1](bad)+'</td></tr>').join('')+'</tbody></table>'
     +'<div class="hint"><span>良い日は営収の多い'+n+'日、悪い日は少ない'+n+'日です。日付を押すと、その日の日報を開きます。「多い曜日」「多い天気」は、その'+n+'日のなかでいちばん多いものです。</span></div>';
 }
-/* マニュアル: the three docs, and for each screen the sections that explain it (a link to a heading opens the doc there) */
-const MAN={easy:{u:'https://claude.ai/artifact/3GFqong9d9odhL9MNRJyCr',n:'かんたん手順書',d:'最初に読む。毎日の手順だけを短く'},fig:{u:'https://claude.ai/artifact/2ocLy81gMMvBTcmyspwR7M',n:'図解マニュアル',d:'画面の図と番号で、どこを押すかを見る'},use:{u:'https://claude.ai/artifact/9nQ32ZWAXXYZvCppfzTzNG',n:'使い方マニュアル',d:'すべての機能と、困ったときの答え'}};
-const MS={flow:['easy','mv322v937h3.5417','1日の流れ'],ride:['easy','mv322v937h3.5721','お客様1人を記録する'],kiko:['easy','mv322v937h3.7407','帰庫したら'],bk:['easy','mv322v937h3.6609','月に1回：バックアップ'],troubleEasy:['easy','mv322v937h3.6789','困ったとき'],
- day:['fig','m451xxj3bmb.4721','日報の画面の見方'],rideFig:['fig','m451xxj3bmb.5600','ボタンで1件を記録する'],voice:['fig','m451xxj3bmb.6264','声で記録する'],fix:['fig','m451xxj3bmb.6982','今日の流れと直し方'],kikoFig:['fig','m451xxj3bmb.7522','帰庫したら'],look:['fig','m451xxj3bmb.7777','振り返りの画面'],comp:['fig','m451xxj3bmb.8975','前年・複数年と比べる'],ana:['fig','m451xxj3bmb.9291','分析で振り返る'],set:['fig','m451xxj3bmb.8092','設定'],coFig:['fig','m451xxj3bmb.12483','会社の決まり'],troubleFig:['fig','m451xxj3bmb.8366','困ったとき早見表'],
- start:['use','mjrhtaa28xg.42082','出庫・帰庫と目標'],keys:['use','mjrhtaa28xg.36800','ボタンと数字キーで記録する'],brk:['use','mjrhtaa28xg.41817','休憩'],kou:['use','mjrhtaa28xg.56648','拘束時間と休息'],meter:['use','mjrhtaa28xg.53668','メーターの集計'],cash:['use','mjrhtaa28xg.56423','現金を数える'],report:['use','mjrhtaa28xg.43811','日報を1枚で見る'],fixUse:['use','mjrhtaa28xg.42836','直す・取り消す'],edit:['use','mjrhtaa28xg.43304','修正画面'],list:['use','mjrhtaa28xg.44789','一覧'],month:['use','mjrhtaa28xg.44994','月集計・年集計'],map:['use','mjrhtaa28xg.44360','地図'],setUse:['use','mjrhtaa28xg.45480','設定'],co:['use','mjrhtaa28xg.58348','会社の決まり'],dw:['use','mjrhtaa28xg.59491','大和自動車交通の給与'],trouble:['use','mjrhtaa28xg.46421','困ったとき']};
+/* マニュアル: the three read-only manual pages (manual/*.html, built from manual/src/*.md), and for each screen the sections that explain it (a link to a heading opens the page there) */
+const MBASE=SOLO?'manual/':'https://rymannio-debug.github.io/taxi-nippo/manual/',MQ=SOLO?'':'?from=claude';
+const MAN={easy:{u:MBASE+'easy.html'+MQ,n:'かんたん手順書',d:'最初に読む。毎日の手順だけを短く'},fig:{u:MBASE+'zukai.html'+MQ,n:'図解マニュアル',d:'画面の図と番号で、どこを押すかを見る'},use:{u:MBASE+'tsukaikata.html'+MQ,n:'使い方マニュアル',d:'すべての機能と、困ったときの答え'}};
+const MS={flow:['easy','flow','1日の流れ'],ride:['easy','ride','お客様1人を記録する'],kiko:['easy','kiko','帰庫したら'],bk:['easy','backup','月に1回：バックアップ'],troubleEasy:['easy','trouble','困ったとき'],
+ day:['fig','day','日報の画面の見方'],rideFig:['fig','ride','ボタンで1件を記録する'],voice:['fig','voice','声で記録する'],fix:['fig','fix','今日の流れと直し方'],kikoFig:['fig','kiko','帰庫したら'],look:['fig','look','振り返りの画面'],comp:['fig','comp','前年・複数年と比べる'],ana:['fig','ana','分析で振り返る'],set:['fig','set','設定'],coFig:['fig','co','会社の決まり'],troubleFig:['fig','trouble','困ったとき早見表'],
+ start:['use','start','出庫・帰庫と目標'],keys:['use','keys','ボタンと数字キーで記録する'],brk:['use','brk','休憩'],kou:['use','kou','拘束時間と休息'],meter:['use','meter','メーターの集計'],cash:['use','cash','現金を数える'],report:['use','report','日報を1枚で見る'],fixUse:['use','fix','直す・取り消す'],edit:['use','edit','修正画面'],list:['use','list','一覧'],month:['use','month','月集計・年集計'],map:['use','map','地図'],setUse:['use','set','設定'],co:['use','co','会社の決まり'],dw:['use','dw','大和自動車交通の給与'],trouble:['use','trouble','困ったとき']};
 const manUrl=k=>{const m=MS[k];return m?MAN[m[0]].u+'#'+m[1]:MAN[k].u};
 const manA=(k,cls)=>{const m=MS[k];return '<a class="'+(cls||'mv-a')+'" href="'+manUrl(k)+'" target="_blank" rel="noopener"><span><b>'+esc(m[2])+'</b><small>'+MAN[m[0]].n+'</small></span></a>'};
 /* which sections fit the screen that is open now */

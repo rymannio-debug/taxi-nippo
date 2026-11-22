@@ -7,3 +7,4 @@ tests/*.png
 /dbg_*.png
 /_*.png
 tests/*.json
+__pycache__/
