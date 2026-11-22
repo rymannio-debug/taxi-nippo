@@ -24,7 +24,7 @@ let p=await page(open0);
 await tapEl(p,'#ride-b');await p.clock.runFor(15*60000);await tapEl(p,'#ride-b');
 ok(await vis(p,'#np-xr'),'降車で開いた料金の数字キーの上に「迎車・1名・高速代」が並ぶ');
 await tapEl(p,'#np-xr [data-xk="mukae"]');await tapEl(p,'#np-xr [data-xk="pax"]');
-ok(await p.evaluate(()=>[...document.querySelectorAll('#np-xr button')].map(b=>b.textContent+':'+b.getAttribute('aria-pressed')).join(' '))==='迎車:true 2名:true 高速代:false','迎車・2名が押せて、押した印が付く');
+ok(await p.evaluate(()=>[...document.querySelectorAll('#np-xr button')].map(b=>b.textContent+':'+b.getAttribute('aria-pressed')).join(' '))==='迎車:true 2名:true 高速代:false メモ:false','迎車・2名が押せて、押した印が付く（メモは押していない）');
 await tapEl(p,'#np-xr [data-xk="toll"]');
 ok(/高速代/.test(await txt(p,'#np-l')),'「高速代」で高速代の数字キーに変わる');
 await keys(p,['1','3','2','0']);await tapEl(p,'#np [data-k="ok"]');
