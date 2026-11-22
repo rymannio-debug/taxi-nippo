@@ -432,14 +432,43 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tbody>
 </table></div>
 <p>料金が空のまま支払いを押すと、記録されず「先に料金を入れてください」と出ます。</p>
-<h3 id="s37765">2名以上・迎車・高速代</h3>
-<p>支払いを押す前に、料金の数字キーのいちばん上の段（迎車・1名・高速代）で入れます。数字キーに隠れないので、画面を動かさずに押せます。</p>
+<h3 id="s37765">2名以上・迎車・高速代・メモ</h3>
+<p>支払いを押す前に、料金の数字キーのいちばん上の段（迎車・1名・高速代・メモ）で入れます。数字キーに隠れないので、画面を動かさずに押せます。</p>
 <ul>
 <li>迎車：押すと「迎車あり」で黄色になる。もう一度押すと消える</li>
 <li>人数：押すたびに 1名→2名→…→5名→1名 と変わる（料金の欄の下の［−］［＋］でも変えられる）</li>
 <li>高速代：押すと高速代の数字キーになる。金額を入れて「確定」を押すと、料金の数字キーに戻る</li>
+<li>メモ：押すとメモの画面が開く。書いて「保存」を押すと料金の数字キーに戻り、ボタンが「メモ ✓」になる。支払いを押すと、メモも一緒に記録される</li>
 </ul>
 <p>これらを押しても、料金の数字キーは開いたままです。記録すると元に戻ります。</p>
+<p><strong>メモ</strong>　忘れ物の問い合わせ、次の予約の話など、その乗車に一言残せます。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>いつ</th>
+<th>どこで</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>降車のあと、支払いを押す前</td>
+<td>料金の数字キーの上の［メモ］</td>
+</tr>
+<tr>
+<td>記録した直後</td>
+<td>画面の上に出る「記録しました」の「メモ」</td>
+</tr>
+<tr>
+<td>あとから</td>
+<td>「今日の流れ」でその行を押し、修正画面の「その他」のメモ</td>
+</tr>
+<tr>
+<td>声で</td>
+<td>「メモ ○○」。降車のあとなら、これから記録する乗車に、記録のあとなら今日の最後の乗車に残る</td>
+</tr>
+</tbody>
+</table></div>
+<p>メモの画面には、前に書いたメモが6つまで出て、押すとそのまま入ります。キーボードのマイクを押せば、話して書けます。走行中は書かず、止まってから書いてください。残したメモは「今日の流れ」に「📝」付きで出て、CSVにも入ります。</p>
 <h3 id="s37915">メーターは下3桁でよい（出庫は全部の桁）</h3>
 <p>メーターは車の走行距離計の数字です。<strong>出庫メーターだけは、毎回全部の桁を入れます</strong>（45,230 kmなら「45230」）。乗務ごとに違う車に乗ることがあるので、前の日の数字からは補いません。下3桁ほどで入れると「出庫は全部の桁を入れてください」と出て、入れ直しになります。</p>
 <p>その日の帰庫メーターと乗車・降車のメーターは、下3桁でかまいません。45,520 kmなら「520」と入れれば、上の桁はその日の出庫メーター（や直前の読み）からアプリが補います。欄の下に「45,520 km　出庫から +290 km」のように出るので、その場で確かめられます。</p>
@@ -569,6 +598,11 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>直前の記録を直す</td>
 <td>「さっきのはカード」「取り消し」</td>
 <td>—</td>
+</tr>
+<tr>
+<td>メモを残す</td>
+<td>「メモ 忘れ物の問い合わせ」</td>
+<td>メモは？（「メモ」とだけ言ったとき）</td>
 </tr>
 </tbody>
 </table></div>
@@ -1671,7 +1705,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v89（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v90（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();
