@@ -2260,7 +2260,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v86',APP_DATE='2026-11-22';
+const APP_VER='v87',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4397,23 +4397,37 @@ function aiShow(text,secs,done){const a=$('ai-a');a.hidden=false;a.classList.tog
 /* 単体版: Gemini（Google）の無料枠。キーはこの端末の localStorage だけ（バックアップには入れない）。キーがなければ、近い章を出すだけ */
 const AIKEY='taxi-nippo-ai-key',GEM='https://generativelanguage.googleapis.com/v1beta/';
 const aiKey=()=>{try{return localStorage.getItem(AIKEY)||''}catch(e){return ''}};
-let gemModel='';
+// 頼む順: 覚えているモデル → gemini-flash-lite-latest → gemini-flash-latest → 番号付きの Flash-Lite・Flash（新しい順）。
+// omni（無料枠なし）・gemma（遅い）・preview は使わない。混雑(503/500)・回数の上限(429)・名前なし(404)なら次へ
+const AIMODEL='taxi-nippo-ai-model';
+let gemModel=(()=>{try{return localStorage.getItem(AIMODEL)||''}catch(e){return ''}})();
+const gemVer=x=>{const m=x.match(/^gemini-([\d.]+)-flash(-lite)?$/);return m?m[1].split('.').map(Number):null};
 async function gemCall(key,prompt,signal){
   const ask=m=>fetch(GEM+'models/'+m+':generateContent',{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},
     body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:2048}})});
-  let m=gemModel||'gemini-flash-latest',r=await ask(m);
-  // 名前が使えない(404)・混んでいる(503/500)ときは、このキーで使える Flash 系を順に試す（Flash → Flash-Lite、新しい順）
-  if([404,429,500,503].includes(r.status)){
-    const L=await fetch(GEM+'models?pageSize=200',{signal,headers:{'x-goog-api-key':key}});
-    if(L.ok){const j=await L.json(),ok=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')&&/flash/.test(x.name)&&!/image|tts|audio|live|preview|exp/.test(x.name)).map(x=>x.name.replace(/^models\//,'')).filter(x=>x!==m).sort().reverse();
-      const order=ok.filter(x=>!/lite/.test(x)).concat(ok.filter(x=>/lite/.test(x))).concat(['gemini-flash-lite-latest'].filter(x=>x!==m&&!ok.includes(x))).slice(0,5);
-      for(const x of order){const r2=await ask(x);if(r2.ok||![404,429,500,503].includes(r2.status)){m=x;r=r2;break}if(r.status!==429||r2.status===429)r=r2}}}
-  if(!r.ok){let j={};try{j=await r.json()}catch(e){}const msg=((j.error||{}).message||'')+' '+((j.error||{}).status||'');
-    const e=new Error(msg);e.status=r.status;e.code=r.status===429?'rate_limited':r.status===503||r.status===500?'busy':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
-  gemModel=m;const j=await r.json(),c=(j.candidates||[])[0];
-  const t=c&&c.content&&(c.content.parts||[]).map(x=>x.text||'').join('').trim();
-  if(!t){const e=new Error('empty');e.code=c&&c.finishReason==='SAFETY'?'refused':'empty_completion';throw e}
-  return t}
+  const RETRY=[404,429,500,503],tried=new Set();let first=null,last=null,listed=false;
+  let queue=[gemModel,'gemini-flash-lite-latest','gemini-flash-latest'].filter((x,i,a)=>x&&a.indexOf(x)===i);
+  while(tried.size<8){
+    if(!queue.length){if(listed)break;listed=true;
+      const L=await fetch(GEM+'models?pageSize=200',{signal,headers:{'x-goog-api-key':key}});if(!L.ok)break;
+      const j=await L.json(),names=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')).map(x=>x.name.replace(/^models\//,'')).filter(x=>gemVer(x));
+      const cmp=(a,b)=>{const x=gemVer(a),y=gemVer(b);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(y[i]||0)-(x[i]||0);if(d)return d}return 0};
+      queue=names.filter(x=>/lite$/.test(x)).sort(cmp).concat(names.filter(x=>!/lite$/.test(x)).sort(cmp)).filter(x=>!tried.has(x));if(!queue.length)break}
+    const m=queue.shift();if(tried.has(m))continue;tried.add(m);
+    const r=await ask(m);
+    if(r.ok){const j=await r.json(),c=(j.candidates||[])[0],t=c&&c.content&&(c.content.parts||[]).filter(x=>!x.thought).map(x=>x.text||'').join('').trim();
+      if(t){if(gemModel!==m){gemModel=m;try{localStorage.setItem(AIMODEL,m)}catch(e){}}return t}
+      if(c&&c.finishReason==='SAFETY'){const e=new Error('safety');e.code='refused';throw e}
+      continue}
+    let j={};try{j=await r.json()}catch(e){}
+    const err={status:r.status,msg:((j.error||{}).message||'')+' '+((j.error||{}).status||'')};
+    if(!RETRY.includes(r.status)){last=err;break}
+    if(!first||first.status===404||(first.status===429&&r.status!==404))first=err;last=err}
+  const f=(last&&!RETRY.includes(last.status))?last:(first||last||{status:0,msg:'no model'});
+  const e=new Error(f.msg);e.status=f.status;
+  e.code=f.status===429?'rate_limited':f.status===503||f.status===500?'busy':(f.status===400&&/API.?KEY|api key/i.test(f.msg))||f.status===401||f.status===403?'bad_key':f.status===0?'empty_completion':'upstream_error';
+  if(f.status===404||f.status===429||f.status===503)try{localStorage.removeItem(AIMODEL)}catch(x){}
+  gemModel='';throw e}
 function aiNote(){const n=$('ai-note');if(!n)return;
   n.innerHTML=!SOLO?'マニュアルをもとにAI（Claude）が答えます。まちがうこともあるので、下のボタンのマニュアルで確かめてください。あなたのClaudeの利用枠を使います。走行中は使わないでください。'
    :aiKey()?'マニュアルをもとにAI（Gemini・無料枠）が答えます。まちがうこともあるので、下のボタンのマニュアルで確かめてください。走行中は使わないでください。'
@@ -4471,7 +4485,7 @@ if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();
           catch(e){out.push(m+': × 通信できず '+short(e.name+' '+e.message))}show()}}}
     catch(e){out.push('モデル一覧: × 通信できず '+short(e.name+' '+e.message))}
     out.push('— この結果を写真で送ってください（キーは写りません）');show();bt.disabled=false});
-  $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
+  $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY);localStorage.removeItem(AIMODEL)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
 }
 if(window.claude&&window.claude.use){
   window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false}).catch(()=>{});
