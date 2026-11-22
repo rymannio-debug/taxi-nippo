@@ -23,6 +23,7 @@ let p=await page(null);const G=[];
 await p.context().route(/generativelanguage\.googleapis\.com/,async r=>{const u=r.request().url(),k=r.request().headers()['x-goog-api-key'];G.push({u,k,body:r.request().postData()});
   if(k==='bad')return r.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:{code:400,message:'API key not valid. Please pass a valid API key.',status:'INVALID_ARGUMENT'}})});
   if(k==='busy')return r.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:{code:429,message:'quota',status:'RESOURCE_EXHAUSTED'}})});
+  if(k==='quota'&&/gemini-flash-latest:|gemini-9\.0-flash:/.test(u))return r.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:{code:429,message:'quota limit: 0',status:'RESOURCE_EXHAUSTED'}})});
   if(k==='crowd'&&/gemini-flash-latest:/.test(u))return r.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:{code:503,message:'This model is currently experiencing high demand.',status:'UNAVAILABLE'}})});
   if(k==='crowd'&&/gemini-9\.0-flash:/.test(u))return r.fulfill({status:503,contentType:'application/json',body:'{"error":{"code":503}}'});
   if(k==='old'&&/gemini-flash-latest/.test(u))return r.fulfill({status:404,contentType:'application/json',body:'{"error":{"code":404}}'});
@@ -52,6 +53,8 @@ await p.evaluate(()=>localStorage.setItem('taxi-nippo-ai-key','busy'));await p.l
 ok(/無料で使える回数/.test(await p.textContent('#ai-a'))&&await p.locator('#ai-a a').count()>0,'上限のときは、そう伝えて近い章を出す');
 await p.evaluate(()=>localStorage.setItem('taxi-nippo-ai-key','old'));G.length=0;await p.locator('#ai-go').tap();await p.waitForTimeout(800);
 ok(/会社の決まり/.test(await p.textContent('#ai-a'))&&G.some(g=>/gemini-9\.0-flash:generateContent/.test(g.u)),'名前が使えないときは、使える Flash を選ぶ');
+await p.evaluate(()=>localStorage.setItem('taxi-nippo-ai-key','quota'));G.length=0;await p.locator('#ai-go').tap();await p.waitForTimeout(800);
+ok(/会社の決まり/.test(await p.textContent('#ai-a'))&&G.some(g=>/gemini-9\.0-flash-lite:generateContent/.test(g.u)),'回数の上限(429)のときも、ほかの Flash に頼み直す');
 await p.evaluate(()=>localStorage.setItem('taxi-nippo-ai-key','crowd'));G.length=0;await p.locator('#ai-go').tap();await p.waitForTimeout(800);
 ok(/会社の決まり/.test(await p.textContent('#ai-a'))&&G.some(g=>/gemini-9\.0-flash-lite:generateContent/.test(g.u)),'混んでいる(503)ときは、ほかの Flash に頼み直す');
 await p.locator('#mv-close').tap();await p.evaluate(()=>{location.hash='#set'});await p.waitForTimeout(300);

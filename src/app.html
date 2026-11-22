@@ -2256,7 +2256,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v84',APP_DATE='2026-11-22';
+const APP_VER='v85',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4399,11 +4399,11 @@ async function gemCall(key,prompt,signal){
     body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:2048}})});
   let m=gemModel||'gemini-flash-latest',r=await ask(m);
   // 名前が使えない(404)・混んでいる(503/500)ときは、このキーで使える Flash 系を順に試す（Flash → Flash-Lite、新しい順）
-  if([404,500,503].includes(r.status)){
+  if([404,429,500,503].includes(r.status)){
     const L=await fetch(GEM+'models?pageSize=200',{signal,headers:{'x-goog-api-key':key}});
     if(L.ok){const j=await L.json(),ok=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')&&/flash/.test(x.name)&&!/image|tts|audio|live|preview|exp/.test(x.name)).map(x=>x.name.replace(/^models\//,'')).filter(x=>x!==m).sort().reverse();
       const order=ok.filter(x=>!/lite/.test(x)).concat(ok.filter(x=>/lite/.test(x))).concat(['gemini-flash-lite-latest'].filter(x=>x!==m&&!ok.includes(x))).slice(0,5);
-      for(const x of order){const r2=await ask(x);if(r2.ok||![404,500,503].includes(r2.status)){m=x;r=r2;break}r=r2}}}
+      for(const x of order){const r2=await ask(x);if(r2.ok||![404,429,500,503].includes(r2.status)){m=x;r=r2;break}if(r.status!==429||r2.status===429)r=r2}}}
   if(!r.ok){let j={};try{j=await r.json()}catch(e){}const msg=((j.error||{}).message||'')+' '+((j.error||{}).status||'');
     const e=new Error(msg);e.status=r.status;e.code=r.status===429?'rate_limited':r.status===503||r.status===500?'busy':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
   gemModel=m;const j=await r.json(),c=(j.candidates||[])[0];
