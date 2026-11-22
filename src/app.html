@@ -1026,6 +1026,8 @@ body.driving #stpill,body.driving #toast{display:none!important}
 .ai-a{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:calc(15px*var(--fs,1));line-height:1.65;white-space:normal;overflow-wrap:anywhere}
 .ai-a.wait{color:var(--muted)}
 .ai-a .ai-src{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ai-diag{margin:0;padding:8px 10px;border:1px dashed var(--line);border-radius:10px;background:var(--field);font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text}
+#ai-diag{min-height:44px}
 .ai-note{font-size:calc(12.5px*var(--fs,1));color:var(--muted);line-height:1.5}
 .manrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:calc(13.5px*var(--fs,1));color:var(--muted)}
 .manrow a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-weight:700;font-size:calc(13.5px*var(--fs,1));background:var(--surface)}
@@ -1247,6 +1249,8 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <label class="f">Geminiのキー<input type="password" id="ai-key" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AQ.… や AIza… で始まる文字"></label>
       <div class="btnrow"><button type="button" class="btn" id="ai-key-del">キーを消す</button><button type="button" class="btn pri" id="ai-key-save">保存して試す</button></div>
       <span class="disp-n" id="ai-key-st"></span>
+      <button type="button" class="btn" id="ai-diag">接続を調べる（うまく答えないとき）</button>
+      <pre class="ai-diag" id="ai-diag-out" hidden></pre>
       <span class="disp-n">キーの作り方：パソコンかiPhoneで <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> を開き、Googleのアカウントでログインして「APIキーを作成」を押し、「API キー」の行の右のコピーのボタンを押して、ここに貼ります。料金の登録（クレジットカード）はしないでください。しなければ無料のままで、使いすぎたときは止まるだけです。キーはこのiPhoneの中だけに残り、バックアップには入りません。Geminiに送るのは質問とマニュアルの文だけで、記録は送りません。無料枠では、送った内容がGoogleのサービス改善に使われることがあります。</span>
     </div>
     <div class="card about" id="about">
@@ -2256,7 +2260,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v85',APP_DATE='2026-11-22';
+const APP_VER='v86',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4449,6 +4453,24 @@ if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();
     catch(e){if(e&&(e.code==='rate_limited'||e.code==='busy')){try{localStorage.setItem(AIKEY,k)}catch(x){}st(e.code==='busy'?'保存しました（いまはGeminiが混み合っています。少し時間をおいて使ってください）。':'保存しました（いまは無料で使える回数の上限なので、しばらくしてから使えます）。')}
       else{const d=' （くわしく: '+String((e&&(e.status?'HTTP '+e.status+' ':'')+(e.name||'')+' '+(e.message||''))||'').trim().slice(0,160)+'）';st((e&&e.code==='bad_key'?'このキーは使えませんでした。コピーした文字を確かめてください。保存していません。':navigator.onLine===false?'電波がないので確かめられませんでした。保存していません。':'Geminiにつながりませんでした。保存していません。')+d)}}
     finally{$('ai-key-save').disabled=false;aiNote()}});
+  // 接続を調べる: このキーで使えるモデルを並べ、Flash 系に短い質問を1回ずつ送って、返事（番号と理由）を出す。キーは出さない
+  $('ai-diag').addEventListener('click',async()=>{const k=$('ai-key').value.trim()||aiKey(),o=$('ai-diag-out'),bt=$('ai-diag');o.hidden=false;
+    if(!k){o.textContent='キーが入っていません。';return}
+    bt.disabled=true;const out=[];const show=()=>{o.textContent=out.join('\n')};
+    out.push('版 '+APP_VER+' / '+new Date().toLocaleString('ja-JP')+' / キー '+k.slice(0,3)+'…（'+k.length+'文字）'+(navigator.onLine===false?' / 圏外':''));show();
+    const H={'x-goog-api-key':k},short=t=>String(t||'').replace(/\s+/g,' ').slice(0,140);
+    try{const r=await fetch(GEM+'models?pageSize=200',{headers:H});let j={};try{j=await r.json()}catch(e){}
+      if(!r.ok){out.push('モデル一覧: HTTP '+r.status+' '+short((j.error||{}).status+' '+(j.error||{}).message));show()}
+      else{const all=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')).map(x=>x.name.replace(/^models\//,''));
+        out.push('モデル一覧: '+all.length+'個（generateContent）');show();
+        const fl=['gemini-flash-latest','gemini-flash-lite-latest'].concat(all.filter(x=>/flash|gemma/.test(x)&&!/image|tts|audio|live/.test(x))).filter((x,i,a)=>a.indexOf(x)===i).slice(0,14);
+        for(const m of fl){const t0=Date.now();try{const r2=await fetch(GEM+'models/'+m+':generateContent',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},H),body:JSON.stringify({contents:[{role:'user',parts:[{text:'「はい」とだけ答えて'}]}],generationConfig:{maxOutputTokens:64}})});
+            let j2={};try{j2=await r2.json()}catch(e){}
+            const ok=r2.ok?'○ '+short(((((j2.candidates||[])[0]||{}).content||{}).parts||[]).map(x=>x.text).join('')):'× '+r2.status+' '+short((j2.error||{}).status+' '+(j2.error||{}).message);
+            out.push(m+': '+ok+'（'+((Date.now()-t0)/1000).toFixed(1)+'秒）')}
+          catch(e){out.push(m+': × 通信できず '+short(e.name+' '+e.message))}show()}}}
+    catch(e){out.push('モデル一覧: × 通信できず '+short(e.name+' '+e.message))}
+    out.push('— この結果を写真で送ってください（キーは写りません）');show();bt.disabled=false});
   $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
 }
 if(window.claude&&window.claude.use){
