@@ -4,3 +4,6 @@ test-results/
 tests/*.png
 !tests/tile_osm.png
 !tests/tile_pale.png
+/dbg_*.png
+/_*.png
+tests/*.json
