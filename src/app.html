@@ -2256,7 +2256,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v83',APP_DATE='2026-11-22';
+const APP_VER='v84',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4398,12 +4398,14 @@ async function gemCall(key,prompt,signal){
   const ask=m=>fetch(GEM+'models/'+m+':generateContent',{method:'POST',signal,headers:{'Content-Type':'application/json','x-goog-api-key':key},
     body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0.2,maxOutputTokens:2048}})});
   let m=gemModel||'gemini-flash-latest',r=await ask(m);
-  if(r.status===404){ // 名前が使えないとき: このキーで使えるモデルから Flash を選ぶ
+  // 名前が使えない(404)・混んでいる(503/500)ときは、このキーで使える Flash 系を順に試す（Flash → Flash-Lite、新しい順）
+  if([404,500,503].includes(r.status)){
     const L=await fetch(GEM+'models?pageSize=200',{signal,headers:{'x-goog-api-key':key}});
-    if(L.ok){const j=await L.json(),ok=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')&&/flash/.test(x.name)&&!/image|tts|audio|live|preview|exp/.test(x.name)).map(x=>x.name.replace(/^models\//,'')).sort().reverse();
-      if(ok.length){m=ok.find(x=>!/lite/.test(x))||ok[0];r=await ask(m)}}}
+    if(L.ok){const j=await L.json(),ok=(j.models||[]).filter(x=>(x.supportedGenerationMethods||[]).includes('generateContent')&&/flash/.test(x.name)&&!/image|tts|audio|live|preview|exp/.test(x.name)).map(x=>x.name.replace(/^models\//,'')).filter(x=>x!==m).sort().reverse();
+      const order=ok.filter(x=>!/lite/.test(x)).concat(ok.filter(x=>/lite/.test(x))).concat(['gemini-flash-lite-latest'].filter(x=>x!==m&&!ok.includes(x))).slice(0,5);
+      for(const x of order){const r2=await ask(x);if(r2.ok||![404,500,503].includes(r2.status)){m=x;r=r2;break}r=r2}}}
   if(!r.ok){let j={};try{j=await r.json()}catch(e){}const msg=((j.error||{}).message||'')+' '+((j.error||{}).status||'');
-    const e=new Error(msg);e.status=r.status;e.code=r.status===429?'rate_limited':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
+    const e=new Error(msg);e.status=r.status;e.code=r.status===429?'rate_limited':r.status===503||r.status===500?'busy':(r.status===400&&/API.?KEY|api key/i.test(msg))||r.status===401||r.status===403?'bad_key':'upstream_error';throw e}
   gemModel=m;const j=await r.json(),c=(j.candidates||[])[0];
   const t=c&&c.content&&(c.content.parts||[]).map(x=>x.text||'').join('').trim();
   if(!t){const e=new Error('empty');e.code=c&&c.finishReason==='SAFETY'?'refused':'empty_completion';throw e}
@@ -4430,7 +4432,7 @@ async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-s
     else{const r=await AI.s(prompt,{modelTier:'quick',signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true)}}
   catch(e){const c=e&&(e.code||(e.name==='AbortError'?(AI.timeout?'timeout':'cancelled'):navigator.onLine===false?'offline':SOLO?'network':''));
     if(!SOLO&&(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared')){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
-    else{const m={cancelled:'止めました。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',
+    else{const m={cancelled:'止めました。',busy:'いまGeminiが混み合っています。少し時間をおいて、もう一度押してください。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',
       prompt_too_large:'質問を短くしてください。',bad_key:'Geminiのキーが使えませんでした。設定の「AIに聞く」でキーを確かめてください。',timeout:'答えが返ってきませんでした。',offline:'電波がないので、AIに聞けません。',network:'Geminiにつながりませんでした。'}[c]||'答えを出せませんでした。';
       if(SOLO&&c!=='cancelled')aiList(secs,m+(secs.length?'近いマニュアルの章です。':''));
       else aiShow((e&&e.text?e.text+'\n\n':'')+m+(c==='cancelled'?'':' 下のマニュアルから探してください。'),secs,true)}}
@@ -4444,7 +4446,7 @@ if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();
   $('ai-key-save').addEventListener('click',async()=>{const k=$('ai-key').value.trim();if(!k){st('キーを貼り付けてから押してください。');return}
     st('確かめています…');$('ai-key-save').disabled=true;
     try{await gemCall(k,'「はい」とだけ答えてください。',undefined);try{localStorage.setItem(AIKEY,k)}catch(e){}st('保存しました。［？ マニュアル］の「AIに聞く」で使えます。')}
-    catch(e){if(e&&e.code==='rate_limited'){try{localStorage.setItem(AIKEY,k)}catch(x){}st('保存しました（いまは無料で使える回数の上限なので、しばらくしてから使えます）。')}
+    catch(e){if(e&&(e.code==='rate_limited'||e.code==='busy')){try{localStorage.setItem(AIKEY,k)}catch(x){}st(e.code==='busy'?'保存しました（いまはGeminiが混み合っています。少し時間をおいて使ってください）。':'保存しました（いまは無料で使える回数の上限なので、しばらくしてから使えます）。')}
       else{const d=' （くわしく: '+String((e&&(e.status?'HTTP '+e.status+' ':'')+(e.name||'')+' '+(e.message||''))||'').trim().slice(0,160)+'）';st((e&&e.code==='bad_key'?'このキーは使えませんでした。コピーした文字を確かめてください。保存していません。':navigator.onLine===false?'電波がないので確かめられませんでした。保存していません。':'Geminiにつながりませんでした。保存していません。')+d)}}
     finally{$('ai-key-save').disabled=false;aiNote()}});
   $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
