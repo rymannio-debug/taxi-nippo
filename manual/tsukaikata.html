@@ -146,6 +146,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tbody>
 </table></div>
 <p>帰庫したときの日報、修正画面、設定の「会社の決まり」にも、その説明へのボタンがあります。マニュアルは別の画面で開き、押した説明の見出しへ自動で移ります。マニュアルは読むだけのページで、書き換えはできません（内容の直しはClaudeが行います）。マニュアルの中の青い字を押すと、ほかの章やほかのマニュアルへ移ります。アプリに戻るときは、マニュアルの左上の［‹ 戻る］を押します。iPhoneのホーム画面に置いた版から開いたときは「完了」を押すと戻ります（Safariでアプリのアドレスを開くと、記録の入っていない別の画面になります）。Claude版から開いたときは、［‹ 戻る］でClaude版に戻ります。</p>
+<p><strong>AIに聞く（Claude版だけ）</strong>　［？ マニュアル］の画面のいちばん上に「AIに聞く」の欄があります。「足切りはどこで入れるの？」のように打って「聞く」を押すと、マニュアルをもとにAI（Claude）が短く答え、その下に根拠にした章へのボタンが出ます。押すと、その章の見出しへ移ります。考えるのに数秒かかります。途中でやめるときは「止める」を押します。答えはまちがうこともあるので、章のボタンでマニュアルを確かめてください。あなたのClaudeの利用枠を使います。初めて使うときは、Claudeを使ってよいかの確認が出ます。走行中は使わないでください。単体版（iPhoneのホーム画面の版）には、この欄はありません。</p>
 <h2 id="day">3. 日報の画面の見方</h2>
 <p>いちばん使うのは「日報」の画面です。次に押すボタンは、いつも画面のいちばん下に大きく出ます。画面を下へ動かしても、下のボタンは同じ場所にあります。</p>
 <p>日報の画面の文字は、読みやすさを優先したUD（ユニバーサルデザイン）書体のBIZ UDPゴシックです。時刻・地名・金額は大きく濃くし、今日の流れでは降車地を「→」の下の行に出しています。</p>
@@ -1578,6 +1579,11 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>自動で始まる</td>
 <td>「🎤 答える」を押してから答える</td>
 </tr>
+<tr>
+<td>AIに聞く（マニュアルの質問）</td>
+<td>できない</td>
+<td>できる</td>
+</tr>
 </tbody>
 </table></div>
 <p>Claude版では、画面のいちばん下に保存の状態が出ます。「Claudeに保存済み」はどの端末でも同じ記録が見られる状態、「通信できません」はiPhoneには保存済みで、つながったときに自動で送り直す状態です。Claude版の記録を単体版に移すときは、Claude版でバックアップを保存し、単体版の「設定」で復元します。Claude版で記録を消すと、Claudeに保存した分と、ほかの端末の記録も消えます。</p>
@@ -1622,7 +1628,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v81（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v82（2026-11-22）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

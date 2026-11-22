@@ -1020,6 +1020,13 @@ body.driving #stpill,body.driving #toast{display:none!important}
 .mv-a::after{content:"開く ›";flex:none;font-size:calc(13px*var(--fs,1));font-weight:700;color:var(--muted)}
 .mv-docs .mv-a{background:var(--surface);border-width:2px}
 #mv .c-head .btn{flex:0 0 auto;white-space:nowrap;min-height:44px}
+/* AIに聞く (Claude版だけ): 質問とマニュアルの抜き出しを Claude に送り、答えと根拠の章へのリンクを出す */
+.ai textarea{width:100%;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--field);font-size:calc(16px*var(--fs,1));resize:vertical}
+.ai .btnrow{display:flex;gap:8px}
+.ai-a{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:calc(15px*var(--fs,1));line-height:1.65;white-space:normal;overflow-wrap:anywhere}
+.ai-a.wait{color:var(--muted)}
+.ai-a .ai-src{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ai-note{font-size:calc(12.5px*var(--fs,1));color:var(--muted);line-height:1.5}
 .manrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:calc(13.5px*var(--fs,1));color:var(--muted)}
 .manrow a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-weight:700;font-size:calc(13.5px*var(--fs,1));background:var(--surface)}
 .hrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -1453,6 +1460,12 @@ body.driving #stpill,body.driving #toast{display:none!important}
 <div class="ov" id="mv" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mv-h">
     <div class="c-head"><div><h3 id="mv-h">マニュアル</h3><span>押すと、マニュアルがその説明のところで開きます（別の画面）。見終わったら、このアプリに戻ってください。</span></div><button type="button" class="btn x" id="mv-close">閉じる</button></div>
+    <div class="mv-sec ai" id="ai" hidden><b>AIに聞く（Claude版だけ）</b>
+      <textarea id="ai-q" rows="2" maxlength="300" placeholder="例：足切りはどこで入れるの？" aria-label="AIに聞きたいこと"></textarea>
+      <div class="btnrow"><button type="button" class="btn" id="ai-stop" hidden>止める</button><button type="button" class="btn pri" id="ai-go">聞く</button></div>
+      <div class="ai-a" id="ai-a" aria-live="polite" hidden></div>
+      <small class="ai-note">マニュアルをもとにAI（Claude）が答えます。まちがうこともあるので、下のリンクのマニュアルで確かめてください。あなたのClaudeの利用枠を使います。走行中は使わないでください。</small>
+    </div>
     <div class="mv-sec"><b id="mv-here-h">この画面の説明</b><div class="mv-links" id="mv-here"></div></div>
     <div class="mv-sec"><b>3つのマニュアル</b><div class="mv-docs" id="mv-docs"></div></div>
     <div class="manrow" id="mv-trouble">困ったとき：</div>
@@ -2235,7 +2248,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v81',APP_DATE='2026-11-22';
+const APP_VER='v82',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4349,7 +4362,45 @@ function wireDownloads(dl){
       });
     });
 }
+/* AIに聞く (Claude版だけ): マニュアルの原稿 (manual/src/*.md、Claude版と一緒に置く) を章に分け、
+   質問に近い章だけを Claude に渡して答えさせる。答えの [[doc#id]] は、その章へのリンクにする */
+const AI={s:null,secs:null,ctl:null},AIDOC={easy:'かんたん手順書',zukai:'図解マニュアル',tsukaikata:'使い方マニュアル'};
+async function aiSecs(){if(AI.secs)return AI.secs;const out=[];
+  for(const d of Object.keys(AIDOC)){const r=await fetch('manual/src/'+d+'.md');if(!r.ok)throw new Error('md');const t=await r.text();let cur=null,h2='';
+    for(const line of t.split('\n')){const m=line.match(/^(#{2,4}) (.+?)\s*\{#([\w-]+)\}\s*$/);
+      if(m){if(m[1]==='##')h2=m[2];cur={doc:d,id:m[3],title:(m[1]==='##'?'':h2+' › ')+m[2],text:''};out.push(cur)}
+      else if(cur&&!/^!\[/.test(line))cur.text+=line+'\n'}}
+  return AI.secs=out}
+const aiGrams=t=>{const s=t.replace(/[\s、。，．・？！?!「」（）()［］\[\]『』:：]/g,''),g=new Set();for(let i=0;i<s.length-1;i++)g.add(s.slice(i,i+2));return g};
+function aiPick(q,secs){const g=[...aiGrams(q)].filter(b=>!/^[ぁ-ん]{2}$/.test(b));if(!g.length)return [];
+  // 珍しい2文字ほど重く (どの章にもある「入れ」などは軽く)。見出しに出れば3倍、本文は3回まで
+  const N=secs.length,w=g.map(b=>{const df=secs.filter(x=>x.title.includes(b)||x.text.includes(b)).length;return df?Math.log((N+1)/df):0});
+  const sc=secs.map(x=>{let n=0;g.forEach((b,i)=>{if(!w[i])return;if(x.title.includes(b))n+=3*w[i];n+=Math.min(3,x.text.split(b).length-1)*w[i]});return [n,x]}).filter(a=>a[0]>0).sort((a,b)=>b[0]-a[0]);
+  const pick=[];let len=0;for(const [,x] of sc){const t=x.text.trim().slice(0,2500);if(len+t.length>9000||pick.length>=7)break;pick.push(x);len+=t.length}return pick}
+const aiLink=(d,id)=>MBASE+d+'.html'+MQ+'#'+id;
+function aiShow(text,secs,done){const a=$('ai-a');a.hidden=false;a.classList.toggle('wait',!done&&!text);
+  const used=[];let h=esc(text||'考えています…').replace(/\[\[(easy|zukai|tsukaikata)#([\w-]+)\]\]/g,(m,d,id)=>{const x=(secs||[]).find(y=>y.doc===d&&y.id===id);if(!x)return '';if(!used.includes(x))used.push(x);return ''}).replace(/\n{2,}/g,'\n').trim().replace(/\n/g,'<br>');
+  if(done&&used.length)h+='<div class="ai-src">'+used.map(x=>'<a class="mv-a" href="'+aiLink(x.doc,x.id)+'" target="_blank" rel="noopener"><span><b>'+esc(x.title)+'</b><small>'+AIDOC[x.doc]+'</small></span></a>').join('')+'</div>';
+  a.innerHTML=h}
+async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-stop');if(!q||!AI.s){$('ai-q').focus();return}
+  go.disabled=true;stop.hidden=false;aiShow('',null,false);let secs=[];
+  try{secs=aiPick(q,await aiSecs())}catch(e){aiShow('マニュアルを読み込めませんでした。上の「3つのマニュアル」から開いてください。',null,true);go.disabled=false;stop.hidden=true;return}
+  const here=manHere().map(k=>MS[k][2]).join('、'),scr={'#list':'一覧','#month':'月集計','#year':'年集計','#map':'地図','#set':'設定'}[location.hash]||'日報';
+  const prompt='あなたはスマホアプリ「タクシー売上日報」のヘルプ係です。タクシー運転手の質問に、下の「マニュアルの抜き出し」だけを根拠にして日本語で答えてください。\n'
+   +'決まり:\n- やさしい言葉で、3〜7行。手順は 1. 2. のように番号を付ける。ボタンや欄の名前はマニュアルの表記どおり「」で書く。\n- 最後の行に、根拠にした節の印を [[easy#ride]] の形で1〜3個だけ書く（抜き出しにある印だけ）。\n- 抜き出しに答えがないときは「マニュアルには書かれていません」と書き、近い節の印を示す。マニュアルにない操作や機能を作らない。\n- 走行中に画面を操作することは勧めない。\n\n'
+   +'いま開いている画面: '+scr+'（この画面に合う説明: '+here+'）\n質問: '+q+'\n\n--- マニュアルの抜き出し ---\n'
+   +(secs.length?secs.map(x=>'[['+x.doc+'#'+x.id+']] '+AIDOC[x.doc]+' › '+x.title+'\n'+x.text.trim().slice(0,2500)).join('\n\n'):'（質問に近い節が見つかりませんでした）');
+  AI.ctl=new AbortController();
+  try{const r=await AI.s(prompt,{modelTier:'quick',signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true)}
+  catch(e){const c=e&&e.code;
+    if(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared'){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
+    else aiShow((e&&e.text?e.text+'\n\n':'')+({cancelled:'止めました。',rate_limited:'いまは混み合っています。少し待ってからもう一度押してください。',prompt_too_large:'質問を短くしてください。'}[c]||'答えを出せませんでした。もう一度押すか、下のマニュアルから探してください。'),secs,true)}
+  finally{AI.ctl=null;go.disabled=false;stop.hidden=true}}
+$('ai-go').addEventListener('click',aiAsk);
+$('ai-stop').addEventListener('click',()=>{if(AI.ctl)AI.ctl.abort()});
+$('ai-q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();aiAsk()}});
 if(window.claude&&window.claude.use){
+  window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;$('ai').hidden=false}).catch(()=>{});
   window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false}).catch(()=>{});
   window.claude.use('downloads').then(dl=>{if(dl)wireDownloads(dl)}).catch(()=>{});
   window.claude.use('dictation').then(d=>{
