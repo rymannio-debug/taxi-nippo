@@ -2260,7 +2260,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v87',APP_DATE='2026-11-22';
+const APP_VER='v88',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4448,7 +4448,8 @@ async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-s
   try{
     if(SOLO){const t=await gemCall(key,prompt,AI.ctl.signal);aiShow(t.replace(/\*\*/g,''),secs,true)}
     else{const r=await AI.s(prompt,{modelTier:'quick',signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true)}}
-  catch(e){const c=e&&(e.code||(e.name==='AbortError'?(AI.timeout?'timeout':'cancelled'):navigator.onLine===false?'offline':SOLO?'network':''));
+  catch(e){// fetch を止めたときの DOMException は code が数字(20)なので、名前で先に見分ける
+    const c=e&&(e.name==='AbortError'?(AI.timeout?'timeout':'cancelled'):typeof e.code==='string'?e.code:navigator.onLine===false?'offline':SOLO?'network':'');
     if(!SOLO&&(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared')){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
     else{const m={cancelled:'止めました。',busy:'いまGeminiが混み合っています。少し時間をおいて、もう一度押してください。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',
       prompt_too_large:'質問を短くしてください。',bad_key:'Geminiのキーが使えませんでした。設定の「AIに聞く」でキーを確かめてください。',timeout:'答えが返ってきませんでした。',offline:'電波がないので、AIに聞けません。',network:'Geminiにつながりませんでした。'}[c]||'答えを出せませんでした。';

@@ -1,7 +1,7 @@
 /* Offline support. The page itself is fetched fresh from the network whenever there is a signal (so an update shows on the
    next open), and the saved copy is used only when the network fails. Other files are served from the phone and refreshed in the
    background. Every network fetch skips the browser's own HTTP cache, so an old copy is never saved as the new one. */
-const CACHE='taxi-nippo-4ca15ce1b2';
+const CACHE='taxi-nippo-f2f514f5ce';
 const FILES=['./','index.html','manifest.webmanifest','icon-180.png','icon-192.png','leaflet.js','leaflet.css',"manual/easy.html","manual/tsukaikata.html","manual/zukai.html","manual/img/z-ana.webp","manual/img/z-ask.webp","manual/img/z-check.webp","manual/img/z-coset.webp","manual/img/z-day.webp","manual/img/z-daynight.webp","manual/img/z-drive.webp","manual/img/z-edit.webp","manual/img/z-extras.webp","manual/img/z-fare.webp","manual/img/z-kiko.webp","manual/img/z-listen.webp","manual/img/z-meter.webp","manual/img/z-order.webp","manual/img/z-result.webp","manual/img/z-screens.webp","manual/img/z-set.webp","manual/img/z-states.webp","manual/img/z-timeline.webp","manual/img/z-years.webp","manual/src/easy.md","manual/src/tsukaikata.md","manual/src/zukai.md"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('taxi-nippo-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
