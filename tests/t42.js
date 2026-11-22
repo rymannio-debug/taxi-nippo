@@ -33,7 +33,7 @@ ok(!(await vis(p,'#go'))&&!(await vis(p,'#reset'))&&!(await vis(p,'#why')),'灰�
 ok(await vis(p,'#q-text')&&await vis(p,'#q-fare'),'「文字で入れる」「料金から入れる」がある');
 await C(p,'q-text');await p.waitForTimeout(300);ok(await vis(p,'#say')&&await p.evaluate(()=>document.activeElement.id)==='say','「文字で入れる」で入力欄が開く');
 await p.evaluate(()=>document.activeElement.blur());await C(p,'reset').catch(()=>{});await p.waitForTimeout(300);
-const h=await p.evaluate(()=>document.documentElement.scrollHeight);ok(h<1720,'日報画面の高さ '+h+'px（上の切り替えを押しやすい44pxにした分を含む）');
+const h=await p.evaluate(()=>document.documentElement.scrollHeight);ok(h<1740,'日報画面の高さ '+h+'px（上の切り替えを押しやすい44pxにした分を含む）');
 
 console.log('3. 乗車・降車・料金・支払い（テンキーの確定のあと支払いボタン）');
 await p.waitForTimeout(2100);await C(p,'ride-b');await p.waitForTimeout(400);

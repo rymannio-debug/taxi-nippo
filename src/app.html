@@ -4150,7 +4150,9 @@ $('basechips').addEventListener('click',e=>{const b=e.target.closest('[data-base
 const yenVal=v=>String(v).replace(/[,，円\s]/g,'');
 const tierRead=()=>[...$('tier-list').querySelectorAll('.tier')].map(r=>({min:yenVal(r.querySelector('[data-tmin]').value),rate:r.querySelector('[data-trate]').value}));
 function tierSave(rows){settings=cleanSettings(Object.assign({},settings,{tiers:rows}));tierExtra=Math.max(0,rows.length-settings.tiers.length);saveSettings()}
-$('tier-list').addEventListener('change',()=>{tierSave(tierRead());renderProSet();render()});/* the rows stay as they are */
+$('tier-list').addEventListener('change',()=>{tierSave(tierRead());renderProSet();render()});
+/* iPhone では、キーボードの外を押しても欄を離れないことがある。打つたびにも保存する（並びは作り直さない） */
+let tierT=null;$('tier-list').addEventListener('input',()=>{clearTimeout(tierT);tierT=setTimeout(()=>{tierSave(tierRead());renderProSet();render()},400)});/* the rows stay as they are */
 $('tier-list').addEventListener('click',e=>{const b=e.target.closest('[data-tdel]');if(!b)return;const rows=tierRead();rows.splice(+b.dataset.tdel,1);b.blur();tierSave(rows);tierRender();renderProSet();render()});
 $('tier-add').addEventListener('click',()=>{if(settings.tiers.length+tierExtra>=6)return;tierExtra++;tierRender();renderProSet();const r=$('tier-list').lastElementChild;if(r)r.querySelector('[data-tmin]').focus()});
 /* from the month and the 帰庫 screen to 会社の決まり */

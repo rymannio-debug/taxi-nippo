@@ -71,7 +71,8 @@ await feed(p,5);await p.waitForTimeout(100);ok(await vis(p,'#drv'),'2回続く�
 ok(/空車/.test(await txt(p,'#drv-st'))&&/5,500/.test(await txt(p,'#drv-sum')),'いまの状態と今日の営収が大きく出る');
 ok(await p.evaluate(()=>document.body.classList.contains('driving')),'走行中の印');
 const cover=await p.evaluate(()=>{const e=document.elementFromPoint(195,780);return !!(e&&e.closest('#drv'))});ok(cover,'下の大きいボタンは隠れて押せない');
-await tapEl(p,'#drv-talk');ok(await vis(p,'#vs'),'［話す］は押せる（声で記録できる）');
+await p.evaluate(()=>{window.__vo=0;const o=window.voStart;window.voStart=(...a)=>{window.__vo++;return o(...a)}});
+await tapEl(p,'#drv-talk');ok(await p.evaluate(()=>window.__vo)===1,'［話す］は押せる（声で記録できる）');
 await p.evaluate(()=>{const c=document.getElementById('vs-close')||document.querySelector('.vs-close');c&&c.click()});await p.waitForTimeout(300);
 await feed(p,0);ok(await vis(p,'#drv'),'止まった1回目ではまだ');
 await feed(p,0);await p.waitForTimeout(100);ok(!(await vis(p,'#drv')),'2回続くと元の画面に戻る');
