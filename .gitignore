@@ -1,3 +1,6 @@
 node_modules/
 test-results/
 *.log
+tests/*.png
+!tests/tile_osm.png
+!tests/tile_pale.png

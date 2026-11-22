@@ -8,7 +8,7 @@ const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:
 await ctx.route(/tile|open-meteo/,r=>r.abort());await ctx.route(/nominatim/,r=>r.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:'{"address":{"province":"東京都","city":"調布市"}}'}));
 await ctx.route(/LonLatToAddress/,r=>r.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:'{"results":{"muniCd":"13208","lv01Nm":"小島町一丁目"}}'}));
 const p=await ctx.newPage().then(async pg=>{await pg.addInitScript(AUTOF);await pg.addInitScript(SHIM);return pg});const E=[];p.on('pageerror',e=>E.push(e.message));
-await p.addInitScript(RIDE);await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+await p.addInitScript(RIDE);await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
 const pos=()=>p.$eval('#ride-b',e=>{const r=e.getBoundingClientRect();return {txt:e.textContent,bottom:Math.round(innerHeight-r.bottom),w:Math.round(r.width),h:Math.round(r.height),bg:getComputedStyle(e).backgroundColor,vis:getComputedStyle(e).display!=='none'}});
 let q=await pos();ok(q.bottom<110&&q.w>330&&q.h>=100&&q.vis,scheme+' 空車: 下に大きく固定 '+JSON.stringify(q));ok(await p.evaluate(()=>{const r=document.getElementById('dockrow').getBoundingClientRect();return r.bottom>innerHeight-40&&r.height>50}),'その下に［休憩］［話す］［帰庫］');
 await p.evaluate(()=>window.scrollTo(0,9999));await p.waitForTimeout(200);q=await pos();ok(q.bottom<110,'下まで動かしても下に残る');

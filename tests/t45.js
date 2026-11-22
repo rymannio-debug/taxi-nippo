@@ -5,7 +5,7 @@ const today=(()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMont
 async function page(seed,opt={}){const ctx=await b.newContext({viewport:opt.vp||{width:390,height:844}});await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());
  const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;if(opt.time)await p.clock.setFixedTime(opt.time);
  await p.addInitScript(sd=>{if(!localStorage.getItem('__s')){localStorage.clear();for(const k in sd)localStorage.setItem(k,JSON.stringify(sd[k]));localStorage.setItem('__s','1')}},seed);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);return p}
 const C=(p,id)=>p.evaluate(i=>document.getElementById(i).click(),id);
 const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.height>0},sel);
 const tl=p=>p.$$eval('#listwrap .tl',e=>e.map(x=>x.className.replace('tl ','')+':'+x.textContent.replace(/\s+/g,' ').trim().slice(0,22)));

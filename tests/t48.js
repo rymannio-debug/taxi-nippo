@@ -20,7 +20,7 @@ const D={
 async function page(o={}){const ctx=await b.newContext({viewport:o.vp||{width:390,height:844},colorScheme:o.dark?'dark':'light'});await fr(ctx);await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.clock.setFixedTime(new Date(2026,10,20,12,0));
  await p.addInitScript(([sd,o])=>{if(o.claude)window.claude={use:async()=>null};if(!localStorage.getItem('__s')){localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));if(o.ui)localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify(o.ui));localStorage.setItem('__s','1')}},[D,o]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 /* headless Chromium can drop localStorage on a reload of a file:// page; put back what the page had (app settings included) */
 const reloadKeep=async q=>{const snap=await q.evaluate(()=>Object.assign({},localStorage));await q.addInitScript(sn=>{for(const k in sn)localStorage.setItem(k,sn[k])},snap);await q.reload()};
 const C=(p,sel)=>p.evaluate(s=>document.querySelector(s).click(),sel);
@@ -138,7 +138,7 @@ console.log('11. デバッグで直したところ');
  const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());const q=await ctx.newPage();const E2=[];q.on('pageerror',e=>E2.push(e.message));
  await q.clock.setFixedTime(new Date(2026,10,20,12,0));
  await q.addInitScript(sd=>{localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify({mview:'ana'}))},D2);
- await q.goto('file://'+__dirname+'/../index.html');await q.waitForTimeout(600);await q.evaluate(()=>document.getElementById('tab-month').click());await q.waitForTimeout(400);
+ await q.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await q.waitForTimeout(600);await q.evaluate(()=>document.getElementById('tab-month').click());await q.waitForTimeout(400);
  const mu=await q.evaluate(()=>['東村山市本町二丁目','武蔵村山市本町','田村市船引町','新宿区市谷本村町','横浜市中区本町','神奈川県川崎市中原区小杉町','市川市市川','四日市市諏訪町','西多摩郡瑞穂町箱根ケ崎','市ヶ谷駅'].map(muniOf).join());
  ok(mu==='東村山市,武蔵村山市,田村市,新宿区,横浜市中区,川崎市中原区,市川市,四日市市,西多摩郡瑞穂町,市ヶ谷駅','市区町村のまとめ方（東村山市が「東村」にならない） '+mu);
  const R2=await rows(q,'#m-a0 table');ok(R2.length===1&&R2[0][0]==='3日(火)'&&/22時間を超える日/.test(await txt(q,'#m-a0')),'帰庫を出庫より前に入れた日（23時間）は時間の計算から外す');

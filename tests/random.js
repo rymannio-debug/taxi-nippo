@@ -10,7 +10,7 @@ for(let r=0;r<6;r++){const D={};for(let i=0;i<60;i++){const dt=new Date(2023+Mat
  const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));
  await p.clock.setFixedTime(new Date(2026,10,20,12,0));
  await p.addInitScript(sd=>{localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));localStorage.setItem('taxi-nippo-set-v1',JSON.stringify({dayGoal:Math.random()<.5?50000:null,monthGoal:600000,closeDay:[0,15,20,25,'x'][Math.floor(Math.random()*5)],work:['','day','kaku','bad'][Math.floor(Math.random()*4)],endPlan:Math.random()<.5?'02:00':'',rate:Math.random()<.5?52:'',cutoff:Math.random()<.5?450000:null,change:Math.random()<.5?10000:null,name:'運転 太郎',emp:42,spots:[{n:'駅',la:35.65,lo:139.54},{n:5},null]}));localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify({aopen:{0:true,1:true,2:true,3:true,4:true,5:true},odo:Math.random()<.5?'end':'ride',nktoll:Math.random()<.5}))},D);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(600);
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(600);
  const chk=async lab=>{const t=await p.evaluate(()=>[...document.querySelectorAll('main section:not([hidden]),.app>section:not([hidden])')].map(s=>s.innerText).join('\n')||document.body.innerText);const m=t.match(/NaN|undefined|Infinity|\[object/g);if(m)bad.push('乱数'+r+' '+lab+': '+[...new Set(m)].join(','))};
  const click=sel=>p.evaluate(s=>{const e=document.querySelector(s);if(e)e.click();return !!e},sel);
  const ks=Object.keys(D).sort();

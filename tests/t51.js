@@ -10,7 +10,7 @@ async function page(data,o={}){const ctx=await b.newContext({viewport:o.vp||{wid
  const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.clock.install({time:o.at||new Date(2026,10,21,17,30)});
  await p.addInitScript(([sd,u])=>{if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();if(sd)localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));if(u)localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify(u))},[data||null,o.ui||null]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const C=(p,id)=>p.evaluate(i=>document.getElementById(i).click(),id);
 const kv=p=>p.evaluate(()=>[...document.querySelectorAll('#rv-body .rtable tr')].filter(r=>r.querySelector('th')).map(r=>r.querySelector('th').textContent+'='+r.querySelector('td').textContent).join('|'));
 const txt=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\s+/g,' '):''},sel);

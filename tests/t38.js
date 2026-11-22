@@ -10,7 +10,7 @@ await p.addInitScript(()=>{
   window.SpeechSynthesisUtterance=function(t){this.text=t};window.webkitSpeechRecognition=undefined;
   window.SpeechRecognition=class{start(){const t=window.__q.shift();setTimeout(()=>{if(t!=null){const r=[[{transcript:t}]];r[0].isFinal=true;this.onresult({resultIndex:0,results:r})}setTimeout(()=>this.onend(),60)},120)}stop(){setTimeout(()=>this.onend&&this.onend(),20)}abort(){setTimeout(()=>this.onend&&this.onend(),20)}};
 });
-await p.addInitScript(RIDE);await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+await p.addInitScript(RIDE);await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
 const say=async(...lines)=>{await p.evaluate(l=>window.__q.push(...l),lines);await p.tap('#vbtn');await p.waitForTimeout(700*lines.length+900)};
 const day=()=>p.evaluate(k=>JSON.parse(JSON.stringify(days)||'{}')[k]||{},today);
 const last=()=>p.evaluate(()=>window.__said.slice(-3).join(' / '));

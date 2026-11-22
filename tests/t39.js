@@ -10,7 +10,7 @@ const p=await ctx.newPage();await p.addInitScript(SHIM);const E=[];p.on('pageerr
 await p.addInitScript(s=>{if(!sessionStorage.getItem('x')){localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(s));sessionStorage.setItem('x','1')}
   window.__said=[];Object.defineProperty(window,'speechSynthesis',{configurable:true,get:()=>({speak:u=>{if(u.text.trim()){window.__said.push(u.text);setTimeout(()=>u.onend&&u.onend(),100)}},cancel:()=>{},getVoices:()=>[]})});window.SpeechSynthesisUtterance=function(t){this.text=t};
 },{[today]:{type:'day',date:today,trips:[],breaks:[],startTime:'05:00',endTime:'',odoStart:null,odoEnd:null}});
-await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
 const n=()=>p.evaluate(k=>(JSON.parse(JSON.stringify(days))[k].trips||[]).length,today);
 console.log('1. 抜けのない1件はすぐ記録');
 await p.evaluate(()=>document.getElementById('ride-b').click());await p.waitForTimeout(1500);await p.evaluate(()=>document.activeElement.blur());

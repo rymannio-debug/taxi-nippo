@@ -9,7 +9,7 @@ async function page(seed,geoOk){const ctx=await b.newContext({viewport:{width:39
  await ctx.route(/LonLatToAddress/,r=>geoOk?r.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:'{"results":{"muniCd":"13208","lv01Nm":"小島町一丁目"}}'}):r.abort());
  const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.addInitScript(sd=>{if(!localStorage.getItem('__s')){localStorage.clear();for(const k in sd)localStorage.setItem(k,JSON.stringify(sd[k]));localStorage.setItem('__s','1')}},seed);
- await p.addInitScript(RIDE);await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);p.taps=0;return p}
+ await p.addInitScript(RIDE);await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);p.taps=0;return p}
 const tap=async(p,sel)=>{await p.evaluate(s=>document.querySelector(s).click(),sel);p.taps++;await p.waitForTimeout(500)};
 const key=(p,k)=>tap(p,'#np-kf [data-k="'+k+'"], #np .np-k:not(.np-kf) [data-k="'+k+'"]');
 const kf=(p,k)=>tap(p,'#np-kf [data-k="'+k+'"]');

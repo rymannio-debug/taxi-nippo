@@ -8,7 +8,7 @@ for(const y of [2022,2023,2025,2026])for(let m=1;m<=12;m++){if(y===2026&&m>11)co
 async function page(o={}){const ctx=await b.newContext({viewport:o.vp||{width:390,height:844}});await fr(ctx);await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.clock.setFixedTime(new Date(2026,10,20,12,0));
  await p.addInitScript(sd=>{if(!localStorage.getItem('__s')){localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));localStorage.setItem('__s','1')}},D);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const C=(p,sel)=>p.evaluate(s=>document.querySelector(s).click(),sel);
 const txt=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\s+/g,' '):''},sel);
 const rows=(p,sel)=>p.$$eval(sel+' table.my tbody tr',r=>r.map(x=>[...x.children].map(c=>c.textContent.trim())));
@@ -59,7 +59,7 @@ console.log('記録が今年しかないとき・狭い画面');
 const only={};for(const k of Object.keys(D).filter(k=>k.startsWith('2026-11')))only[k]=D[k];
 const ctx=await b.newContext({viewport:{width:320,height:568}});await fr(ctx);p=await ctx.newPage();p.E=[];p.on('pageerror',e=>p.E.push(e.message));await p.clock.setFixedTime(new Date(2026,10,20,12,0));
 await p.addInitScript(sd=>{localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify({mcmp:'multi'}));localStorage.setItem('taxi-nippo-yr-v1',JSON.stringify({mode:'cal',cmp:'multi'}))},only);
-await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);
+await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);
 await C(p,'#tab-month');await p.waitForTimeout(300);ok(/前の年の同じ期間の記録がまだない/.test(await txt(p,'#m-cmp')),'前の年がないときは、その旨を出す');
 ok(!(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth)),'320pxではみ出さない（月）');
 await C(p,'#tab-year');await p.waitForTimeout(300);ok(!(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth)),'320pxではみ出さない（年）');

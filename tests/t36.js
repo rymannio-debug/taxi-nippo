@@ -25,7 +25,7 @@ async function page(mode){
        const res=[[{transcript:t}]];res[0].isFinal=kind==='f';this.onresult&&this.onresult({resultIndex:0,results:res});setTimeout(step,150)};setTimeout(step,150)}
      stop(){setTimeout(()=>this.onend&&this.onend(),30)} abort(){setTimeout(()=>this.onend&&this.onend(),30)}};
   }},[seed,mode]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const store=(p)=>p.evaluate(k=>JSON.parse(JSON.stringify(days))[k].trips,today);
 for(const mode of ['solo','claude']){
 console.log('==',mode==='solo'?'単体版（ブラウザの音声認識）':'Claude版（dictation）');
@@ -73,6 +73,6 @@ console.log('errors',p.E);await p.context().close()}
 console.log('== 使えないとき');
 {const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true});const p=await ctx.newPage().then(async pg=>{await pg.addInitScript(AUTOF);await pg.addInitScript(SHIM);return pg});
  await p.addInitScript(()=>{window.SpeechRecognition=class{start(){setTimeout(()=>{this.onerror({error:'service-not-allowed'});this.onend()},50)}stop(){}abort(){}};window.webkitSpeechRecognition=undefined});
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(600);await p.tap('#vbtn');await p.waitForTimeout(500);
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(600);await p.tap('#vbtn');await p.waitForTimeout(500);
  ok(!(await p.isVisible('#vs'))&&await p.evaluate(()=>document.activeElement.id)==='say','使えないときは入力欄が開き、キーボードのマイクへ');ok(/キーボードのマイク/.test(await p.textContent('#toast-t')),'知らせが出る');await ctx.close()}
 await b.close()})();

@@ -6,7 +6,7 @@ for(const vp of [{width:320,height:568},{width:375,height:667},{width:390,height
   const ctx=await b.newContext({viewport:vp,hasTouch:true,isMobile:true});await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());
   const p=await ctx.newPage();await p.clock.install({time:new Date(2026,10,21,7,30)});
   await p.addInitScript(()=>{if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify({'2026-11-21':{type:'day',date:'2026-11-21',startTime:'06:55',odoStart:85100,breaks:[],trips:[{id:'x',t:'07:00',tin:'07:00',tout:'07:10',fare:1500,pay:'cash',ts:1}]}}))});
-  await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+  await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
   const T=async id=>{const r=await p.evaluate(i=>{const e=document.getElementById(i).getBoundingClientRect();return [e.left+e.width/2,e.top+e.height/2]},id);await p.touchscreen.tap(r[0],r[1]);await p.waitForTimeout(500)};
   if(st==='on'||st==='done'||st==='pad'||st==='pay'){await T('ride-b');await p.clock.runFor(10*60000)}
   if(st==='done'||st==='pad'||st==='pay'){await T('ride-b');}
@@ -23,7 +23,7 @@ for(const vp of [{width:320,height:568},{width:375,height:667},{width:390,height
 const ctx=await b.newContext({viewport:vp,hasTouch:true,isMobile:true});await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());
 const p=await ctx.newPage();await p.clock.install({time:new Date(2026,10,21,7,30)});
 await p.addInitScript(()=>{if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify({'2026-11-21':{type:'day',date:'2026-11-21',startTime:'06:55',odoStart:85100,breaks:[],trips:[]}}))});
-await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
 const tapId=async id=>{const r=await p.evaluate(i=>{const e=document.getElementById(i).getBoundingClientRect();return [e.left+e.width/2,e.top+e.height/2]},id);await p.touchscreen.tap(r[0],r[1]);await p.waitForTimeout(500)};
 await tapId('ride-b');const s1=await p.evaluate(()=>document.getElementById('ride').dataset.st);
 await p.clock.runFor(10*60000);await tapId('ride-b');const s2=await p.evaluate(()=>document.getElementById('ride').dataset.st+'/'+!document.getElementById('np').hidden);

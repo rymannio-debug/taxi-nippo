@@ -10,7 +10,7 @@ async function page(seed,opt={}){const ctx=await b.newContext({viewport:{width:3
   if(o.silent){window.webkitSpeechRecognition=undefined;window.SpeechRecognition=class{start(){setTimeout(()=>this.onend&&this.onend(),150)}stop(){}abort(){}}}
   Object.defineProperty(window,'speechSynthesis',{configurable:true,get:()=>({speak:u=>setTimeout(()=>u.onend&&u.onend(),30),cancel:()=>{},getVoices:()=>[]})});window.SpeechSynthesisUtterance=function(t){this.text=t};
  },[seed,opt]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);return p}
 const C=(p,id)=>p.evaluate(i=>document.getElementById(i).click(),id);
 const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.height>0},sel);
 const base={'taxi-nippo-v1':{[today]:{type:'day',date:today,startTime:'07:00',trips:[],breaks:[]}}};

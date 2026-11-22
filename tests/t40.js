@@ -8,7 +8,7 @@ await p.addInitScript(s=>{localStorage.setItem('taxi-nippo-v1',JSON.stringify(s)
  {id:'a',t:'08:00',tin:'08:00',tout:'08:40',fare:2400,pay:'cash',pax:1,from:'調布駅',to:'',o1:45110,o2:45118,ts:1},
  {id:'b',t:'08:30',tin:'08:30',tout:'08:50',fare:1500,pay:'card',pax:1,from:'府中駅',to:'国立駅',o1:null,o2:null,ts:2},
  {id:'c',t:'09:30',tin:'09:30',tout:'09:45',fare:300,pay:'cash',pax:1,from:'国立駅',to:'立川駅',o1:45140,o2:45146,ts:3}]}});
-await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
 await p.click('#rv-open');await p.waitForTimeout(500);const t=await p.$$eval('#rv-check button',e=>e.map(x=>x.textContent.replace('直す ›','')));console.log('   '+t.join('\n   '));
 ok(t.length>=5,'問題 '+t.length+'件');ok(t.some(x=>/帰庫メーター/.test(x)),'帰庫メーターなし');ok(t.some(x=>/-01.*降車地/.test(x)),'01 降車地なし');ok(t.some(x=>/-02.*メーター/.test(x)),'02 メーターなし');ok(t.some(x=>/重なって/.test(x)),'時間の重なり');ok(t.some(x=>/-03.*料金/.test(x)),'03 料金 ¥300');ok(t.some(x=>/休憩が0分/.test(x)),'休憩0分');
 await p.screenshot({path:'ck_day.png'});

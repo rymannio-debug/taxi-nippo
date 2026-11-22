@@ -7,7 +7,7 @@ async function page(data,o={}){const ctx=await b.newContext({viewport:o.vp||{wid
  const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.clock.install({time:o.at||new Date(2026,10,21,18,0)});
  await p.addInitScript(([sd,set])=>{if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();if(sd)localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));if(set)localStorage.setItem('taxi-nippo-set-v1',JSON.stringify(set))},[data||null,o.set||null]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const tapEl=async(p,sel)=>{const r=await p.evaluate(s=>{const e=[...document.querySelectorAll(s)].find(x=>x.getClientRects().length);if(!e)return null;e.scrollIntoView({block:'center'});const q=e.getBoundingClientRect();return [q.left+q.width/2,q.top+q.height/2]},sel);if(!r)return false;await p.touchscreen.tap(r[0],r[1]);await p.waitForTimeout(350);return true};
 const keys=async(p,ks)=>{for(const k of ks){await tapEl(p,'#np [data-k="'+k+'"]')}};
 const txt=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\s+/g,' '):''},sel);

@@ -8,7 +8,7 @@ await ctx.route(/tile|open-meteo/,r=>r.abort());await ctx.route(/nominatim/,r=>r
 await ctx.route(/LonLatToAddress/,r=>r.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*'},body:'{"results":{"muniCd":"13208","lv01Nm":"小島町一丁目"}}'}));
 const p=await ctx.newPage().then(async pg=>{await pg.addInitScript(AUTOF);await pg.addInitScript(SHIM);return pg});const E=[];p.on('pageerror',e=>E.push(e.message));
 await p.addInitScript(s=>{if(!sessionStorage.getItem('x')){localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(s));sessionStorage.setItem('x','1')}},{[today]:{type:'day',date:today,trips:[{id:'z',t:'08:00',fare:1000,pay:'cash',pax:1,o1:45200,o2:45210,km:10}],breaks:[],startTime:'07:00',endTime:'',odoStart:45190,odoEnd:null}});
-await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);
+await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);
 const key=async k=>{await p.tap('#np [data-k="'+k+'"]:visible');await p.waitForTimeout(60)};
 const act=()=>p.evaluate(()=>document.activeElement&&document.activeElement.id);
 await p.tap('#ride-b');await p.waitForTimeout(600);

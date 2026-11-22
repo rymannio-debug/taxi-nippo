@@ -5,7 +5,7 @@ const pad=n=>String(n).padStart(2,'0');
 async function page(data,o={}){const ctx=await b.newContext({viewport:{width:390,height:844}});await fr(ctx);await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.clock.install({time:o.at||new Date(2026,10,21,14,20)});
  await p.addInitScript(([sd,u])=>{if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));if(u)localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify(u))},[data,o.ui||null]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const C=(p,id)=>p.evaluate(i=>document.getElementById(i).click(),id);
 const txt=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\s+/g,' '):''},sel);
 

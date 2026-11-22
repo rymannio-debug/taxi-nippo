@@ -10,7 +10,7 @@ async function page(data,o={}){const ctx=await b.newContext({viewport:o.vp||{wid
  await p.clock.install({time:o.at||new Date(2026,10,21,13,0)});
  await p.addInitScript(([sd,set,u,bk])=>{window.__wl=[];Object.defineProperty(navigator,'wakeLock',{configurable:true,value:{request:async t=>{const s={released:false,_l:[],addEventListener(n,f){this._l.push(f)},release:async function(){this.released=true;window.__wl.push('release');this._l.forEach(f=>f())}};window.__wl.push('request');return s}}});
   if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();if(sd)localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));if(set)localStorage.setItem('taxi-nippo-set-v1',JSON.stringify(set));if(u)localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify(u));if(bk)localStorage.setItem('taxi-nippo-bk-v1',bk)},[data||null,o.set||null,o.ui||null,o.bk||null]);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(800);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const tapEl=async(p,sel)=>{const r=await p.evaluate(s=>{const e=[...document.querySelectorAll(s)].find(x=>x.getClientRects().length);if(!e)return null;const q=e.getBoundingClientRect();return [q.left+q.width/2,q.top+q.height/2]},sel);if(!r)return false;await p.touchscreen.tap(r[0],r[1]);await p.waitForTimeout(350);return true};
 const keys=async(p,ks)=>{for(const k of ks){await tapEl(p,'#np [data-k="'+k+'"]')}};
 const txt=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);return e?e.textContent.replace(/\s+/g,' '):''},sel);

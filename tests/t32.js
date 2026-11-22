@@ -7,7 +7,7 @@ const ok=(c,m)=>console.log((c?'  ✓ ':'  ✗ ')+m);
 async function page(seed){const ctx=await b.newContext({viewport:{width:390,height:844},geolocation:{latitude:35.65,longitude:139.54},permissions:['geolocation']});
  await ctx.route(/nominatim|gsi|tile|open-meteo/,r=>r.abort());const p=await ctx.newPage().then(async pg=>{await pg.addInitScript(AUTOF);await pg.addInitScript(SHIM);return pg});const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;
  await p.addInitScript(sd=>{if(!sessionStorage.getItem('x')){localStorage.clear();if(sd)for(const k in sd)localStorage.setItem(k,typeof sd[k]==='string'?sd[k]:JSON.stringify(sd[k]));sessionStorage.setItem('x','1')}},seed||null);
- await p.addInitScript(RIDE);await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);return p}
+ await p.addInitScript(RIDE);await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);return p}
 const today=(()=>{const n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')})();
 const yd=(()=>{const n=new Date(Date.now()-864e5);return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')})();
 console.log('1. 2回押し');

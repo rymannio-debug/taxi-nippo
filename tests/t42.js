@@ -9,7 +9,7 @@ async function page(seed){const ctx=await b.newContext({viewport:{width:390,heig
   window.__said=[];window.__q=[];Object.defineProperty(window,'speechSynthesis',{configurable:true,get:()=>({speak:u=>{if(u.text.trim()){window.__said.push(u.text);setTimeout(()=>u.onend&&u.onend(),80)}},cancel:()=>{},getVoices:()=>[]})});window.SpeechSynthesisUtterance=function(t){this.text=t};
   window.webkitSpeechRecognition=undefined;window.SpeechRecognition=class{start(){const t=window.__q.shift();setTimeout(()=>{if(t!=null){const r=[[{transcript:t}]];r[0].isFinal=true;this.onresult({resultIndex:0,results:r})}setTimeout(()=>this.onend(),60)},120)}stop(){setTimeout(()=>this.onend&&this.onend(),20)}abort(){setTimeout(()=>this.onend&&this.onend(),20)}};
  },seed||null);
- await p.addInitScript(RIDE);await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);return p}
+ await p.addInitScript(RIDE);await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);return p}
 const C=(p,id)=>p.evaluate(i=>document.getElementById(i).click(),id);
 const vis=(p,sel)=>p.evaluate(s=>{const e=document.querySelector(s);if(!e)return false;const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(e).visibility!=='hidden'},sel);
 const dockS=p=>p.evaluate(()=>{const b=document.getElementById('ride-b');return {t:b.textContent,s:b.dataset.s,st:document.getElementById('ride').dataset.st,before:getComputedStyle(b,'::before').content}});

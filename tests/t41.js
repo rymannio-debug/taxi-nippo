@@ -8,7 +8,7 @@ async function page(seed,opt={}){const ctx=await b.newContext({viewport:opt.vp||
  if(opt.time)await p.clock.setFixedTime(opt.time);
  const E=[];p.on('pageerror',e=>E.push(e.message));p.on('console',m=>{if(m.type()==='error'&&!/Failed to load resource/.test(m.text()))E.push('console: '+m.text())});p.E=E;
  await p.addInitScript(sd=>{if(!sessionStorage.getItem('x')){localStorage.clear();if(sd)for(const k in sd)localStorage.setItem(k,typeof sd[k]==='string'?sd[k]:JSON.stringify(sd[k]));sessionStorage.setItem('x','1')}},seed||null);
- await p.goto('file://'+__dirname+'/../index.html');await p.waitForTimeout(700);return p}
+ await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(700);return p}
 const click=(p,id)=>p.evaluate(i=>document.getElementById(i).click(),id);
 async function tour(p){for(const t of ['tab-list','tab-month','tab-year','tab-day']){await click(p,t);await p.waitForTimeout(250)}
  await click(p,'rv-open');await p.waitForTimeout(400);await click(p,'rv-close').catch(()=>{});await p.waitForTimeout(150)}
