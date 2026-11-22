@@ -724,6 +724,40 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tr>
 </tbody>
 </table></div>
+<h3 id="inbound">訪日客をくわしく残す</h3>
+<p>客層で「訪日客」を押すと、その下に「話していた言葉」のボタンが出ます。言葉は、前回選んだものが最初から選ばれています。「地域・旅の形・支払い・やり取り」を開くと、分かるときだけ残せます。どれも入れなくても記録できます。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>選べるもの</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>話していた言葉</td>
+<td>英語、中国語、韓国語、タイ語、スペイン語、その他</td>
+</tr>
+<tr>
+<td>地域</td>
+<td>中国、台湾、香港、韓国、東南アジア、北米、欧州、豪州、中東、その他（会話で分かったときだけ）</td>
+</tr>
+<tr>
+<td>旅の形</td>
+<td>個人、家族、団体、出張</td>
+</tr>
+<tr>
+<td>支払い</td>
+<td>Alipay、WeChat Pay、海外のカード、その他（Alipay・WeChat Pay を押すと支払方法は「QR決済」、海外のカードは「カード」になる）</td>
+</tr>
+<tr>
+<td>やり取り</td>
+<td>翻訳アプリを使った、行き先を地図・画面で見せられた（いくつでも）</td>
+</tr>
+</tbody>
+</table></div>
+<p>声なら「訪日 中国語 台湾 家族 アリペイ 帝国ホテルから 2400円」のように続けて言えます。あとから直すときは、修正画面の「その他」で客層を「訪日客」にすると、同じ欄が出ます。一覧とCSVにも列があります。名前やパスポートなど、お客様個人が分かることは残しません。</p>
+<p><strong>乗せた場所・行き先の種類（自動）</strong>　乗車地・降車地の名前から「空港・病院・ホテル・観光地・商業施設・駅・繁華街・住宅地・その他」を自動で決めます。押す必要はなく、前の記録にも効きます。一覧・CSV・分析に出ます。</p>
 <h3 id="s40806">料金に高速代は入れない</h3>
 <p>料金にはメーターの運賃だけを入れます。高速代は料金の数字キーの上の「高速代」で入れるか、「高速1320円」と分けて話します。営収や集計に入るのは料金だけです。受け取った総額を料金に入れると、高速代の分だけ営収が多く出てしまいます。</p>
 <h3 id="s40936">案件番号</h3>
@@ -1251,6 +1285,14 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>きっかけ・客層・天気ごとの回数、単価、1回の時間（前の降車からその乗車の降車まで）、時間あたり営収</td>
 </tr>
 <tr>
+<td>訪日客</td>
+<td>訪日客の回数・平均単価と、話していた言葉・地域・旅の形・支払い・乗せた場所の種類・時間帯ごとの回数と単価。前の年の同じ月の回数との比べ（春節・桜・紅葉などの季節の波）</td>
+</tr>
+<tr>
+<td>乗せた場所・行き先の種類</td>
+<td>乗車地・降車地を駅・ホテル・空港・病院などに自動で分け、種類ごとの回数・単価・距離</td>
+</tr>
+<tr>
 <td>良い日・悪い日</td>
 <td>営収の多い日と少ない日（各5日。出番が10日未満なら半分ずつ）と、曜日・天気・出庫時刻・稼働・時間あたり・回数・単価の比べ。日付を押すと、その日の日報が開く</td>
 </tr>
@@ -1760,7 +1802,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v92（2026-11-22）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v93（2026-11-23）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();
