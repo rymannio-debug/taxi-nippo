@@ -93,7 +93,7 @@ textarea#say:focus{border-color:var(--accent);outline:none}
 h2{font-size:calc(14px*var(--fs,1));margin:6px 0 -6px;color:var(--muted);letter-spacing:.12em;font-weight:600;display:flex;justify-content:space-between}
 .list{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .list li+li{border-top:1px solid var(--line)}
-.trip{width:100%;display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;align-items:center;padding:12px 14px;background:none;border:none;text-align:left;min-height:62px}
+.trip{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 14px;background:none;border:none;text-align:left;min-height:62px}
 .trip .t{font-family:var(--num);font-size:19px;color:var(--muted);font-variant-numeric:tabular-nums;grid-row:1 / 3}
 .trip .r{min-width:0;font-size:calc(16px*var(--fs,1));font-weight:600;overflow-wrap:anywhere}
 .trip .r i{font-style:normal;color:var(--muted);margin:0 4px;font-weight:400}
@@ -902,7 +902,8 @@ body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5
 #v-day .trip .r{font-size:calc(16.5px*var(--fs,1));font-weight:700;line-height:1.4}
 #v-day .trip .r .to{display:block}
 #v-day .trip .r i{margin:0 4px 0 0}
-#v-day .trip .f{font-size:clamp(17px,5vw,21px)}
+#v-day .trip .f{font-size:clamp(15px,5vw,21px)}
+@media (max-width:340px){#v-day .trip{gap:2px 8px}}
 #v-day .trip .m,#v-day .tl-x .tl-sub{font-size:calc(14.5px*var(--fs,1));line-height:1.45}
 #v-day .tag{font-size:calc(13.5px*var(--fs,1))}
 #v-day .tl-x{font-size:calc(16.5px*var(--fs,1))}
