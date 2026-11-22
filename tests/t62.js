@@ -92,5 +92,11 @@ await load(p,gpx(pts.slice(-10).concat([[35.72,139.85,T([10,40])],[35.73,139.85,
 const n=await p.evaluate(k=>trkSegs(k,trkMem[k]).length,K);
 const all=await p.evaluate(k=>trkStats(k,trkMem[k]).all,K);
 ok(n>=2&&all<5000,'とんだ所で線が分かれ、その間は距離に数えない（'+Math.round(all)+'m）');
+
+console.log('9. GPSのつかみ始めの古い位置（最初の1点が10km先）は捨てる');
+const Q=[[35.75,139.90,T([10,0])]];for(let i=1;i<=300;i++)Q.push([35.66+i*0.0001,139.80,T([10,0])+i*1000]);
+await load(p,gpx(Q));
+const st=await p.evaluate(k=>({all:trkStats(k,trkMem[k]).all,first:trkMem[k].p[0]}),K);
+ok(st.all>3000&&st.all<3600&&st.first[0]<35.7,'最初の点を捨て、距離は約3.3km（'+Math.round(st.all)+'m）');
 ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
 await b.close()})();

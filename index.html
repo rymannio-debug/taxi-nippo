@@ -2305,7 +2305,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v91',APP_DATE='2026-11-22';
+const APP_VER='v92',APP_DATE='2026-11-22';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -2398,7 +2398,7 @@ const okLL=g=>Array.isArray(g)&&g.length===2&&isFinite(g[0])&&isFinite(g[1])&&Ma
 function mapNote(t){const n=$('map-note');n.textContent=t||'';n.hidden=!t}
 function renderMap(){
   const k=mapDay||cur,dt=fromYmd(k),d=days[k],tr=d&&d.trips?sorted(d):[];
-  if(trkMem[k]===undefined&&STORE.loaded){trkMem[k]=null;trkGet(k).then(t=>{if(t){trkMem[k]=t;if(location.hash==='#map'&&(mapDay||cur)===k)renderMap()}})}
+  if(trkMem[k]===undefined&&STORE.loaded){trkMem[k]=null;trkGet(k).then(t=>{if(t&&!trkMem[k]){trkMem[k]=t;if(location.hash==='#map'&&(mapDay||cur)===k)renderMap()}})}
   const trk=trkMem[k]||null,showTrk=!!(trk&&trkOn);
   $('mplabel').textContent=(dt.getMonth()+1)+'月'+dt.getDate()+'日（'+WD[dt.getDay()]+'）';
   $('mptoday').hidden=k===defaultDate();
@@ -2580,7 +2580,10 @@ function trkFromGpx(k,text,name){
     if(!inDay.length){const cnt={};pts.forEach(p=>{const s=ymd(new Date(p[2]));cnt[s]=(cnt[s]||0)+1});const top=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0],dt=fromYmd(top);
       return {err:'このGPXは'+(dt.getMonth()+1)+'月'+dt.getDate()+'日の記録のようです。上の ‹ › でその日にしてから読み込んでください。',day:top}}
     pts=inDay;
-    const out=[pts[0]];for(let i=1;i<pts.length;i++){const a=out[out.length-1],b=pts[i],dt=(b[2]-a[2])/1000;if(dt<=0)continue;if(trkHav(a,b)/dt>55&&trkHav(a,b)>300)continue;out.push(b)}pts=out}
+    pts=pts.filter((q,i)=>!i||q[2]>pts[i-1][2]);
+    /* 飛んだ点を捨てる：前後どちらへも時速200km超で300m以上はなれている点（GPSのつかみ始めの古い位置も、最初の点の飛びとして捨てる）。2回くり返す */
+    const fast=(a,b)=>{const d=trkHav(a,b);return d>300&&d/Math.max(1,(b[2]-a[2])/1000)>55};
+    for(let n=0;n<2;n++)pts=pts.filter((q,i,A)=>{const a=A[i-1],b=A[i+1];return !((a?fast(a,q):true)&&(b?fast(q,b):true)&&(a||b))})}
   else pts=all.map(p=>[p[0],p[1],null]);
   if(pts.length<2)return {err:'この日の道の点が少なすぎて、線を引けませんでした。'};
   /* pieces split where the signal was lost (10分以上・1km以上とんだ所); each piece is thinned on its own,
