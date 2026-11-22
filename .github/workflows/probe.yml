@@ -1,6 +1,8 @@
 # 調べ用（手で動かす）: WebKit で tests/probe.js などを走らせて、出力を見る
 name: 調べ用
 on:
+  push:
+    branches: [probe]
   workflow_dispatch:
     inputs:
       file:
@@ -18,12 +20,12 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps ${{ inputs.browser }}
+      - run: npx playwright install --with-deps ${{ inputs.browser || 'webkit' }}
       - run: sudo apt-get install -y fonts-noto-cjk
       - run: |
           node tests/serve.js > /tmp/port & sleep 2
           export APP_URL="http://127.0.0.1:$(cat /tmp/port)/index.html"
-          BROWSER=${{ inputs.browser }} node tests/${{ inputs.file }}.js || true
-          MOBILE=1 BROWSER=${{ inputs.browser }} node tests/${{ inputs.file }}.js || true
+          BROWSER=${{ inputs.browser || 'webkit' }} node tests/${{ inputs.file || 'probe' }}.js || true
+          MOBILE=1 BROWSER=${{ inputs.browser || 'webkit' }} node tests/${{ inputs.file || 'probe' }}.js || true
         env:
           TZ: Asia/Tokyo
