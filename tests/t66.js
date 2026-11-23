@@ -59,6 +59,15 @@ ok(await p.evaluate(()=>window.__calls.join())==='search_files'&&/新しく送�
 await p.evaluate(()=>{window.__mod='2026-11-22T10:00:00Z';window.__calls=[]});await p.evaluate(()=>syncImport(true));await p.waitForTimeout(600);
 ok(await p.evaluate(()=>window.__calls.join())==='search_files,download_file_content','新しく送られていれば取り込む');
 ok(!E.length,'エラーなし '+E.join('/'));
+console.log('4b. Claude版の記録を全部消す');
+await p.locator('#ro-clear').tap();await p.waitForTimeout(200);
+ok(await p.locator('#ro-clear-ok').isVisible()&&/2日・乗車2件/.test(await p.textContent('#ro-clear-n')),'消す前に、消すものを見せて確かめる');
+await p.locator('#ro-clear-ok [data-rc="no"]').tap();ok(await p.evaluate(()=>Object.keys(days).filter(k=>hasContent(days[k])).length)===2,'「やめる」なら消えない');
+await p.locator('#ro-clear').tap();await p.locator('#ro-clear-ok [data-rc="yes"]').tap();await p.waitForTimeout(400);
+ok(await p.evaluate(()=>Object.keys(days).filter(k=>hasContent(days[k])).length)===0&&/全部消しました/.test(await p.textContent('#sync-st')),'全部消える');
+ok(await p.evaluate(()=>!localStorage.getItem('taxi-nippo-sync')),'取り込みの履歴も消え、開いても自動では取り込まない');
+await p.evaluate(()=>{window.__calls=[]});await p.evaluate(()=>syncImport(false));await p.waitForTimeout(600);
+ok(await p.evaluate(()=>Object.keys(days).filter(k=>hasContent(days[k])).length)===2,'「iPhone版から取り込む」でまた見られる');
 console.log('5. iPhone版から送ったものでなければ取り込まない');
 await ctx.close();
 ctx=await ctxNew();p=await ctx.newPage();E=[];p.on('pageerror',e=>E.push(e.message));

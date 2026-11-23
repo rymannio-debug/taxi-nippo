@@ -955,6 +955,8 @@ body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5
 /* Claude版は iPhone版の写し: 記録・修正・設定の操作を出さない（見る・分析するだけ） */
 body.ro #shift .ride-b,body.ro #sh-x,body.ro #ride,body.ro #composer,body.ro #bar,body.ro #dockrow,body.ro #drv,body.ro .bk-rw,body.ro #e-save,body.ro #e-del,body.ro #toast-e,body.ro #toast-b,body.ro #toast-m{display:none!important}
 body.ro #v-set>.card:not(#isync):not(#disp):not(#about):not(#bk){display:none!important}
+.btn.danger{background:var(--danger,#c0392b);color:#fff;border-color:var(--danger,#c0392b)}
+#ro-clear-ok em{display:block;margin:4px 0 8px}
 .rob{margin:6px 0;padding:8px 12px;border:1px dashed var(--line);border-radius:12px;font-size:calc(13.5px*var(--fs,1));color:var(--muted);background:var(--field)}
 .rob[hidden]{display:none}
 .ibbox{display:flex;flex-direction:column;gap:6px;margin:4px 0 6px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
@@ -1303,6 +1305,10 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <span class="disp-n">この版（Claude版）は、iPhone版の記録の写しを見る・分析するための版です。ここでは記録できません。iPhone版の設定の「Claude版へ送る」でGoogleドライブに保存したファイルを、ここで取り込みます。取り込むと、この版の記録と設定はiPhone版と同じになります。</span>
       <button type="button" class="btn pri" id="sync-go">iPhone版から取り込む</button>
       <span class="disp-n" id="sync-st"></span>
+      <b class="sub-h">Claude版の記録を全部消す</b>
+      <span class="disp-n">この版（Claude版）に入っている記録と、取り込みの履歴を全部消します。iPhone版の記録とGoogleドライブのファイルは消えません。消したあとは、開いても自動では取り込みません。もう一度見るときは「iPhone版から取り込む」を押します。</span>
+      <button type="button" class="btn" id="ro-clear">Claude版の記録を全部消す</button>
+      <div class="cmdbox" id="ro-clear-ok" hidden><b>Claude版の記録を全部消しますか？</b><em id="ro-clear-n"></em><div class="btnrow"><button type="button" class="btn" data-rc="no">やめる</button><button type="button" class="btn danger" data-rc="yes">全部消す</button></div></div>
     </div>
     <div class="card" id="aiset" hidden>
       <b class="disp-h">AIに聞く（Gemini・無料）</b>
@@ -2365,6 +2371,14 @@ async function syncImport(auto){
     const c=bkCount(B.days);syncShow('取り込みました：'+(c.txt||'記録なし')+(changed.length?'（'+changed.length+'日分が変わりました）':'（変わったところはありません）'));
   }catch(e){syncShow(driveErr(e).replace(/保存/g,'取り込み').replace(/「バックアップを保存」か「コピー」を使ってください。/,''))}
   finally{syncing=false;$('sync-go').disabled=false}}
+/* Claude版の記録を全部消す（iPhone版・ドライブは消さない）。取り込みの履歴も消し、開いたときの自動の取り込みを止める */
+async function roClearAll(){
+  const ks=Object.keys(days).filter(k=>hasContent(days[k]));
+  ks.forEach(k=>{days[k]=emptyDay(k)});
+  try{localStorage.removeItem(SYNC_LS)}catch(e){}
+  for(const k in AADV.res)delete AADV.res[k];
+  roWrite=true;saveLocal();render();try{await pushDays(ks)}finally{roWrite=false}
+  $('ro-clear-ok').hidden=true;syncShow('Claude版の記録を全部消しました（'+ks.length+'日分）。iPhone版の記録は残っています。');bkInfo()}
 async function pushDays(ks){for(const k of ks){persist(k);if(chains[k]){try{await chains[k]}catch(e){}}}}
 function doRestore(addOnly){
   const B=bkPending;if(!B)return;const ks=Object.keys(B.days).sort().filter(k=>!addOnly||!(days[k]&&hasContent(days[k]))),old={};
@@ -2442,7 +2456,7 @@ async function undoDelete(){
 const SOLO=!(window.claude&&window.claude.use);
 const RO=!SOLO;  /* Claude版は iPhone版の写し（見る・分析するだけ） */
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v96',APP_DATE='2026-11-23';
+const APP_VER='v97',APP_DATE='2026-11-23';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -5039,7 +5053,11 @@ if(window.claude&&window.claude.use){
   }).catch(()=>{});
 }
 $('ed-badge').hidden=SOLO;
-if(RO){document.body.classList.add('ro');$('ro-note').hidden=false;$('isync').hidden=false;{const v=$('v-set'),f=v.querySelector(':scope>.card');if(f&&f!==$('isync'))v.insertBefore($('isync'),f)}syncShow('');$('sync-go').addEventListener('click',()=>syncImport(false))}
+if(RO){document.body.classList.add('ro');$('ro-note').hidden=false;$('isync').hidden=false;{const v=$('v-set'),f=v.querySelector(':scope>.card');if(f&&f!==$('isync'))v.insertBefore($('isync'),f)}syncShow('');$('sync-go').addEventListener('click',()=>syncImport(false));
+  $('ro-clear').addEventListener('click',()=>{const ks=Object.keys(days).filter(k=>hasContent(days[k])),c=bkCount(Object.fromEntries(ks.map(k=>[k,days[k]])));
+    $('ro-clear-n').textContent=ks.length?'消すもの：'+c.txt+'。元には戻せません（iPhone版から取り込み直せば、また見られます）。':'消す記録はありません。';
+    $('ro-clear-ok').querySelector('[data-rc="yes"]').hidden=!ks.length;$('ro-clear-ok').hidden=false});
+  $('ro-clear-ok').addEventListener('click',e=>{const b=e.target.closest('[data-rc]');if(!b)return;if(b.dataset.rc==='yes')roClearAll();else $('ro-clear-ok').hidden=true})}
 if(SOLO){
   wireDownloads({save:soloSave});
   $('tab-map').hidden=false;$('mp-open').hidden=false;
