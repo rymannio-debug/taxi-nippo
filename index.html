@@ -959,6 +959,7 @@ body.ro #v-set>.card:not(#isync):not(#disp):not(#about):not(#bk){display:none!im
 #ro-clear-ok em{display:block;margin:4px 0 8px}
 .rob{margin:6px 0;padding:8px 12px;border:1px dashed var(--line);border-radius:12px;font-size:calc(13.5px*var(--fs,1));color:var(--muted);background:var(--field)}
 .rob[hidden]{display:none}
+.rob.test{border-style:solid;border-color:var(--warn-line,#c98a00);background:var(--warn-bg,#fff4d6);color:var(--ink)}
 .ibbox{display:flex;flex-direction:column;gap:6px;margin:4px 0 6px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
 .ibbox[hidden]{display:none}
 .ibmore summary{min-height:44px;display:flex;align-items:center;font-weight:700;font-size:calc(14px*var(--fs,1));cursor:pointer}
@@ -1301,12 +1302,17 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <span class="disp-n">説明や表の小さい文字が大きくなります。料金や大きいボタンの文字は、はじめから大きいので変わりません。この端末だけの設定です。</span>
     </div>
     <div class="card" id="isync" hidden>
-      <b class="disp-h">iPhone版から取り込む</b>
-      <span class="disp-n">この版（Claude版）は、iPhone版の記録の写しを見る・分析するための版です。ここでは記録できません。iPhone版の設定の「Claude版へ送る」でGoogleドライブに保存したファイルを、ここで取り込みます。取り込むと、この版の記録と設定はiPhone版と同じになります。</span>
+      <b class="disp-h">Claude版の使い方</b>
+      <div class="chips" id="cmodechips" role="group" aria-label="Claude版の使い方"><button type="button" class="chip" data-cmode="ana">AI分析（iPhone版の写し）</button><button type="button" class="chip" data-cmode="test">テスト（試しに記録）</button></div>
+      <span class="disp-n" id="cmode-h"></span>
+      <div id="cm-ana">
+      <b class="sub-h">iPhone版から取り込む</b>
+      <span class="disp-n">iPhone版の設定の「Claude版へ送る」でGoogleドライブに保存したファイルを、ここで取り込みます。取り込むと、AI分析の記録と設定はiPhone版と同じになります。</span>
       <button type="button" class="btn pri" id="sync-go">iPhone版から取り込む</button>
       <span class="disp-n" id="sync-st"></span>
-      <b class="sub-h">Claude版の記録を全部消す</b>
-      <span class="disp-n">この版（Claude版）に入っている記録と、取り込みの履歴を全部消します。iPhone版の記録とGoogleドライブのファイルは消えません。消したあとは、開いても自動では取り込みません。もう一度見るときは「iPhone版から取り込む」を押します。</span>
+      </div>
+      <b class="sub-h" id="ro-clear-h">Claude版の記録を全部消す</b>
+      <span class="disp-n" id="ro-clear-d">この版（Claude版）に入っている記録と、取り込みの履歴を全部消します。iPhone版の記録とGoogleドライブのファイルは消えません。消したあとは、開いても自動では取り込みません。もう一度見るときは「iPhone版から取り込む」を押します。</span>
       <button type="button" class="btn" id="ro-clear">Claude版の記録を全部消す</button>
       <div class="cmdbox" id="ro-clear-ok" hidden><b>Claude版の記録を全部消しますか？</b><em id="ro-clear-n"></em><div class="btnrow"><button type="button" class="btn" data-rc="no">やめる</button><button type="button" class="btn danger" data-rc="yes">全部消す</button></div></div>
     </div>
@@ -1808,11 +1814,14 @@ const WD=['日','月','火','水','木','金','土'];
 const mins=t=>{const a=(t||'00:00').split(':');return (+a[0])*60+(+a[1])};
 
 /* ---------- storage ---------- */
-const LS='taxi-nippo-v1',LSX='taxi-nippo-wxsel-v1';const WXS=['晴れ','曇り','雨','雪'];let wxSel='';const LSS='taxi-nippo-set-v1';let settings=cleanSettings({}),settingsDirty=false,tierExtra=0;
+/* Claude版の使い方: 'ana'＝AI分析（iPhone版の写し・見るだけ）／'test'＝テスト（試しに記録。保存場所は別で、iPhone版にも写しにも混ざらない） */
+const TESTMODE=(()=>{try{return !!(window.claude&&window.claude.use)&&localStorage.getItem('taxi-nippo-cmode')==='test'}catch(e){return false}})();
+const NSK=k=>TESTMODE?k.replace(/^taxi-nippo-/,'taxi-nippo-test-'):k;
+const LS=NSK('taxi-nippo-v1'),LSX='taxi-nippo-wxsel-v1';const WXS=['晴れ','曇り','雨','雪'];let wxSel='';const LSS=NSK('taxi-nippo-set-v1');let settings=cleanSettings({}),settingsDirty=false,tierExtra=0;
 let days={},col=null,dirty=new Set(),queued={},chains={},firstSync=false,navigated=false;
 /* Days changed here that Claude has not confirmed yet. Kept across reloads: without this, a ride recorded while offline
    would be replaced by the older server copy the next time the app opens. */
-const LSD='taxi-nippo-dirty-v1';
+const LSD=NSK('taxi-nippo-dirty-v1');
 try{const j=JSON.parse(localStorage.getItem(LSD)||'[]');if(Array.isArray(j))j.forEach(k=>{if(/^\d{4}-\d\d-\d\d$/.test(k))dirty.add(k)})}catch(e){}
 const saveDirty=()=>{try{localStorage.setItem(LSD,JSON.stringify([...dirty]))}catch(e){}};
 const resend=()=>{if(col)[...dirty].forEach(k=>{if(days[k])persist(k)})};
@@ -1829,7 +1838,7 @@ const ibLast=()=>{try{return localStorage.getItem('taxi-nippo-iblang')||''}catch
 function curIb(){const p=parsed.ib||{},o=ibSel||{},r={};['lang','reg','party','pay'].forEach(f=>{const v=f in o?o[f]:p[f];if(v)r[f]=v});const x='x' in o?o.x:p.x;if(x&&x.length)r.x=x.slice();return r}  /* 記録の前（降車のあと）に書いたメモ。記録するとその乗車に入る */
 const curPax=()=>xo.pax!=null?xo.pax:((parsed&&parsed.pax)||1),curMukae=()=>xo.mukae!=null?xo.mukae:!!(parsed&&parsed.mukae),curToll=()=>xo.toll!=null?xo.toll:((parsed&&parsed.toll)||0);
 function renderX(){$('x-pax').textContent=curPax()+'名';$('x-mukae').setAttribute('aria-pressed',String(curMukae()));const t=$('p-toll');if(document.activeElement!==t)t.value=curToll()?String(curToll()):''}
-const LSO='taxi-nippo-odo-v1',LST='taxi-nippo-time-v1';
+const LSO=NSK('taxi-nippo-odo-v1'),LST=NSK('taxi-nippo-time-v1');
 /* status pill at the top: shown on the 日報 screen only while the ride card is out of view */
 let rideSeen=true;
 function stPill(){
@@ -1983,7 +1992,7 @@ function setWx(w){wxSel=w;try{localStorage.setItem(LSX,JSON.stringify({d:ymd(new
    前の版が localStorage に入れた記録は、この版をはじめて開いたときに移し、localStorage には「移した」印だけを残す。
    localStorage に本物の記録があるときは、それがいちばん新しい（IndexedDB が使えなかったときの書き込み）ので、それを移す。
    保存はいつも最新の記録だけを書き、失敗したら画面の上の赤い帯で知らせる（黙って失敗しない）。 */
-const MOVED='{"_moved":"indexeddb"}';
+const MOVED='{"_moved":"indexeddb"}',IDBK=TESTMODE?'days-test':'days';
 const STORE={db:null,loaded:false,changed:false,want:false,ready:null,fail:'',persisted:null};
 function idbOpen(){return new Promise((res,rej)=>{try{const r=indexedDB.open('taxi-nippo',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'))}catch(e){rej(e)}})}
 function idbReq(mode,f){return new Promise((res,rej)=>{let tx;try{tx=STORE.db.transaction('kv',mode)}catch(e){rej(e);return}let out;const q=f(tx.objectStore('kv'));q.onsuccess=()=>{out=q.result};tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error||q.error);tx.onabort=()=>rej(tx.error||new Error('abort'))})}
@@ -1995,8 +2004,8 @@ async function storeInit(){
   STORE.db=db;
   if(db){
     let ls=null;try{ls=localStorage.getItem(LS)}catch(e){}
-    if(ls&&ls!==MOVED){try{await idbPut('days',ls);lsSet(LS,MOVED)}catch(e){STORE.db=null}}
-    else{let raw=null;try{raw=await idbGet('days')}catch(e){}
+    if(ls&&ls!==MOVED){try{await idbPut(IDBK,ls);lsSet(LS,MOVED)}catch(e){STORE.db=null}}
+    else{let raw=null;try{raw=await idbGet(IDBK)}catch(e){}
       if(typeof raw==='string'){try{const j=JSON.parse(raw);if(j&&typeof j==='object'){days=cleanDays(j);STORE.changed=true}}catch(e){}}}
   }
   STORE.loaded=true;
@@ -2013,7 +2022,7 @@ function saveLocal(){
 async function flushSave(){
   saving=true;
   while(saveQ!=null){const s=saveQ;saveQ=null;
-    try{await idbPut('days',s);saveOk()}
+    try{await idbPut(IDBK,s);saveOk()}
     catch(e){const q=e&&(e.name==='QuotaExceededError'||/quota/i.test(e.message||''));if(lsSet(LS,s))saveOk();else saveBad(q?'この端末の空きが足りません':'保存の場所に書き込めません')}}
   saving=false;
 }
@@ -2242,7 +2251,7 @@ function rateTable(ks,order){
 }
 /* Backup: every day's record and the goals as one JSON text. Restore replaces the days the backup holds and leaves the others;
    what it replaced is kept on this device so the restore can be undone once. */
-const LSB='taxi-nippo-bk-v1',LSUNDO='taxi-nippo-undo-v1';
+const LSB=NSK('taxi-nippo-bk-v1'),LSUNDO=NSK('taxi-nippo-undo-v1');
 let bkPending=null;
 const bkMsg=t=>{$('bk-msg').firstElementChild.textContent=t};
 const slash=k=>k.replace(/-/g,'/');
@@ -2347,7 +2356,7 @@ function findBackup(v,depth){if(depth>5||v==null)return null;
   return null}
 let syncing=false;
 async function syncImport(auto){
-  if(SOLO||syncing)return;if(!mcpNs){if(!auto)syncShow('ClaudeにGoogleドライブが連携されていないため、取り込めません。claude.aiの「カスタマイズ」→「コネクタ」でGoogle Driveを連携してください。');return}
+  if(SOLO||TESTMODE||syncing)return;if(!mcpNs){if(!auto)syncShow('ClaudeにGoogleドライブが連携されていないため、取り込めません。claude.aiの「カスタマイズ」→「コネクタ」でGoogle Driveを連携してください。');return}
   syncing=true;$('sync-go').disabled=true;syncShow('Googleドライブを探しています…');
   try{
     const r=await mcpNs.callTool(DRV,'search_files',{query:"title contains '売上日報_Claude版へ' and trashed = false",orderBy:'modifiedTime desc',pageSize:5,excludeContentSnippets:true},{cache:false});
@@ -2375,10 +2384,10 @@ async function syncImport(auto){
 async function roClearAll(){
   const ks=Object.keys(days).filter(k=>hasContent(days[k]));
   ks.forEach(k=>{days[k]=emptyDay(k)});
-  try{localStorage.removeItem(SYNC_LS)}catch(e){}
+  if(!TESTMODE)try{localStorage.removeItem(SYNC_LS)}catch(e){}
   for(const k in AADV.res)delete AADV.res[k];
   roWrite=true;saveLocal();render();try{await pushDays(ks)}finally{roWrite=false}
-  $('ro-clear-ok').hidden=true;syncShow('Claude版の記録を全部消しました（'+ks.length+'日分）。iPhone版の記録は残っています。');bkInfo()}
+  $('ro-clear-ok').hidden=true;if(TESTMODE){$('cmode-h').textContent='テストの記録を全部消しました（'+ks.length+'日分）。'}else syncShow('Claude版の記録を全部消しました（'+ks.length+'日分）。iPhone版の記録は残っています。');bkInfo()}
 async function pushDays(ks){for(const k of ks){persist(k);if(chains[k]){try{await chains[k]}catch(e){}}}}
 function doRestore(addOnly){
   const B=bkPending;if(!B)return;const ks=Object.keys(B.days).sort().filter(k=>!addOnly||!(days[k]&&hasContent(days[k]))),old={};
@@ -2400,7 +2409,7 @@ async function undoRestore(){
 /* ===== Deleting records =====
    One day, a period, or everything. The days are emptied (not removed), so the empty copy also reaches Claude and other devices.
    What was there is kept on this device until the next deletion, so 「消した記録を戻す」 can put it back. Goals stay. */
-const LSDEL='taxi-nippo-del-v1';
+const LSDEL=NSK('taxi-nippo-del-v1');
 let delMode='day',delPending=null,delGoals=false;
 const hasGoals=()=>!!(settings.dayGoal||settings.monthGoal||settings.breakGoal);
 const delMsg=t=>{$('del-msg').firstElementChild.textContent=t};
@@ -2454,10 +2463,10 @@ async function undoDelete(){
    The same page opened outside Claude (its own https address) has no Claude runtime. There it may ask the phone for its position,
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
-const RO=!SOLO;  /* Claude版は iPhone版の写し（見る・分析するだけ） */
+const RO=!SOLO&&!TESTMODE;  /* Claude版のAI分析は iPhone版の写し（見る・分析するだけ）。テストのときは記録できる */
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v97',APP_DATE='2026-11-23';
-const LSG='taxi-nippo-geo-v1';
+const APP_VER='v98',APP_DATE='2026-11-23';
+const LSG=NSK('taxi-nippo-geo-v1');
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
 /* geoErr: this ride's pickup / drop-off could not be located (no permission, no signal): the place is then optional in the checks */
@@ -3010,7 +3019,7 @@ async function initCloud(){
     if(!user)return;
     const id=await user.id();
     if(!id)return;
-    col=db.collection('data/users/'+id);
+    col=db.collection('data/users/'+id+(TESTMODE?'/test/days':''));
     setSync('記録を読み込み中…');
     const timer=setTimeout(()=>setSync('まだ読み込めていません。この端末の記録を表示しています'),10000);
     col.onSnapshot(snap=>{
@@ -4096,7 +4105,7 @@ function openMan(){const here=manHere(),t={'#list':'一覧','#month':'月集計'
 function closeMan(){$('mv').hidden=true;$('man-b').focus()}
 function aboutUi(){
   $('ab-ver').textContent=(SOLO?'iPhone版（本番）':'Claude版（試し用）')+'　'+APP_VER+'（'+APP_DATE.replace(/-/g,'/')+'）';
-  $('ab-ed').textContent=SOLO?'ふだんの記録はこの版で取ります。Claude版で見る・分析するときは、バックアップの「Claude版へ送る」でGoogleドライブに保存します。記録はiPhone版からClaude版へだけ送ります（Claude版のバックアップは、この版には読み込めません）。':'この版はiPhone版の写しで、見る・分析するだけです。記録はiPhone版で取り、iPhone版の「Claude版へ送る」→ この版の「iPhone版から取り込む」で写します。';
+  $('ab-ed').textContent=SOLO?'ふだんの記録はこの版で取ります。Claude版で見る・分析するときは、バックアップの「Claude版へ送る」でGoogleドライブに保存します。記録はiPhone版からClaude版へだけ送ります（Claude版のバックアップは、この版には読み込めません）。':TESTMODE?'この版（Claude版）のテストです。試しに記録できます。記録はテスト用の場所に入り、AI分析の写しやiPhone版には入りません。':'この版はiPhone版の写しで、見る・分析するだけです（AI分析）。記録はiPhone版で取り、iPhone版の「Claude版へ送る」→ この版の「iPhone版から取り込む」で写します。';
 }
 function route(){
   const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#set'?'set':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
@@ -5034,7 +5043,7 @@ if(window.claude&&window.claude.use){
   window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false}).catch(()=>{});
   window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false;
     /* 前に取り込んだことがあれば、開いたときに新しいものを探す（初めては「iPhone版から取り込む」を押してから） */
-    if(syncInfo())setTimeout(()=>syncImport(true),1500)}).catch(()=>{});
+    if(RO&&syncInfo())setTimeout(()=>syncImport(true),1500)}).catch(()=>{});
   window.claude.use('downloads').then(dl=>{if(dl)wireDownloads(dl)}).catch(()=>{});
   window.claude.use('dictation').then(d=>{
     if(!d)return;dict=d;
@@ -5053,11 +5062,20 @@ if(window.claude&&window.claude.use){
   }).catch(()=>{});
 }
 $('ed-badge').hidden=SOLO;
-if(RO){document.body.classList.add('ro');$('ro-note').hidden=false;$('isync').hidden=false;{const v=$('v-set'),f=v.querySelector(':scope>.card');if(f&&f!==$('isync'))v.insertBefore($('isync'),f)}syncShow('');$('sync-go').addEventListener('click',()=>syncImport(false));
-  $('ro-clear').addEventListener('click',()=>{const ks=Object.keys(days).filter(k=>hasContent(days[k])),c=bkCount(Object.fromEntries(ks.map(k=>[k,days[k]])));
-    $('ro-clear-n').textContent=ks.length?'消すもの：'+c.txt+'。元には戻せません（iPhone版から取り込み直せば、また見られます）。':'消す記録はありません。';
+if(!SOLO){
+  [...$('cmodechips').children].forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.cmode==='test')===TESTMODE)));
+  $('cmode-h').textContent=TESTMODE?'いまは「テスト」です。試しに記録でき、記録はこの版のテスト用の場所に入ります。AI分析の写しやiPhone版には混ざりません。':'いまは「AI分析」です。iPhone版の写しを見る・分析するだけで、記録はできません。';
+  $('cmodechips').addEventListener('click',e=>{const b=e.target.closest('[data-cmode]');if(!b||(b.dataset.cmode==='test')===TESTMODE)return;try{localStorage.setItem('taxi-nippo-cmode',b.dataset.cmode)}catch(x){}location.reload()});
+  $('ed-badge').textContent=TESTMODE?'テスト':'AI分析';
+}
+if(TESTMODE){$('isync').hidden=false;$('cm-ana').hidden=true;$('ro-note').hidden=false;$('ro-note').classList.add('test');$('ro-note').textContent='テスト中：ここで取った記録は試し用です（iPhone版にもAI分析の写しにも入りません）。切り替えは設定の「Claude版の使い方」。';
+  {const v=$('v-set'),f=v.querySelector(':scope>.card');if(f&&f!==$('isync'))v.insertBefore($('isync'),f)}
+  $('ro-clear-h').textContent='テストの記録を全部消す';$('ro-clear-d').textContent='テストで取った記録を全部消します。AI分析の写しとiPhone版の記録は消えません。';$('ro-clear').textContent='テストの記録を全部消す'}
+if(!SOLO){$('ro-clear').addEventListener('click',()=>{const ks=Object.keys(days).filter(k=>hasContent(days[k])),c=bkCount(Object.fromEntries(ks.map(k=>[k,days[k]])));
+    $('ro-clear-n').textContent=ks.length?'消すもの：'+c.txt+'。元には戻せません'+(TESTMODE?'。':'（iPhone版から取り込み直せば、また見られます）。'):'消す記録はありません。';
     $('ro-clear-ok').querySelector('[data-rc="yes"]').hidden=!ks.length;$('ro-clear-ok').hidden=false});
   $('ro-clear-ok').addEventListener('click',e=>{const b=e.target.closest('[data-rc]');if(!b)return;if(b.dataset.rc==='yes')roClearAll();else $('ro-clear-ok').hidden=true})}
+if(RO){document.body.classList.add('ro');$('ro-note').hidden=false;$('isync').hidden=false;{const v=$('v-set'),f=v.querySelector(':scope>.card');if(f&&f!==$('isync'))v.insertBefore($('isync'),f)}syncShow('');$('sync-go').addEventListener('click',()=>syncImport(false))}
 if(SOLO){
   wireDownloads({save:soloSave});
   $('tab-map').hidden=false;$('mp-open').hidden=false;

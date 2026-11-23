@@ -1723,7 +1723,29 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>それでも古いままのときは、先にバックアップを保存してから、iPhoneの「設定」→「アプリ」→「Safari」→「詳細」→「Webサイトデータ」で「github.io」を削除し、アイコンを追加し直します。この操作でiPhone内の記録も消えるので、最後にバックアップから復元してください。</p>
 <p>手順はGitHubのドキュメント「Creating a GitHub Pages site」と「Configuring a publishing source」（2026年11月16日時点）によります。画面の表記は変わることがあります。</p>
 <h2 id="claude">付録B Claude版を使うとき</h2>
-<p>同じアプリは、Claudeの中のタクシー売上日報（Claude版）でも開けます。Claude版は、<strong>iPhone版の記録の写しを見る・分析するための版</strong>です。記録はiPhone版で取り、iPhone版からClaude版へだけ送ります。Claude版からiPhone版へは送れません。</p>
+<p>同じアプリは、Claudeの中のタクシー売上日報（Claude版）でも開けます。Claude版は <strong>テスト用とAI分析用</strong> の版で、ふだんの記録はiPhone版で取ります。Claude版の「設定」のいちばん上の「Claude版の使い方」で、2つを切り替えます（切り替えると画面が読み直されます。題名の横に、いまの使い方が出ます）。</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>使い方</th>
+<th>できること</th>
+<th>記録</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI分析（はじめ）</td>
+<td>iPhone版から取り込んだ写しを見る・分析する・AIのアドバイスをもらう</td>
+<td>記録できない（見るだけ）</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>新しい機能を試しに使う。試しに出庫・乗車・料金などを記録できる</td>
+<td>テスト用の場所に入る。AI分析の写しやiPhone版には入らない。「テストの記録を全部消す」で消せる</td>
+</tr>
+</tbody>
+</table></div>
+<p>記録はiPhone版からClaude版へだけ送ります。Claude版からiPhone版へは送れません（テストで作ったバックアップも、iPhone版には読み込めません）。</p>
 <h3 id="sync">iPhone版からClaude版へ送る</h3>
 <ol>
 <li>iPhone版の「設定」→「バックアップ」の「Claude版へ送る（Googleドライブ）」を押す</li>
@@ -1733,7 +1755,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>一度取り込むと、次からはClaude版を開いたときに、新しく送られたファイルがあれば自動で取り込みます。日報の上に、いちばん新しい取り込みの日時が出ます。</p>
 <ul>
 <li>取り込むと、Claude版の記録と設定はiPhone版と同じになります。Claude版にしかなかった記録は消えます</li>
-<li>Claude版では、出庫・乗車・話す・修正の保存・設定の変更・復元・記録を消すは出ません（見る・分析する・バックアップを保存するだけ）</li>
+<li>AI分析のときは、出庫・乗車・話す・修正の保存・設定の変更・復元・記録を消すは出ません（見る・分析する・バックアップを保存するだけ）。試しに記録したいときは「テスト」に切り替えます</li>
 <li>Claude版の記録を消すときは、Claude版の設定の「Claude版の記録を全部消す」を押し、確かめて「全部消す」。Claude版の記録と取り込みの履歴が消えます（iPhone版の記録とGoogleドライブのファイルは消えません）。消したあとは自動では取り込まず、「iPhone版から取り込む」を押すとまた見られます</li>
 <li>iPhone版から送ったものでないファイルは取り込みません。Claude版のバックアップはiPhone版に読み込めません</li>
 <li>Claude版を使うには、ClaudeとGoogleドライブをつないでおきます（下の「Googleドライブに保存する」の手順）</li>
@@ -1815,7 +1837,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v97（2026-11-23）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v98（2026-11-23）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

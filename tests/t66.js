@@ -40,7 +40,7 @@ await p.goto(APP);await p.waitForTimeout(1200);
 ok(await p.evaluate(()=>document.body.classList.contains('ro')),'Claude版は写しの見た目（body.ro）');
 ok(await p.locator('#ro-note').isVisible()&&/写し/.test(await p.textContent('#ro-note')),'日報の上に「iPhone版の写しです」');
 ok(!(await p.locator('#dockrow').isVisible())&&!(await p.locator('#ride').isVisible())&&!(await p.locator('#composer').isVisible()),'乗車・話す・文字で入れるは出ない');
-ok(/写し/.test(await p.textContent('#ed-badge')),'題名の横は「写し」');
+ok(/AI分析/.test(await p.textContent('#ed-badge')),'題名の横は「AI分析」');
 await p.evaluate(()=>{const f=document.getElementById('p-fare');f.value='3000';record(true)});await p.waitForTimeout(300);
 ok(await p.evaluate(()=>(days['2026-11-22']||{trips:[]}).trips.length===0),'記録しようとしても止まる');
 console.log('3. Claude版: iPhone版から取り込む');
