@@ -32,7 +32,7 @@ console.log('1. 切り替え');
 let p=await page();await C(p,'#tab-month');await p.waitForTimeout(300);
 ok(await vis(p,'#m-view [data-av="sum"]')&&await vis(p,'#v-month .meter')&&!(await vis(p,'#m-ana')),'月集計はふだん「集計」で、合計の数字が出る');
 await C(p,'#m-view [data-av="ana"]');await p.waitForTimeout(500);
-ok(!(await vis(p,'#v-month .meter'))&&!(await vis(p,'#mcard'))&&await p.$$eval('#m-ana>.card',e=>e.length)===10&&await p.evaluate(()=>document.querySelector('#m-ana>.card').id)==='m-a8','「分析」で合計が隠れ、分析のカード10枚が出る（いちばん上は「この期間の要点」）');
+ok(!(await vis(p,'#v-month .meter'))&&!(await vis(p,'#mcard'))&&await p.$$eval('#m-ana>.card',e=>e.length)===11&&await p.evaluate(()=>[...document.querySelectorAll('#m-ana>.card')].slice(0,2).map(c=>c.id).join())==='m-a8,m-a10','「分析」で合計が隠れ、分析のカード11枚が出る（いちばん上は「この期間の要点」、次に「AIのアドバイス」）');
 ok(await p.evaluate(()=>document.querySelector('#m-view [data-av="ana"]').getAttribute('aria-pressed'))==='true','「分析」が押された状態');
 await reloadKeep(p);await p.waitForTimeout(800);await C(p,'#tab-month');await p.waitForTimeout(400);
 ok(await vis(p,'#m-ana .astat'),'開き直しても「分析」のまま');
@@ -118,7 +118,7 @@ await C(p,'#mnext');await p.waitForTimeout(300);t=await txt(p,'#m-ana');
 ok(/出番が4日以上ある期間で出ます（この期間は1日）/.test(t)&&/この期間にロングはありません/.test(t),'1日だけの月: 良い日・悪い日は出ない、ロングなし');
 ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
 p=await page({ui:{mview:'ana'},claude:true});await C(p,'#tab-month');await p.waitForTimeout(500);
-ok(await p.$$eval('#m-ana>.card',e=>e.length)===10&&!(await p.$('#m-amap')),'Claude版は地図なしで10枚');
+ok(await p.$$eval('#m-ana>.card',e=>e.length)===11&&!(await p.$('#m-amap')),'Claude版は地図なしで11枚');
 ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
 
 console.log('10. 画面の幅と夜');

@@ -941,11 +941,22 @@ body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5
 .astat em.dlt.dn,.akeys b.dn,.asum b.dn{color:var(--danger,#c0392b)}
 .htable td.few{opacity:.55;font-style:italic}
 .mtable td.few{opacity:.55}
+.advbtns{display:flex;gap:8px}.advbtns .btn{flex:1}
+.advout{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:calc(15px*var(--fs,1));line-height:1.65}
+.advout[hidden]{display:none}
+.advout ul{margin:2px 0 6px;padding-left:1.2em}.advout li{margin:2px 0}.advout p{margin:2px 0}
+.advout .advwait{color:var(--muted)}
+.advref{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.advref .chip{min-height:40px}
 .akeys{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
 .akey{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);text-align:left;font-size:calc(15px*var(--fs,1));line-height:1.5}
 .akey .kt{flex:1 1 auto;min-width:0}
 .akey .km{flex:none;font-size:calc(13px*var(--fs,1));font-weight:700;color:var(--muted)}
 .mtable.ab td:first-child,.mtable.ab th:first-child{min-width:6.5em;word-break:keep-all}
+/* Claude版は iPhone版の写し: 記録・修正・設定の操作を出さない（見る・分析するだけ） */
+body.ro #shift .ride-b,body.ro #sh-x,body.ro #ride,body.ro #composer,body.ro #bar,body.ro #dockrow,body.ro #drv,body.ro .bk-rw,body.ro #e-save,body.ro #e-del,body.ro #toast-e,body.ro #toast-b,body.ro #toast-m{display:none!important}
+body.ro #v-set>.card:not(#isync):not(#disp):not(#about):not(#bk){display:none!important}
+.rob{margin:6px 0;padding:8px 12px;border:1px dashed var(--line);border-radius:12px;font-size:calc(13.5px*var(--fs,1));color:var(--muted);background:var(--field)}
+.rob[hidden]{display:none}
 .ibbox{display:flex;flex-direction:column;gap:6px;margin:4px 0 6px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
 .ibbox[hidden]{display:none}
 .ibmore summary{min-height:44px;display:flex;align-items:center;font-weight:700;font-size:calc(14px*var(--fs,1));cursor:pointer}
@@ -1070,12 +1081,13 @@ body.driving #stpill,body.driving #toast{display:none!important}
 
 <div class="app">
   <header class="top">
-    <h1>売上日報<small class="ed" id="ed-badge" hidden>試し用</small></h1>
+    <h1>売上日報<small class="ed" id="ed-badge" hidden>写し</small></h1>
     <button type="button" class="ib txt manb" id="man-b" aria-haspopup="dialog"><span aria-hidden="true">？</span>マニュアル</button>
     <nav class="seg" aria-label="表示切替"><a href="#day" id="tab-day">日報</a><a href="#list" id="tab-list">一覧</a><a href="#month" id="tab-month">月集計</a><a href="#year" id="tab-year">年集計</a><a href="#map" id="tab-map" hidden>地図</a><a href="#set" id="tab-set">設定</a></nav>
   </header>
 
   <section id="v-day" style="display:contents">
+    <div class="rob" id="ro-note" hidden>この版はiPhone版の写しです（見る・分析するだけ）。<span id="ro-when"></span></div>
     <div class="datebar">
       <button class="ib" id="prev" aria-label="前の日">‹</button>
       <div class="d" id="dlabel"></div>
@@ -1286,6 +1298,12 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <div class="chips" id="fschips" role="group" aria-label="文字の大きさ"><button type="button" class="chip" data-fs="1">標準</button><button type="button" class="chip" data-fs="1.15">大</button><button type="button" class="chip" data-fs="1.3">特大</button></div>
       <span class="disp-n">説明や表の小さい文字が大きくなります。料金や大きいボタンの文字は、はじめから大きいので変わりません。この端末だけの設定です。</span>
     </div>
+    <div class="card" id="isync" hidden>
+      <b class="disp-h">iPhone版から取り込む</b>
+      <span class="disp-n">この版（Claude版）は、iPhone版の記録の写しを見る・分析するための版です。ここでは記録できません。iPhone版の設定の「Claude版へ送る」でGoogleドライブに保存したファイルを、ここで取り込みます。取り込むと、この版の記録と設定はiPhone版と同じになります。</span>
+      <button type="button" class="btn pri" id="sync-go">iPhone版から取り込む</button>
+      <span class="disp-n" id="sync-st"></span>
+    </div>
     <div class="card" id="aiset" hidden>
       <b class="disp-h">AIに聞く（Gemini・無料）</b>
       <span class="disp-n">［？ マニュアル］の「AIに聞く」は、キーがなくても、質問に近いマニュアルの章を出します。GoogleのGeminiのキー（無料）を入れると、AIがマニュアルをもとに答えます。</span>
@@ -1306,9 +1324,12 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <div class="hint"><span id="bk-info"></span></div>
       <div class="hint"><span id="bk-store"></span></div>
       <div class="btnrow"><button type="button" class="btn pri" id="bk-save" hidden>バックアップを保存</button><button type="button" class="btn" id="bk-copy">バックアップをコピー</button></div>
+      <button type="button" class="btn" id="bk-send" hidden>Claude版へ送る（Googleドライブ）</button>
+      <div class="hint" id="bk-send-h" hidden><span>押すと共有の画面が出ます。「ドライブ」を選び、マイドライブに保存してください（iPhoneにGoogleドライブのアプリが要ります）。Claude版は、開いたときにそのファイルを取り込みます。記録はiPhone版からClaude版へだけ送ります。</span></div>
       <button type="button" class="btn" id="bk-drive" hidden>Googleドライブに保存</button>
       <div class="hint" id="bk-drive-h" hidden><span>ClaudeにGoogleドライブを連携していると、マイドライブに直接保存できます。初めて押したときに、許可の確認が出ます。</span></div>
       <div class="hint" id="bk-drive-l" hidden><a id="bk-drive-a" href="https://drive.google.com/" target="_blank" rel="noopener">保存したファイルをGoogleドライブで開く</a></div>
+      <div class="bk-rw">
       <div class="cap">バックアップから復元する</div>
       <div class="hint"><span>保存したバックアップのファイルを選ぶか、コピーしておいた内容を下の枠に貼り付けて読み込みます。読み込んだあと、内容を確かめてから復元します。</span></div>
       <label class="btn" for="bk-file">バックアップのファイルを選ぶ</label>
@@ -1330,6 +1351,7 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <div class="cmdbox" id="del-confirm" hidden></div>
       <button type="button" class="btn" id="del-undo" hidden>消した記録を戻す</button>
       <div class="hint" id="del-msg"><span></span></div>
+      </div>
     </details>
   </section>
 
@@ -2220,7 +2242,7 @@ const bkMsg=t=>{$('bk-msg').firstElementChild.textContent=t};
 const slash=k=>k.replace(/-/g,'/');
 function backupText(){
   const ds={};Object.keys(days).sort().forEach(k=>{if(hasContent(days[k]))ds[k]=days[k]});
-  return JSON.stringify({app:'taxi-nippo',version:1,exported:new Date().toISOString(),settings:settings,days:ds});
+  return JSON.stringify({app:'taxi-nippo',version:1,from:SOLO?'iphone':'claude',exported:new Date().toISOString(),settings:settings,days:ds});
 }
 function bkCount(ds){const ks=Object.keys(ds).sort();let n=0;ks.forEach(k=>{n+=(ds[k].trips||[]).length});return {ks:ks,n:n,txt:ks.length?slash(ks[0])+'〜'+slash(ks[ks.length-1])+'、'+ks.length+'日・乗車'+n+'件':''}}
 function bkInfo(){
@@ -2242,11 +2264,13 @@ function parseBackup(text){
   }
   if(!Object.keys(ds).length)return null;
   const g=j.settings&&typeof j.settings==='object'?cleanSettings(j.settings):null;
-  return {days:ds,settings:g};
+  return {days:ds,settings:g,from:j.from==='iphone'||j.from==='claude'?j.from:'',exported:typeof j.exported==='string'?j.exported:''};
 }
 function offerRestore(text){
   const B=parseBackup(text),box=$('bk-confirm');
   if(!B){bkPending=null;box.hidden=true;bkMsg('バックアップとして読めませんでした。このアプリで保存したファイルか、内容が途中で切れていないかを確かめてください。');return}
+  /* 記録は iPhone版 → Claude版 の一方向だけ。Claude版で作ったバックアップは iPhone版に入れない */
+  if(SOLO&&B.from==='claude'){bkPending=null;box.hidden=true;bkMsg('これはClaude版で作ったバックアップです。記録はiPhone版からClaude版へだけ送る決まりなので、iPhone版には読み込めません。');return}
   const c=bkCount(B.days),over=c.ks.filter(k=>days[k]&&hasContent(days[k])).length;
   bkPending=B;bkMsg('');
   const add=c.ks.length-over;
@@ -2303,6 +2327,44 @@ async function driveSave(){
   }catch(e){bkMsg(driveErr(e))}
   finally{btn.disabled=false}
 }
+/* Claude版: Googleドライブの「売上日報_Claude版へ」（いちばん新しいもの）を読み、iPhone版の記録の写しにする */
+const SYNC_LS='taxi-nippo-sync';
+const syncInfo=()=>{try{return JSON.parse(localStorage.getItem(SYNC_LS)||'null')}catch(e){return null}};
+function syncShow(t){$('sync-st').textContent=t;const i=syncInfo();$('ro-when').textContent=i?'いちばん新しい取り込み：'+new Date(i.at).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+'（iPhone版で '+new Date(i.exp||i.mod).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+' に送ったもの）':'まだiPhone版から取り込んでいません。設定の「iPhone版から取り込む」で取り込みます。'}
+/* 返事の中から、このアプリのバックアップ（JSONそのものか base64）を探す */
+function findBackup(v,depth){if(depth>5||v==null)return null;
+  if(typeof v==='string'){const t=v.trim();if(t.startsWith('{')&&t.includes('taxi-nippo')){const B=parseBackup(t);if(B)return B}
+    if(/^[A-Za-z0-9+/=\s]{40,}$/.test(t)){try{const bin=atob(t.replace(/\s+/g,''));const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);const tx=new TextDecoder().decode(u);if(tx.includes('taxi-nippo')){const B=parseBackup(tx);if(B)return B}}catch(e){}}
+    return null}
+  if(Array.isArray(v)){for(const x of v){const B=findBackup(x,depth+1);if(B)return B}return null}
+  if(typeof v==='object'){for(const k of Object.keys(v)){const B=findBackup(v[k],depth+1);if(B)return B}}
+  return null}
+let syncing=false;
+async function syncImport(auto){
+  if(SOLO||syncing)return;if(!mcpNs){if(!auto)syncShow('ClaudeにGoogleドライブが連携されていないため、取り込めません。claude.aiの「カスタマイズ」→「コネクタ」でGoogle Driveを連携してください。');return}
+  syncing=true;$('sync-go').disabled=true;syncShow('Googleドライブを探しています…');
+  try{
+    const r=await mcpNs.callTool(DRV,'search_files',{query:"title contains '売上日報_Claude版へ' and trashed = false",orderBy:'modifiedTime desc',pageSize:5,excludeContentSnippets:true},{cache:false});
+    const pl=r&&r.payload,files=(pl&&Array.isArray(pl.files)?pl.files:[]).filter(f=>f&&f.id&&/売上日報_Claude版へ/.test(f.title||f.name||''));
+    if(!files.length){syncShow('Googleドライブに「売上日報_Claude版へ」が見つかりませんでした。iPhone版の設定で「Claude版へ送る」を押し、共有の画面で「ドライブ」に保存してください。');return}
+    const f=files.slice().sort((a,b)=>String(b.modifiedTime||'').localeCompare(String(a.modifiedTime||'')))[0];
+    const last=syncInfo();
+    if(auto&&last&&last.id===f.id&&last.mod===f.modifiedTime){syncShow('取り込み済みです（新しく送られたものはありません）。');return}
+    syncShow('取り込んでいます…');
+    let B=null;
+    try{const d=await mcpNs.callTool(DRV,'download_file_content',{fileId:f.id},{cache:false});B=findBackup(d&&d.payload,0)}catch(e){}
+    if(!B){try{const d=await mcpNs.callTool(DRV,'read_file_content',{fileId:f.id},{cache:false});B=findBackup(d&&d.payload,0)}catch(e){}}
+    if(!B){syncShow('ファイルは見つかりましたが、中身を読めませんでした。iPhone版でもう一度「Claude版へ送る」を押してください。');return}
+    if(B.from!=='iphone'){syncShow('このファイルはiPhone版から送ったものではないので、取り込みません。iPhone版の設定の「Claude版へ送る」を使ってください。');return}
+    /* 写す: iPhone版にない日は空にし、ある日は置き換える。設定もiPhone版と同じにする */
+    const ks=new Set(Object.keys(B.days).concat(Object.keys(days)));const changed=[];
+    ks.forEach(k=>{const nv=B.days[k]||emptyDay(k);if(JSON.stringify(days[k]||null)!==JSON.stringify(nv)){days[k]=nv;changed.push(k)}});
+    if(B.settings){settings=cleanSettings(B.settings);saveSettings()}
+    roWrite=true;saveLocal();render();try{await pushDays(changed)}finally{roWrite=false}
+    try{localStorage.setItem(SYNC_LS,JSON.stringify({id:f.id,mod:f.modifiedTime||'',exp:B.exported||f.modifiedTime||'',at:new Date().toISOString()}))}catch(e){}
+    const c=bkCount(B.days);syncShow('取り込みました：'+(c.txt||'記録なし')+(changed.length?'（'+changed.length+'日分が変わりました）':'（変わったところはありません）'));
+  }catch(e){syncShow(driveErr(e).replace(/保存/g,'取り込み').replace(/「バックアップを保存」か「コピー」を使ってください。/,''))}
+  finally{syncing=false;$('sync-go').disabled=false}}
 async function pushDays(ks){for(const k of ks){persist(k);if(chains[k]){try{await chains[k]}catch(e){}}}}
 function doRestore(addOnly){
   const B=bkPending;if(!B)return;const ks=Object.keys(B.days).sort().filter(k=>!addOnly||!(days[k]&&hasContent(days[k]))),old={};
@@ -2378,8 +2440,9 @@ async function undoDelete(){
    The same page opened outside Claude (its own https address) has no Claude runtime. There it may ask the phone for its position,
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
+const RO=!SOLO;  /* Claude版は iPhone版の写し（見る・分析するだけ） */
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v95',APP_DATE='2026-11-23';
+const APP_VER='v96',APP_DATE='2026-11-23';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -2909,7 +2972,10 @@ const caseNo=(k,n)=>k.slice(2,4)+k.slice(5,7)+k.slice(8,10)+'-'+(n<10?'0':'')+n;
 function caseNos(k){const m={},d=days[k];if(d&&Array.isArray(d.trips))sorted(d).forEach((t,i)=>{m[t.id]=caseNo(k,i+1)});return m}
 const docId=date=>'d'+date.replace(/-/g,'');
 function setSync(t){$('sync').textContent=t}
+let roWrite=false,roWarned=false;
 function persist(date){
+  /* Claude版（写し）では、取り込みのときだけ書く。ほかの書き込みは止める */
+  if(RO&&!roWrite){if(!roWarned){roWarned=true;roStop()}return}
   saveLocal();
   dirty.add(date);saveDirty();
   if(!col)return;
@@ -3458,7 +3524,7 @@ function markCell(){
   if(td)td.classList.add('sel');return td;
 }
 function openCell(date,id,f){
-  const F=LF[f],t=cellTrip({date:date,id:id});if(!F||!t)return;
+  const F=LF[f],t=cellTrip({date:date,id:id});if(!F||!t)return;if(roStop())return;
   cellEd={date:date,id:id,f:f};$('toast').hidden=true;
   const dt=fromYmd(date),typed=F.kind!=='choice',inp=$('c-in'),i=listRows.findIndex(r=>r.k===date&&r.id===id);
   $('c-h').textContent=F.label;
@@ -3538,7 +3604,9 @@ function applyCmd(){
 /* ---------- actions ---------- */
 /* 1) Before a ride is saved, its items are checked; if something worth having is missing or looks wrong, the list is shown
       (and, by voice, read out) and the ride is saved only on 「このまま記録」/「はい」. Nothing missing — saved at once. */
-function record(force,voice){
+/* Claude版は写し。記録・修正の入口で止める */
+function roStop(){if(!RO)return false;toast('Claude版は見るだけです。記録はiPhone版で取ってください',false);return true}
+function record(force,voice){if(roStop())return;
   if(cmd){applyCmd();return}
   if(curFare()==null)return;
   if(!force){const ck=rideCheck();if(ck.warn.length){vsCheck(ck,!!voice);return}}
@@ -3712,9 +3780,10 @@ function anaHtml(p,ks,unit,prev){
   const fold=(h,i)=>{const at=h.indexOf('<!--B-->');if(at<0)return h;const op=!!ui.aopen[i];
     return h.slice(0,at)+'<button type="button" class="atog" data-aopen="'+i+'" aria-expanded="'+op+'">'+(op?'表をたたむ':'表と説明を見る')+'</button><div class="abody"'+(op?'':' hidden')+'>'+h.slice(at+8)+'</div>'};
   const cur=anaStats(ks),pv=prev&&prev.ks.length?anaStats(prev.ks):null;
-  const H=[aTime(ks,C,unit,cur,pv),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C),aInb(ks,C,unit),aKind(ks),aKey(p,ks,C,cur,pv,prev),aData(ks,C)];
+  AADV.ctx[p]={ks,C,unit,cur,pv,prev};
+  const H=[aTime(ks,C,unit,cur,pv),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C),aInb(ks,C,unit),aKind(ks),aKey(p,ks,C,cur,pv,prev),aData(ks,C),aAdv(p,ks)];
   /* 並び: 要点 → 時間 → 曜日×時間帯 → 場所 → 場所の種類 → 条件別 → 料金帯 → 良い日悪い日 → 訪日客 → 記録のそろい具合（番号は開いた表を覚えるためのもので変えない） */
-  return [8,0,1,2,7,4,3,5,6,9].map(i=>'<div class="card" id="'+p+'-a'+i+'">'+fold(H[i],i)+'</div>').join('');
+  return [8,10,0,1,2,7,4,3,5,6,9].map(i=>'<div class="card" id="'+p+'-a'+i+'">'+fold(H[i],i)+'</div>').join('');
 }
 /* 要点: ほかのカードから、件数が足りるものだけを短く。押すとそのカードの表を開く */
 function aKey(p,ks,C,cur,pv,prev){const t='<div class="ctitle">この期間の要点</div>',L=[];
@@ -3734,6 +3803,70 @@ function aKey(p,ks,C,cur,pv,prev){const t='<div class="ctitle">この期間の�
   {const q=dataQ(ks,C);if(q.warn)L.push(go(9,'<b class="dn">記録の抜けがあります</b>：'+q.warn))}
   if(!L.length)return t+'<div class="hint"><span>まだ要点を出せるだけの記録がありません。出庫・帰庫を押し、乗車を'+MINA+'回以上記録すると出ます。</span></div>';
   return t+'<ul class="akeys">'+L.join('')+'</ul><div class="hint"><span>件数が'+MINA+'つ以上あるものだけを出しています。「前の'+(prev?prev.n:'')+'日間」は、この期間のすぐ前の同じ日数です。押すと、そのカードの表が開きます。</span></div>'}
+/* AIのアドバイス: この期間の分析の数字をまとめて AI に渡し、傾向・改善点・気をつけることを書かせる。
+   渡すのは集計した数字だけ（一件ごとの記録・詳しい住所・メモは渡さない）。Claude版は Claude、iPhone版は Gemini（設定のキー） */
+const AADV={ctx:{},res:{},ctl:null};
+const advKey=(p,ks)=>p+'|'+(ks[0]||'')+'|'+(ks[ks.length-1]||'')+'|'+ks.length;
+function advReady(){return SOLO?!!aiKey():!!AI.s}
+function aAdv(p,ks){const t='<div class="ctitle">AIのアドバイス</div>',r=AADV.res[advKey(p,ks)];
+  if(!advReady())return t+'<div class="hint"><span>'+(SOLO?'設定の「AIに聞く（Gemini・無料）」でキーを入れると、この期間の実績から、AIが傾向と改善点を書きます。':'この画面ではAIを使えません。')+'</span></div>';
+  if(ks.length<2)return t+'<div class="hint"><span>出番が2日以上ある期間で使えます。</span></div>';
+  return t+'<div class="advbtns"><button type="button" class="btn pri" data-adv="go"'+(r&&r.busy?' hidden':'')+'>'+(r&&r.text?'もう一度アドバイスをもらう':'アドバイスをもらう')+'</button><button type="button" class="btn" data-adv="stop"'+(r&&r.busy?'':' hidden')+'>止める</button></div>'
+    +'<div class="advout" id="'+p+'-adv"'+(r?'':' hidden')+'>'+(r?advHtml(r.text,r.busy,r.err):'')+'</div>'
+    +'<div class="hint"><span>この期間の分析の数字（時間あたり・曜日×時間帯・場所は市区町村まで・条件別・料金帯・訪日客・記録のそろい具合など）をAI（'+(SOLO?'Gemini・無料枠':'Claude')+'）に渡します。一件ごとの記録・詳しい住所・メモは渡しません。AIの答えは参考です。数字は、ボタンのカードで確かめてください。'+(SOLO?'':'あなたのClaudeの利用枠を使います。')+'</span></div>'}
+const ADVCARD={a0:['0','時間の使い方'],a1:['1','曜日×時間帯'],a2:['2','場所'],a3:['3','料金帯'],a4:['4','条件別の効率'],a5:['5','良い日・悪い日'],a6:['6','訪日客'],a7:['7','場所の種類'],a9:['9','記録のそろい具合']};
+function advHtml(text,busy,err){if(!text&&busy)return '<p class="advwait">実績を読んでいます…（数十秒かかることがあります）</p>';
+  const used=[];let h='';
+  String(text||'').replace(/\*\*/g,'').replace(/^#+\s*/gm,'').split('\n').forEach(line=>{let l=line.trim();if(!l)return;
+    l=l.replace(/\[\[(a\d)\]\]/g,(m,k)=>{if(ADVCARD[k]&&!used.includes(k))used.push(k);return ''}).trim();if(!l)return;
+    const sec=l.match(/^【(.+?)】\s*(.*)$/);
+    if(sec){h+='<div class="ctitle sub">'+esc(sec[1])+'</div>'+(sec[2]?'<p>'+esc(sec[2])+'</p>':'');return}
+    if(/^[-・•*]\s*/.test(l)||/^\d+[.)．]\s*/.test(l)){h+='<li>'+esc(l.replace(/^([-・•*]|\d+[.)．])\s*/,''))+'</li>';return}
+    h+='<p>'+esc(l)+'</p>'});
+  h=h.replace(/(<li>[\s\S]*?<\/li>)(?!<li>)/g,'$1</ul>').replace(/(^|<\/p>|<\/div>|<\/ul>)(<li>)/g,'$1<ul>$2');
+  if(!busy&&used.length)h+='<div class="advref">'+used.map(k=>'<button type="button" class="chip" data-akey="'+ADVCARD[k][0]+'">'+ADVCARD[k][1]+' ›</button>').join('')+'</div>';
+  if(err)h+='<p class="advwait">'+esc(err)+'</p>';
+  return h||'<p class="advwait">'+(busy?'書いています…':'答えが空でした。もう一度押してください。')+'</p>'}
+/* AI に渡す、この期間の数字のまとめ（件数の少ないものには「少」を付ける） */
+function advData(p,X){const {ks,C,cur,pv,prev}=X,all=[];ks.forEach(k=>days[k].trips.forEach(x=>all.push(x)));const L=[],Y=v=>v==null?'不明':'¥'+yen(v),few=n=>n<MINA?'（少'+n+'件）':'（'+n+'件）';
+  const S=all.reduce((a,x)=>a+(x.fare||0),0);
+  L.push('期間: '+slash(ks[0])+'〜'+slash(ks[ks.length-1])+'（'+(p==='m'?'月集計':'年集計')+'）、出番 '+ks.length+'日、乗車 '+all.length+'回、営収 '+Y(S)+'、単価 '+Y(all.length?S/all.length:null)+'、1出番の営収 '+Y(S/ks.length));
+  L.push('[[a0]] 時間あたり営収 '+Y(cur.ph)+'、実車時間率 '+(cur.occ!=null?Math.round(cur.occ*100)+'%':'不明')+'、降車から次の乗車まで '+(cur.wait!=null?Math.round(cur.wait)+'分':'不明')+'、1出番の稼働 '+(cur.work!=null?hmTxt(Math.round(cur.work)):'不明')+'（出庫・帰庫の時刻がある '+C.length+'日で計算）');
+  if(pv&&pv.cdays>=MINA&&C.length>=MINA)L.push('前の'+prev.n+'日間（'+slash(prev.a)+'〜'+slash(prev.b)+'）: 時間あたり営収 '+Y(pv.ph)+'、実車時間率 '+(pv.occ!=null?Math.round(pv.occ*100)+'%':'不明')+'、次の乗車まで '+(pv.wait!=null?Math.round(pv.wait)+'分':'不明')+'、出番 '+pv.days+'日');
+  else L.push('前の期間との比べ: 記録が足りず比べられない');
+  {const g={};C.forEach(c=>{const w=awi(c.k);for(const h in c.band){const x=g[w+'|'+h]=g[w+'|'+h]||{m:0,s:0,d:0};x.m+=c.band[h];x.d++}days[c.k].trips.forEach(x=>{const h=hourOf(x);if(h&&g[w+'|'+h])g[w+'|'+h].s+=x.fare||0})});
+   const R=Object.keys(g).filter(k=>g[k].m>=60&&g[k].d>=2).map(k=>({k,v:g[k].s/g[k].m*60,d:g[k].d})).sort((a,b)=>b.v-a.v),f=r=>AWD[r.k.split('|')[0]]+'曜'+r.k.split('|')[1]+' '+Y(r.v)+'/時（'+r.d+'日）';
+   L.push('[[a1]] 曜日×時間帯（2日以上・1時間以上働いた所だけ）: '+(R.length?'高い順 '+R.slice(0,5).map(f).join('、')+(R.length>5?' ／ 低い順 '+R.slice(-3).reverse().map(f).join('、'):''):'まだ決められない'))}
+  {const g={};all.forEach(x=>{const n=muniOf(x.from);if(!n)return;const r=g[n]=g[n]||{n:0,s:0};r.n++;r.s+=x.fare||0});const ps=Object.keys(g).sort((a,b)=>g[b].n-g[a].n).slice(0,6);
+   const wg={};C.forEach(c=>c.waits.forEach(w=>{const n=muniOf(w.from.to);if(!n)return;const r=wg[n]=wg[n]||{n:0,m:0};r.n++;r.m+=w.m}));const ds=Object.keys(wg).filter(n=>wg[n].n>=2).sort((a,b)=>wg[a].m/wg[a].n-wg[b].m/wg[b].n);
+   L.push('[[a2]] 乗車の多い市区町村: '+(ps.length?ps.map(n=>n+' '+g[n].n+'回・単価'+Y(g[n].s/g[n].n)).join('、'):'乗車地の記録なし')+(ds.length?' ／ 降ろしてから次が早い: '+ds.slice(0,3).map(n=>n+' 平均'+Math.round(wg[n].m/wg[n].n)+'分（'+wg[n].n+'回）').join('、')+'、遅い: '+ds.slice(-2).reverse().map(n=>n+' 平均'+Math.round(wg[n].m/wg[n].n)+'分').join('、'):''))}
+  {const g=aGroup(all.filter(x=>x.from&&x.from!=='—'),x=>pKind(x.from),PKNAME).filter(r=>r.k).slice(0,5);if(g.length)L.push('[[a7]] 乗車地の種類: '+g.map(r=>r.l+' '+r.n+'回・単価'+Y(r.avg)).join('、'))}
+  {const cost={};C.forEach(d=>Object.assign(cost,d.cost));
+   [['乗車のきっかけ',x=>SRCNAME[x.src]],['客層',x=>SEGNAME[x.seg]],['天気',x=>x.wx&&x.wx.w]].forEach(([nm,f])=>{const r=aGroup(all,f,{},cost).filter(r=>r.k);if(r.length)L.push('[[a4]] '+nm+'ごと: '+r.map(r=>r.l+' '+r.n+'回・単価'+Y(r.avg)+(r.ph!=null?'・時間あたり'+Y(r.ph)+few(r.cn):'')).join('、'))})}
+  {let n=0,lg=0,ls=0;const b=BANDS.map(()=>0);all.forEach(x=>{const f=x.fare||0;if(f<=0)return;n++;b[BANDS.findIndex(z=>f<=z[0])]+=f;if(f>=10000){lg++;ls+=f}});
+   if(n)L.push('[[a3]] 料金帯（営収の割合）: '+BANDS.map((z,i)=>z[1]+' '+Math.round(b[i]/S*100)+'%').join('、')+'、ロング '+lg+'回（営収の'+(S?Math.round(ls/S*100):0)+'%）')}
+  {const D=ks.map(k=>({k,s:totals(days[k].trips).sum,st:days[k].startTime||''})).sort((a,b)=>b.s-a.s);if(D.length>=4){const n=D.length>=10?5:Math.floor(D.length/2),g=D.slice(0,n),bd=D.slice(-n),wd=Ls=>{const c={};Ls.forEach(d=>{const w=WD[fromYmd(d.k).getDay()];c[w]=(c[w]||0)+1});return Object.keys(c).sort((a,b)=>c[b]-c[a]).slice(0,2).map(w=>w+'曜'+c[w]).join('・')},av=Ls=>Ls.reduce((a,d)=>a+d.s,0)/Ls.length;
+   L.push('[[a5]] 良い日'+n+'日: 平均'+Y(av(g))+'、多い曜日 '+wd(g)+' ／ 悪い日'+n+'日: 平均'+Y(av(bd))+'、多い曜日 '+wd(bd))}}
+  {const ib=all.filter(x=>x.seg==='inbound');if(ib.length){const cost={};C.forEach(d=>Object.assign(cost,d.cost));const lg=aGroup(ib,x=>x.ib&&x.ib.lang,IBNAME.lang,cost).filter(r=>r.k);
+   L.push('[[a6]] 訪日客: '+ib.length+'回（全体の'+Math.round(ib.length/all.length*100)+'%）・単価'+Y(ib.reduce((a,x)=>a+(x.fare||0),0)/ib.length)+(lg.length?'、言葉 '+lg.slice(0,3).map(r=>r.l+r.n+'回').join('・'):''))}}
+  {const q=dataQ(ks,C);L.push('[[a9]] 記録のそろい具合: '+q.R.map(r=>r[0]+' '+r[1]+'%').join('、'))}
+  if(settings.closeDay||settings.monthGoal)L.push('目標: '+(settings.monthGoal?'月の営収目標 '+Y(settings.monthGoal):'')+(settings.dayGoal?'、1出番の目標 '+Y(settings.dayGoal):''));
+  return L.join('\n')}
+async function advRun(p){const X=AADV.ctx[p];if(!X||!advReady())return;const key=advKey(p,X.ks);
+  const r=AADV.res[key]={text:'',busy:true,err:''};const out=()=>{const el=$(p+'-adv');if(el){el.hidden=false;el.innerHTML=advHtml(r.text,r.busy,r.err)}const bx=$(p+'-a10');if(bx){const g=bx.querySelector('[data-adv="go"]'),st=bx.querySelector('[data-adv="stop"]');if(g){g.hidden=r.busy;g.textContent=r.text?'もう一度アドバイスをもらう':'アドバイスをもらう'}if(st)st.hidden=!r.busy}};out();
+  const prompt='あなたは東京のタクシー乗務員の売上アドバイザーです。下の「実績のまとめ」だけを根拠に、この運転手に日本語でアドバイスしてください。\n'
+   +'書き方:\n- 次の3つの見出しをこの順で使う：【傾向】【改善点】【気をつけること】。各見出しの下に「- 」で始まる短い文を2〜3つ。\n'
+   +'- 【傾向】は数字から言えること（何が良い・悪い・前の期間からどう変わったか）。【改善点】は次の乗務で試せる具体的な行動（いつ・どこで・どう動くか）。【気をつけること】は件数が少なくて言い切れないことや、記録の抜け。\n'
+   +'- それぞれの文の最後に、根拠にした行の印（[[a1]] など、まとめの行頭にあるもの）を1つ付ける。\n'
+   +'- 数字はまとめにあるものだけを使い、計算し直さない。（少n件）の数字は「まだ件数が少ない」と断ってから使う。\n'
+   +'- 速度超過・長時間労働・休憩を削る・拘束時間を延ばすなど、安全や法令・会社の決まりに反することは勧めない。走行中に画面を操作することも勧めない。\n'
+   +'- 太字や表は使わない。全体で400字くらいまで。\n\n--- 実績のまとめ ---\n'+advData(p,X);
+  AADV.ctl=new AbortController();
+  try{if(SOLO){r.text=await gemCall(aiKey(),prompt,AADV.ctl.signal)}
+    else{const z=await AI.s(prompt,{signal:AADV.ctl.signal,onText:({text})=>{r.text=text;out()}});r.text=z.text}}
+  catch(e){const c=e&&(e.name==='AbortError'?'cancelled':typeof e.code==='string'?e.code:'');
+    r.err={cancelled:'止めました。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',busy:'いまGeminiが混み合っています。少し時間をおいて、もう一度押してください。',bad_key:'Geminiのキーが使えませんでした。設定の「AIに聞く」でキーを確かめてください。',not_granted:'AIを使う許可が出ませんでした。'}[c]||'アドバイスを出せませんでした。もう一度押してください。'}
+  finally{r.busy=false;AADV.ctl=null;out()}}
 /* 記録のそろい具合: 分析の数字のもとになる記録が、どれだけ入っているか */
 function dataQ(ks,C){const all=[];ks.forEach(k=>days[k].trips.forEach(x=>all.push(x)));const N=all.length,pc=n=>N?Math.round(n/N*100):0;
   const R=[['出庫・帰庫の時刻',ks.length?Math.round(C.length/ks.length*100):0,'時間の使い方・曜日×時間帯・時間あたり'],
@@ -3949,7 +4082,7 @@ function openMan(){const here=manHere(),t={'#list':'一覧','#month':'月集計'
 function closeMan(){$('mv').hidden=true;$('man-b').focus()}
 function aboutUi(){
   $('ab-ver').textContent=(SOLO?'iPhone版（本番）':'Claude版（試し用）')+'　'+APP_VER+'（'+APP_DATE.replace(/-/g,'/')+'）';
-  $('ab-ed').textContent=SOLO?'ふだんの記録はこの版で取ります。Claude版で取った記録を移すときは、Claude版で「バックアップを保存」し、この版で読み込んで「ない日だけ足す」を押します。':'本番はiPhoneのホーム画面に置いた版です。この版の記録はiPhone版とは別で、iPhone版には入りません。ここで取った記録をiPhone版へ移すときは、下の「バックアップを保存」をして、iPhone版の設定で読み込み「ない日だけ足す」を押します。';
+  $('ab-ed').textContent=SOLO?'ふだんの記録はこの版で取ります。Claude版で見る・分析するときは、バックアップの「Claude版へ送る」でGoogleドライブに保存します。記録はiPhone版からClaude版へだけ送ります（Claude版のバックアップは、この版には読み込めません）。':'この版はiPhone版の写しで、見る・分析するだけです。記録はiPhone版で取り、iPhone版の「Claude版へ送る」→ この版の「iPhone版から取り込む」で写します。';
 }
 function route(){
   const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#set'?'set':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
@@ -4392,6 +4525,11 @@ $('del-confirm').addEventListener('click',e=>{const b=e.target.closest('[data-dl
 $('del-undo').addEventListener('click',undoDelete);
 delUi();
 $('bk-drive').addEventListener('click',driveSave);
+/* iPhone版 → Claude版: 毎回同じ名前のファイルを共有の画面からGoogleドライブへ。Claude版はこの名前を探して取り込む */
+const SYNCNAME='売上日報_Claude版へ.json';
+$('bk-send').addEventListener('click',()=>{if(!SOLO||!dlNs)return;
+  dlNs.save({filename:SYNCNAME,data:backupText()}).then(()=>{markBackup();try{localStorage.setItem('taxi-nippo-sent',new Date().toISOString())}catch(e){}bkMsg('「'+SYNCNAME+'」を作りました。共有の画面で「ドライブ」を選んで保存すると、Claude版で取り込めます。')})
+   .catch(e=>{bkMsg(e&&e.code==='declined'?'送るのをやめました。':'ここではファイルを作れませんでした。')})});
 document.addEventListener('input',e=>{if(!$('toast').hidden&&!$('toast-b').hidden&&!$('toast').contains(e.target))$('toast').hidden=true},true);
 $('sh-b').addEventListener('click',()=>{
   const d=day(cur);
@@ -4572,7 +4710,8 @@ const mshift=n=>{const a=curMonth.split('-').map(Number);const d=new Date(a[0],a
 ['m','y'].forEach(p=>{
   $(p+'-view').addEventListener('click',e=>{const b=e.target.closest('[data-av]');if(!b)return;ui[p==='m'?'mview':'yview']=b.dataset.av;saveUi();if(p==='m')renderMonth();else renderYear()});
   $(p+'-ana').addEventListener('click',e=>{
-    const a=e.target.closest('[data-apl],[data-acd],[data-go],[data-aopen],[data-akey]');if(!a)return;
+    const a=e.target.closest('[data-apl],[data-acd],[data-go],[data-aopen],[data-akey],[data-adv]');if(!a)return;
+    if(a.dataset.adv){if(a.dataset.adv==='go')advRun(p);else if(AADV.ctl)AADV.ctl.abort();return}
     if(a.dataset.akey){const i=a.dataset.akey;if(!ui.aopen[i]){ui.aopen[i]=true;saveUi();if(p==='m')renderMonth();else renderYear()}const c=$(p+'-a'+i);if(c)c.scrollIntoView({block:'start',behavior:'smooth'});return}
     if(a.dataset.aopen){const i=a.dataset.aopen;if(ui.aopen[i])delete ui.aopen[i];else ui.aopen[i]=true;saveUi();if(p==='m')renderMonth();else renderYear();const b=$(p+'-ana').querySelector('[data-aopen="'+i+'"]');if(b)b.focus({preventScroll:true});return}
     if(a.dataset.go){navigated=true;cur=a.dataset.go;location.hash='#day';renderDay();return}
@@ -4728,6 +4867,7 @@ $('savebad-bk').addEventListener('click',()=>{location.hash='#set';route();const
 /* dl.save({filename,data}) hands the viewer a file: Claude's own saver on Claude, the browser's share sheet or download in the stand-alone build */
 function wireDownloads(dl){
    dlNs=dl;
+   if(SOLO){$('bk-send').hidden=false;$('bk-send-h').hidden=false}
    const b=$('csv-save');b.hidden=false;
     const yb=$('y-csv-save');yb.hidden=false;
     const kb=$('bk-save');kb.hidden=false;
@@ -4878,7 +5018,9 @@ if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();
 }
 if(window.claude&&window.claude.use){
   window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false}).catch(()=>{});
-  window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false}).catch(()=>{});
+  window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false;
+    /* 前に取り込んだことがあれば、開いたときに新しいものを探す（初めては「iPhone版から取り込む」を押してから） */
+    if(syncInfo())setTimeout(()=>syncImport(true),1500)}).catch(()=>{});
   window.claude.use('downloads').then(dl=>{if(dl)wireDownloads(dl)}).catch(()=>{});
   window.claude.use('dictation').then(d=>{
     if(!d)return;dict=d;
@@ -4897,6 +5039,7 @@ if(window.claude&&window.claude.use){
   }).catch(()=>{});
 }
 $('ed-badge').hidden=SOLO;
+if(RO){document.body.classList.add('ro');$('ro-note').hidden=false;$('isync').hidden=false;{const v=$('v-set'),f=v.querySelector(':scope>.card');if(f&&f!==$('isync'))v.insertBefore($('isync'),f)}syncShow('');$('sync-go').addEventListener('click',()=>syncImport(false))}
 if(SOLO){
   wireDownloads({save:soloSave});
   $('tab-map').hidden=false;$('mp-open').hidden=false;

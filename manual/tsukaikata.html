@@ -1265,6 +1265,10 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </thead>
 <tbody>
 <tr>
+<td>AIのアドバイス（要点の次）</td>
+<td>「アドバイスをもらう」を押すと、この期間の分析の数字をもとに、AIが【傾向】【改善点】【気をつけること】を2〜3つずつ書く。それぞれの根拠のカードへのボタンが付く。AIに渡すのは集計した数字だけで、一件ごとの記録・詳しい住所・メモは渡さない。iPhone版はGeminiのキー（設定）、Claude版はClaudeで動く</td>
+</tr>
+<tr>
 <td>この期間の要点（いちばん上）</td>
 <td>時間あたり営収と前の期間との比べ、いちばん稼げた時間、乗車がいちばん多い場所、時間あたりがいちばん高い乗せ方、ロング、訪日客、記録の抜け。押すと、そのカードの表が開く</td>
 </tr>
@@ -1523,7 +1527,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <h3 id="fs">文字の大きさ</h3>
 <p>「画面の明るさ」の下の「文字の大きさ」で、標準・大・特大を選びます。説明や表の小さい文字が、大で約1.15倍、特大で約1.3倍になります。料金や大きいボタンの文字は、はじめから大きいので変わりません。この端末だけの設定です。押す場所はどれも、揺れる車内でも押しやすい大きさ（44ポイント以上）にしています。</p>
 <h3 id="s62170">このアプリ（版の名前と番号）</h3>
-<p>「このアプリ」に、いま使っている版と番号（例：iPhone版（本番） v80）が出ます。変更の中身は、版の番号ごとに記録しています。本番はiPhoneのホーム画面の版で、Claude版は試し用です。</p>
+<p>「このアプリ」に、いま使っている版と番号（例：iPhone版（本番） v80）が出ます。変更の中身は、版の番号ごとに記録しています。本番はiPhoneのホーム画面の版で、Claude版はその写しです（題名の横に「写し」と出ます）。</p>
 <h3 id="s62285">走行中の画面の設定</h3>
 <p>「乗務中の画面」の「走行中の画面」で、「大きく簡単にする」（はじめ）か「いつもの画面のまま」を選びます（3章「走行中の画面」）。この端末だけの設定です。</p>
 <h3 id="aiset">AIに聞く（Gemini）</h3>
@@ -1554,7 +1558,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <li>「復元する」を押す</li>
 </ol>
 <p>バックアップにある日は、その日の記録がバックアップの内容に置き換わります。ない日はそのまま残ります。復元した直後なら「直前の復元を取り消す」で元に戻せます。</p>
-<p>いまの記録と同じ日付があるときは、「ない日だけ足す」も選べます。この端末にない日だけを足し、いまの記録と設定はそのままにします。Claude版で取った記録をiPhone版へ移すときに使います。</p>
+<p>いまの記録と同じ日付があるときは、「ない日だけ足す」も選べます。この端末にない日だけを足し、いまの記録と設定はそのままにします。Claude版で作ったバックアップは、iPhone版には読み込めません（記録はiPhone版からClaude版へだけ送ります。付録B）。</p>
 <h3 id="delete">記録を消す</h3>
 <p>いらなくなった記録は、「設定」のいちばん下の「記録を消す」で消せます。先に必ず「バックアップを保存」をしてください。</p>
 <ol>
@@ -1719,40 +1723,43 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>それでも古いままのときは、先にバックアップを保存してから、iPhoneの「設定」→「アプリ」→「Safari」→「詳細」→「Webサイトデータ」で「github.io」を削除し、アイコンを追加し直します。この操作でiPhone内の記録も消えるので、最後にバックアップから復元してください。</p>
 <p>手順はGitHubのドキュメント「Creating a GitHub Pages site」と「Configuring a publishing source」（2026年11月16日時点）によります。画面の表記は変わることがあります。</p>
 <h2 id="claude">付録B Claude版を使うとき</h2>
-<p>同じアプリは、Claudeの中のタクシー売上日報（Claude版）でも開けます。Claudeにログインして開きます。使い方は同じですが、次の点が違います。本番はiPhoneのホーム画面に置いた版で、Claude版は試し用です（題名の横に「試し用」と出ます）。2つの版の記録は別々に保存されます。Claude版で取った記録をiPhone版へ移すときは、Claude版で「バックアップを保存」し、iPhone版で読み込んで「ない日だけ足す」を押します。</p>
+<p>同じアプリは、Claudeの中のタクシー売上日報（Claude版）でも開けます。Claude版は、<strong>iPhone版の記録の写しを見る・分析するための版</strong>です。記録はiPhone版で取り、iPhone版からClaude版へだけ送ります。Claude版からiPhone版へは送れません。</p>
+<h3 id="sync">iPhone版からClaude版へ送る</h3>
+<ol>
+<li>iPhone版の「設定」→「バックアップ」の「Claude版へ送る（Googleドライブ）」を押す</li>
+<li>共有の画面で「ドライブ」を選び、マイドライブに保存する（iPhoneにGoogleドライブのアプリが要ります。ファイル名は「売上日報_Claude版へ.json」）</li>
+<li>Claude版を開き、「設定」のいちばん上の「iPhone版から取り込む」を押す。初めてのときは、Googleドライブを使う許可の確認が出る</li>
+</ol>
+<p>一度取り込むと、次からはClaude版を開いたときに、新しく送られたファイルがあれば自動で取り込みます。日報の上に、いちばん新しい取り込みの日時が出ます。</p>
+<ul>
+<li>取り込むと、Claude版の記録と設定はiPhone版と同じになります。Claude版にしかなかった記録は消えます</li>
+<li>Claude版では、出庫・乗車・話す・修正の保存・設定の変更・復元・記録を消すは出ません（見る・分析する・バックアップを保存するだけ）</li>
+<li>iPhone版から送ったものでないファイルは取り込みません。Claude版のバックアップはiPhone版に読み込めません</li>
+<li>Claude版を使うには、ClaudeとGoogleドライブをつないでおきます（下の「Googleドライブに保存する」の手順）</li>
+</ul>
 <div class="tw"><table>
 <thead>
 <tr>
 <th>項目</th>
-<th>単体版</th>
+<th>iPhone版</th>
 <th>Claude版</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>乗車地・降車地の自動入力</td>
-<td>できる（丁目まで）</td>
-<td>できない。話して入れる</td>
+<td>記録する</td>
+<td>できる</td>
+<td>できない（写しを見るだけ）</td>
 </tr>
 <tr>
-<td>地図</td>
-<td>見られる</td>
-<td>見られない</td>
+<td>乗車地・降車地の自動入力・地図</td>
+<td>できる</td>
+<td>送られた記録の地名を見る（地図は出ない）</td>
 </tr>
 <tr>
 <td>記録の保存先</td>
 <td>iPhoneの中だけ</td>
-<td>iPhoneとClaude</td>
-</tr>
-<tr>
-<td>別の端末で同じ記録を見る</td>
-<td>できない。バックアップで移す</td>
-<td>同じアカウントで開けば見られる</td>
-</tr>
-<tr>
-<td>Googleドライブに直接保存</td>
-<td>できない。共有メニューから保存する</td>
-<td>できる</td>
+<td>Claude（iPhone版から取り込んだ写し）</td>
 </tr>
 <tr>
 <td>圏外で開く</td>
@@ -1760,18 +1767,12 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>開けないことがある</td>
 </tr>
 <tr>
-<td>質問のあとの聞き取り</td>
-<td>自動で始まる</td>
-<td>「🎤 答える」を押してから答える</td>
-</tr>
-<tr>
-<td>AIに聞く（マニュアルの質問）</td>
-<td>近い章を出す。Geminiのキーを入れるとAIが答える（無料）</td>
+<td>AIに聞く・AIのアドバイス</td>
+<td>Geminiのキーを入れるとAIが答える（無料）</td>
 <td>Claudeが答える</td>
 </tr>
 </tbody>
 </table></div>
-<p>Claude版では、画面のいちばん下に保存の状態が出ます。「Claudeに保存済み」はどの端末でも同じ記録が見られる状態、「通信できません」はiPhoneには保存済みで、つながったときに自動で送り直す状態です。Claude版の記録を単体版に移すときは、Claude版でバックアップを保存し、単体版の「設定」で復元します。Claude版で記録を消すと、Claudeに保存した分と、ほかの端末の記録も消えます。</p>
 <h3 id="s49416">Googleドライブに保存する（Claude版）</h3>
 <p>「設定」の「Googleドライブに保存」を押すと、マイドライブにバックアップが直接入ります。初めて使う前に、ClaudeとGoogleドライブをつなぎます。</p>
 <ol>
@@ -1813,7 +1814,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v95（2026-11-23）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v96（2026-11-23）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();
