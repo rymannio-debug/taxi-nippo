@@ -1265,8 +1265,12 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </thead>
 <tbody>
 <tr>
+<td>この期間の要点（いちばん上）</td>
+<td>時間あたり営収と前の期間との比べ、いちばん稼げた時間、乗車がいちばん多い場所、時間あたりがいちばん高い乗せ方、ロング、訪日客、記録の抜け。押すと、そのカードの表が開く</td>
+</tr>
+<tr>
 <td>時間の使い方</td>
-<td>稼働時間（帰庫−出庫−休憩）、時間あたり営収、実車時間率（お客さんを乗せていた時間の割合）、降車から次のお客さんまでの平均。月集計では日ごと、年集計では月ごとの表が付く。緑の数字は、時間あたりがいちばん高い日（月）</td>
+<td>稼働時間（帰庫−出庫−休憩）、時間あたり営収、実車時間率（お客さんを乗せていた時間の割合）、降車から次のお客さんまでの平均。月集計では日ごと、年集計では月ごとの表が付く。緑の数字は、時間あたりがいちばん高い日（月）。時間あたり営収・実車時間率・次のお客さんまでには「前の期間より」が付く（緑は良くなった、赤は悪くなった）</td>
 </tr>
 <tr>
 <td>曜日×時間帯</td>
@@ -1296,9 +1300,16 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <td>良い日・悪い日</td>
 <td>営収の多い日と少ない日（各5日。出番が10日未満なら半分ずつ）と、曜日・天気・出庫時刻・稼働・時間あたり・回数・単価の比べ。日付を押すと、その日の日報が開く</td>
 </tr>
+<tr>
+<td>記録のそろい具合（いちばん下）</td>
+<td>出庫・帰庫の時刻、乗車・降車の時刻、乗車地、きっかけ、客層、天気がどれだけ入っているか。70%に満たないものは薄く出る</td>
+</tr>
 </tbody>
 </table></div>
 <ul>
+<li>「前の期間」は、この期間のすぐ前の同じ日数です（11月1日〜22日を見ているなら、10月10日〜31日）。いまの月がまだ途中でも、同じ日数どうしで比べます。どちらにも出庫・帰庫の時刻が入った日が3日以上あるときに出ます</li>
+<li>「いちばん」は、件数が足りるものの中からだけ選びます。曜日×時間帯は2日以上・合わせて1時間以上働いたところ、条件別・場所・要点は3回以上のもの。足りないものは表に薄く出て、「いちばん」には選びません（たまたまの1回で高く見えるのを防ぐため）</li>
+<li>訪日客の季節の比べは、いまの月が途中なら、前の年も同じ日までの分で比べます</li>
 <li>時間を使う数字（稼働時間、時間あたり、実車時間率、次のお客さんまで、1回の時間、曜日×時間帯）は、出庫と帰庫の時刻が両方入った日だけで出します。帰庫を押し忘れた日や、まだ乗務中の日は入りません。出庫から帰庫までが22時間を超える日（帰庫の時刻の入れ間違いなど）も入れません</li>
 <li>休憩をはさんだ待ち時間は、「次のお客さんまで」「次まで」に入れません</li>
 <li>日付をまたいだ深夜は、出庫した日の曜日に入ります</li>
@@ -1802,7 +1813,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v93（2026-11-23）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v94（2026-11-23）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();

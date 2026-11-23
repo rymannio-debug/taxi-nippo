@@ -936,6 +936,15 @@ body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5
 @media (max-width:359px){.np-x{gap:6px}.np-x button{font-size:calc(14px*var(--fs,1))}}
 /* メモ: 降車のあと（料金の数字キーの「メモ」）か、記録の直後（「記録しました」の「メモ」）に、その乗車へ一言残す */
 #memo textarea{width:100%;min-height:84px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--field);font-size:calc(17px*var(--fs,1));resize:vertical}
+.astat em.dlt{display:block;font-style:normal;font-weight:700;margin-top:2px}
+.astat em.dlt.up,.akeys b.up{color:var(--good,#1a7f3c)}
+.astat em.dlt.dn,.akeys b.dn,.asum b.dn{color:var(--danger,#c0392b)}
+.htable td.few{opacity:.55;font-style:italic}
+.mtable td.few{opacity:.55}
+.akeys{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.akey{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--field);color:var(--ink);text-align:left;font-size:calc(15px*var(--fs,1));line-height:1.5}
+.akey .kt{flex:1 1 auto;min-width:0}
+.akey .km{flex:none;font-size:calc(13px*var(--fs,1));font-weight:700;color:var(--muted)}
 .mtable.ab td:first-child,.mtable.ab th:first-child{min-width:6.5em;word-break:keep-all}
 .ibbox{display:flex;flex-direction:column;gap:6px;margin:4px 0 6px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
 .ibbox[hidden]{display:none}
@@ -2370,7 +2379,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v93',APP_DATE='2026-11-23';
+const APP_VER='v94',APP_DATE='2026-11-23';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -3678,17 +3687,67 @@ function anaView(p,ks,unit){
   if(aMaps[p]){try{aMaps[p].remove()}catch(e){}aMaps[p]=null}
   /* built only while it is on screen: render() runs on every recorded ride */
   if(!on||sec.hidden){box.innerHTML='';return}
-  box.innerHTML=anaHtml(p,ks,unit);
+  box.innerHTML=anaHtml(p,ks,unit,anaPrev(p));
   if(ui.aopen[2])anaMap(p,ks);
 }
-function anaHtml(p,ks,unit){
+/* 前の期間: 同じ日数だけ前（月集計は前の締め期間、年集計は同じ長さの前の期間）。いまの期間が途中なら、今日までと同じ日数で比べる */
+function anaPrev(p){let a,b;
+  if(p==='m'){[a,b]=periodOf(curMonth);if(!settings.closeDay)b=ymd(new Date(+curMonth.slice(0,4),+curMonth.slice(5,7),0))}
+  else if(yMode==='range'){if(!yRangeOk())return null;a=yFrom;b=yTo}
+  else{const ms=yMonths(curQ);if(!ms.length)return null;a=ms[0]+'-01';b=ymd(new Date(+ms[ms.length-1].slice(0,4),+ms[ms.length-1].slice(5,7),0))}
+  const today=ymd(new Date());if(b>today)b=today;if(a>b)return null;
+  const A=fromYmd(a),B=fromYmd(b),n=Math.round((B-A)/864e5)+1,pb=ymd(new Date(A.getFullYear(),A.getMonth(),A.getDate()-1)),pa=ymd(new Date(A.getFullYear(),A.getMonth(),A.getDate()-n));
+  const ks=Object.keys(days).filter(k=>k>=pa&&k<=pb&&days[k].trips&&days[k].trips.length).sort();
+  return {a:pa,b:pb,n:n,ks:ks}}
+/* 期間の主な数字（要点と比べに使う） */
+function anaStats(ks){const C=ks.map(dayClock).filter(Boolean);let W=0,S=0,OW=0,O=0,N=0,AS=0;const ws=[];
+  C.forEach(c=>{W+=c.work;S+=c.sum;if(c.full){OW+=c.work;O+=c.occ}c.waits.forEach(x=>ws.push(x.m))});
+  ks.forEach(k=>{const T=totals(days[k].trips);N+=T.n;AS+=T.sum});
+  return {days:ks.length,cdays:C.length,ph:W?perHour(S,W):null,occ:OW?O/OW:null,wait:ws.length?ws.reduce((a,b)=>a+b,0)/ws.length:null,unit:N?AS/N:null,perDay:ks.length?AS/ks.length:null,work:C.length?W/C.length:null}}
+const MINA=3;  /* 「いちばん」と言うのに要る件数（それより少ないものは表には出すが、選ばない） */
+function anaHtml(p,ks,unit,prev){
   if(!ks.length)return '<div class="card"><div class="hint"><span>'+(p==='m'?'この月':'この期間')+'の記録はまだありません。日報で乗車を記録すると、ここに分析が出ます。</span></div></div>';
   const C=ks.map(dayClock).filter(Boolean);
   /* each card shows its point first; the tables and notes open with the button under it (remembered per card) */
   const fold=(h,i)=>{const at=h.indexOf('<!--B-->');if(at<0)return h;const op=!!ui.aopen[i];
     return h.slice(0,at)+'<button type="button" class="atog" data-aopen="'+i+'" aria-expanded="'+op+'">'+(op?'表をたたむ':'表と説明を見る')+'</button><div class="abody"'+(op?'':' hidden')+'>'+h.slice(at+8)+'</div>'};
-  return [aTime(ks,C,unit),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C),aInb(ks),aKind(ks)].map((h,i)=>'<div class="card" id="'+p+'-a'+i+'">'+fold(h,i)+'</div>').join('');
+  const cur=anaStats(ks),pv=prev&&prev.ks.length?anaStats(prev.ks):null;
+  const H=[aTime(ks,C,unit,cur,pv),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C),aInb(ks),aKind(ks),aKey(p,ks,C,cur,pv,prev),aData(ks,C)];
+  /* 並び: 要点 → 時間 → 曜日×時間帯 → 場所 → 場所の種類 → 条件別 → 料金帯 → 良い日悪い日 → 訪日客 → 記録のそろい具合（番号は開いた表を覚えるためのもので変えない） */
+  return [8,0,1,2,7,4,3,5,6,9].map(i=>'<div class="card" id="'+p+'-a'+i+'">'+fold(H[i],i)+'</div>').join('');
 }
+/* 要点: ほかのカードから、件数が足りるものだけを短く。押すとそのカードの表を開く */
+function aKey(p,ks,C,cur,pv,prev){const t='<div class="ctitle">この期間の要点</div>',L=[];
+  const go=(i,txt)=>'<li><button type="button" class="akey" data-akey="'+i+'"><span class="kt">'+txt+'</span><span class="km">くわしく ›</span></button></li>';
+  if(cur.ph!=null&&pv&&pv.ph!=null&&C.length>=MINA&&pv.cdays>=MINA){const r=Math.round((cur.ph-pv.ph)/pv.ph*100);L.push(go(0,'時間あたり営収は <b>¥'+yen(cur.ph)+'</b>。前の'+prev.n+'日間より <b class="'+(r>=0?'up':'dn')+'">'+(r>=0?'+':'')+r+'%</b>'))}
+  else if(cur.ph!=null)L.push(go(0,'時間あたり営収は <b>¥'+yen(cur.ph)+'</b>（出庫・帰庫の時刻がある'+C.length+'日）'));
+  {const g={};C.forEach(c=>{const w=awi(c.k);for(const h in c.band){const x=g[w+'|'+h]=g[w+'|'+h]||{m:0,s:0,d:0};x.m+=c.band[h];x.d++}days[c.k].trips.forEach(x=>{const h=hourOf(x);if(h&&g[w+'|'+h])g[w+'|'+h].s+=x.fare||0})});
+   let b=null;for(const k in g){const x=g[k];if(x.m>=60&&x.d>=2){const v=x.s/x.m*60;if(!b||v>b.v)b={k,v}}}
+   if(b&&b.v>0){const [w,h]=b.k.split('|');L.push(go(1,'いちばん稼げた時間は <b>'+AWD[w]+'曜 '+h+'</b>（1時間 ¥'+yen(b.v)+'）'))}}
+  {const g={};ks.forEach(k=>days[k].trips.forEach(x=>{const n=muniOf(x.from);if(!n)return;const r=g[n]=g[n]||{n:0,s:0};r.n++;r.s+=x.fare||0}));const ps=Object.keys(g).filter(n=>g[n].n>=MINA).sort((a,b)=>g[b].n-g[a].n);
+   if(ps.length)L.push(go(2,'乗車がいちばん多い場所は <b>'+esc(ps[0])+'</b>（'+g[ps[0]].n+'回・単価 ¥'+yen(g[ps[0]].s/g[ps[0]].n)+'）'))}
+  {const cost={};C.forEach(d=>Object.assign(cost,d.cost));const g={};ks.forEach(k=>days[k].trips.forEach(x=>{const n=SRCNAME[x.src];if(!n||cost[x.id]==null)return;const r=g[n]=g[n]||{n:0,m:0,s:0};r.n++;r.m+=cost[x.id];r.s+=x.fare||0}));
+   const rs=Object.keys(g).filter(n=>g[n].n>=MINA&&g[n].m>0).sort((a,b)=>g[b].s/g[b].m-g[a].s/g[a].m);
+   if(rs.length>1)L.push(go(4,'乗せ方では <b>'+esc(rs[0])+'</b> が時間あたり ¥'+yen(g[rs[0]].s/g[rs[0]].m*60)+' でいちばん'))}
+  {let n=0,lg=0,ls=0,S=0;ks.forEach(k=>days[k].trips.forEach(x=>{const f=x.fare||0;if(f<=0)return;n++;S+=f;if(f>=10000){lg++;ls+=f}}));if(n)L.push(go(3,'ロング（1万円以上）は <b>'+lg+'回</b>'+(lg?'、営収の '+Math.round(ls/S*100)+'%':'')))}
+  {const all=[];ks.forEach(k=>days[k].trips.forEach(x=>all.push(x)));const ib=all.filter(x=>x.seg==='inbound');if(ib.length>=MINA)L.push(go(6,'訪日客は <b>'+ib.length+'回</b>（全体の'+Math.round(ib.length/all.length*100)+'%・単価 ¥'+yen(ib.reduce((a,x)=>a+(x.fare||0),0)/ib.length)+'）'))}
+  {const q=dataQ(ks,C);if(q.warn)L.push(go(9,'<b class="dn">記録の抜けがあります</b>：'+q.warn))}
+  if(!L.length)return t+'<div class="hint"><span>まだ要点を出せるだけの記録がありません。出庫・帰庫を押し、乗車を'+MINA+'回以上記録すると出ます。</span></div>';
+  return t+'<ul class="akeys">'+L.join('')+'</ul><div class="hint"><span>件数が'+MINA+'つ以上あるものだけを出しています。「前の'+(prev?prev.n:'')+'日間」は、この期間のすぐ前の同じ日数です。押すと、そのカードの表が開きます。</span></div>'}
+/* 記録のそろい具合: 分析の数字のもとになる記録が、どれだけ入っているか */
+function dataQ(ks,C){const all=[];ks.forEach(k=>days[k].trips.forEach(x=>all.push(x)));const N=all.length,pc=n=>N?Math.round(n/N*100):0;
+  const R=[['出庫・帰庫の時刻',ks.length?Math.round(C.length/ks.length*100):0,'時間の使い方・曜日×時間帯・時間あたり'],
+    ['乗車・降車の時刻',pc(all.filter(x=>x.tin&&x.tout).length),'実車時間率・次のお客さんまで'],
+    ['乗車地',pc(all.filter(x=>x.from&&x.from!=='—').length),'場所・場所の種類'],
+    ['乗車のきっかけ',pc(all.filter(x=>x.src).length),'条件別（きっかけ）'],
+    ['客層',pc(all.filter(x=>x.seg).length),'条件別（客層）・訪日客'],
+    ['天気',pc(all.filter(x=>x.wx&&x.wx.w).length),'条件別（天気）']];
+  const low=R.slice(0,3).filter(r=>r[1]<70);
+  return {R,N,warn:low.length?low.map(r=>r[0]+' '+r[1]+'%').join('・'):''}}
+function aData(ks,C){const t='<div class="ctitle">記録のそろい具合</div>',q=dataQ(ks,C);
+  let h=t+'<p class="asum">'+(q.warn?'<b class="dn">少ないもの</b>：'+q.warn+'<br>この項目を使う分析は、入っている分だけで出しています':'時刻・場所はよくそろっています')+'</p><!--B-->';
+  h+='<table class="mtable a5 ab"><thead><tr><th>記録</th><th>入っている</th><th>使う分析</th></tr></thead><tbody>'+q.R.map(r=>'<tr><td class="pl">'+r[0]+'</td><td class="n pl'+(r[1]<70?' few':'')+'">'+r[1]+'%</td><td class="pl">'+r[2]+'</td></tr>').join('')+'</tbody></table>';
+  return h+'<div class="hint"><span>出庫・帰庫は出番の日数、ほかは乗車'+q.N+'件のうちの割合です。70%に満たないものは薄くしています。出庫・帰庫と、乗車・降車のボタンを押すと時刻が入り、乗車地は単体版なら位置から自動で入ります。きっかけ・客層・天気は、入れたものだけで比べます。</span></div>'}
 /* 訪日客: 言葉・地域・旅の形ごとの回数と単価、乗せた場所の種類、時間帯、支払い、前の年の同じ月との比べ */
 function aGroup(trs,key,names){const g={};trs.forEach(t=>{const k=key(t)||'';const r=g[k]=g[k]||{n:0,s:0,km:0,kn:0};r.n++;r.s+=t.fare||0;if(t.km!=null){r.km+=t.km;r.kn++}});
   return Object.keys(g).map(k=>({k,l:k?(names[k]||k):'未入力',n:g[k].n,s:g[k].s,avg:Math.round(g[k].s/g[k].n),km:g[k].kn?Math.round(g[k].km/g[k].kn*10)/10:null})).sort((a,b)=>(a.k==='')-(b.k==='')||b.n-a.n||b.s-a.s)}
@@ -3696,8 +3755,8 @@ function aTable(head,rows,tot){return '<table class="mtable a5 ab"><thead><tr><t
 function aInb(ks){const t='<div class="ctitle">訪日客</div>';const all=[];ks.forEach(k=>(days[k].trips||[]).forEach(x=>all.push(x)));const ib=all.filter(x=>x.seg==='inbound');
   if(!ib.length)return t+'<div class="hint"><span>この期間に「訪日客」の乗車はありません。客層で「訪日客」を選ぶと、話していた言葉なども残せて、ここで比べられます。</span></div>';
   const S=ib.reduce((a,x)=>a+(x.fare||0),0),AS=all.reduce((a,x)=>a+(x.fare||0),0),avg=Math.round(S/ib.length),aavg=all.length?Math.round(AS/all.length):0;
-  const L=aGroup(ib,x=>x.ib&&x.ib.lang,IBNAME.lang),top=L.find(r=>r.k);
-  let h=t+'<div class="astat"><div><span>回数</span><b>'+ib.length+'回</b><i>全体の'+Math.round(ib.length/all.length*100)+'%</i></div><div><span>平均単価</span><b>¥'+yen(avg)+'</b><i>全体 ¥'+yen(aavg)+'</i></div><div><span>多い言葉</span><b>'+(top?esc(top.l):'—')+'</b><i>'+(top?top.n+'回':'言葉を選ぶと出ます')+'</i></div></div><!--B-->';
+  const L=aGroup(ib,x=>x.ib&&x.ib.lang,IBNAME.lang),top=L.find(r=>r.k&&r.n>=2)||null;
+  let h=t+'<div class="astat"><div><span>回数</span><b>'+ib.length+'回</b><i>全体の'+Math.round(ib.length/all.length*100)+'%</i></div><div><span>平均単価</span><b>¥'+yen(avg)+'</b><i>全体 ¥'+yen(aavg)+'</i></div><div><span>多い言葉</span><b>'+(top?esc(top.l):'—')+'</b><i>'+(top?top.n+'回':'同じ言葉が2回以上で出ます')+'</i></div></div><!--B-->';
   h+='<div class="ctitle sub">話していた言葉</div>'+aTable('言葉',L,ib.length);
   [['地域',x=>x.ib&&x.ib.reg,IBNAME.reg],['旅の形',x=>x.ib&&x.ib.party,IBNAME.party],['支払い（訪日客）',x=>x.ib&&x.ib.pay,IBNAME.pay]].forEach(([n,f,N])=>{const r=aGroup(ib,f,N);if(r.some(z=>z.k))h+='<div class="ctitle sub">'+n+'</div>'+aTable(n.replace(/（.*/,''),r,ib.length)});
   h+='<div class="ctitle sub">乗せた場所の種類</div>'+aTable('場所',aGroup(ib,x=>pKind(x.from),PKNAME),ib.length);
@@ -3707,10 +3766,10 @@ function aInb(ks){const t='<div class="ctitle">訪日客</div>';const all=[];ks.
   const xs=IBX.map(x=>[x[1],ib.filter(t=>t.ib&&(t.ib.x||[]).includes(x[0])).length]).filter(x=>x[1]);
   if(xs.length)h+='<div class="kv">'+xs.map(x=>'<span>'+x[0]+'<b>'+x[1]+'</b>回</span>').join('')+'</div>';
   /* 前の年の同じ月と比べる（季節の波: 春節・桜・紅葉・年末年始） */
-  const yms=[...new Set(ks.map(k=>k.slice(0,7)))].sort(),cnt=ym=>{let n=0;Object.keys(days).forEach(k=>{if(k.slice(0,7)===ym)(days[k].trips||[]).forEach(x=>{if(x.seg==='inbound')n++})});return n};
+  const td=ymd(new Date()),cut=ym=>ym===td.slice(0,7)?td.slice(8):'31',yms=[...new Set(ks.map(k=>k.slice(0,7)))].sort(),cnt=(ym,c)=>{let n=0;Object.keys(days).forEach(k=>{if(k.slice(0,7)===ym&&k.slice(8)<=c)(days[k].trips||[]).forEach(x=>{if(x.seg==='inbound')n++})});return n};
   const prev=ym=>(+ym.slice(0,4)-1)+ym.slice(4);
-  if(yms.some(ym=>Object.keys(days).some(k=>k.slice(0,7)===prev(ym))))h+='<div class="ctitle sub">前の年の同じ月と比べる</div><table class="mtable a5"><thead><tr><th>月</th><th>今回</th><th>前の年</th><th>増減</th></tr></thead><tbody>'+yms.map(ym=>{const a=cnt(ym),b=cnt(prev(ym));return '<tr><td class="pl">'+(+ym.slice(5))+'月</td><td class="n pl">'+a+'回</td><td class="n pl">'+b+'回</td><td class="n pl">'+(a-b>0?'+':'')+(a-b)+'</td></tr>'}).join('')+'</tbody></table>';
-  return h+'<div class="hint"><span>言葉・地域などは、客層で「訪日客」を選んだ乗車で、選んだものだけを数えます。「未入力」は選んでいない分です。乗せた場所の種類は、乗車地の名前から自動で分けています（駅・ホテル・空港など）。季節の比べは、同じ月の訪日客の回数です。</span></div>'}
+  if(yms.some(ym=>Object.keys(days).some(k=>k.slice(0,7)===prev(ym))))h+='<div class="ctitle sub">前の年の同じ月と比べる</div><table class="mtable a5"><thead><tr><th>月</th><th>今回</th><th>前の年</th><th>増減</th></tr></thead><tbody>'+yms.map(ym=>{const c=cut(ym),a=cnt(ym,c),b=cnt(prev(ym),c);return '<tr><td class="pl">'+(+ym.slice(5))+'月'+(c!=='31'?'<small>'+(+c)+'日まで</small>':'')+'</td><td class="n pl">'+a+'回</td><td class="n pl">'+b+'回</td><td class="n pl">'+(a-b>0?'+':'')+(a-b)+'</td></tr>'}).join('')+'</tbody></table>';
+  return h+'<div class="hint"><span>言葉・地域などは、客層で「訪日客」を選んだ乗車で、選んだものだけを数えます。「未入力」は選んでいない分です。乗せた場所の種類は、乗車地の名前から自動で分けています（駅・ホテル・空港など）。季節の比べは、同じ月の訪日客の回数です。今月はまだ途中なので、前の年も同じ日までの分で比べています。</span></div>'}
 /* 乗せた場所・行き先の種類（すべての乗車。地名から自動） */
 function aKind(ks){const t='<div class="ctitle">乗せた場所・行き先の種類</div>';const all=[];ks.forEach(k=>(days[k].trips||[]).forEach(x=>all.push(x)));
   const named=all.filter(x=>x.from&&x.from!=='—');if(!named.length)return t+'<div class="hint"><span>乗車地の名前が入った記録がまだありません。</span></div>';
@@ -3720,14 +3779,15 @@ function aKind(ks){const t='<div class="ctitle">乗せた場所・行き先の�
   const T=all.filter(x=>x.to&&x.to!=='—');if(T.length)h+='<div class="ctitle sub">行き先の種類</div>'+aTable('行き先',aGroup(T,x=>pKind(x.to),PKNAME).filter(r=>r.k),T.length);
   return h+'<div class="hint"><span>地名に「駅」「病院」「ホテル」「空港」などが入っているかで、自動で分けています。どれにも当たらない住所は「住宅地・その他」です。分け方が違う地名は、乗車の修正画面で場所の名前を付け直すと直ります。</span></div>'}
 const noClock='出庫と帰庫の時刻が両方入った日がないため、まだ出せません。日報で「出庫」と「帰庫」を押すと時刻が入ります。';
-function aTime(ks,C,unit){
+function aTime(ks,C,unit,cur,pv){
   const t='<div class="ctitle">時間の使い方</div>';
   if(!C.length)return t+'<div class="hint"><span>'+noClock+'</span></div>';
   let W=0,S=0,OW=0,O=0;const ws=[];C.forEach(c=>{W+=c.work;S+=c.sum;if(c.full){OW+=c.work;O+=c.occ}c.waits.forEach(x=>ws.push(x.m))});
   const wait=ws.length?ws.reduce((a,b)=>a+b,0)/ws.length:null;
   const tile=(l,v,s)=>'<div><span>'+l+'</span><b>'+v+'</b><i>'+s+'</i></div>';
-  let h=t+'<div class="astat">'+tile('稼働時間',hmTxt(Math.round(W)),'1出番 平均 '+hmTxt(Math.round(W/C.length)))+tile('時間あたり営収','¥'+yen(perHour(S,W)),'営収 ÷ 稼働時間')
-    +tile('実車時間率',OW?Math.round(O/OW*100)+'%':'—','乗せていた時間の割合')+tile('次のお客さんまで',wait!=null?minTxt(wait):'—','降車から次の乗車まで')+'</div><!--B-->';
+  const ok=pv&&pv.cdays>=MINA&&C.length>=MINA,d=(a,b,f,up)=>{if(!ok||a==null||b==null)return '';const v=a-b;if(Math.abs(v)<1e-9)return '<em class="dlt">前の期間と同じ</em>';const good=up?v>0:v<0;return '<em class="dlt '+(good?'up':'dn')+'">前の期間より '+(v>0?'+':'−')+f(Math.abs(v))+'</em>'};
+  let h=t+'<div class="astat">'+tile('稼働時間',hmTxt(Math.round(W)),'1出番 平均 '+hmTxt(Math.round(W/C.length)))+tile('時間あたり営収','¥'+yen(perHour(S,W)),'営収 ÷ 稼働時間'+d(cur&&cur.ph,pv&&pv.ph,v=>'¥'+yen(v),1))
+    +tile('実車時間率',OW?Math.round(O/OW*100)+'%':'—','乗せていた時間の割合'+d(cur&&cur.occ!=null?cur.occ*100:null,pv&&pv.occ!=null?pv.occ*100:null,v=>Math.round(v)+'ポイント',1))+tile('次のお客さんまで',wait!=null?minTxt(wait):'—','降車から次の乗車まで'+d(cur&&cur.wait,pv&&pv.wait,v=>minTxt(v),0))+'</div><!--B-->';
   const rows=[];
   if(unit==='day')C.forEach(c=>rows.push({l:(+c.k.slice(8))+'日('+WD[fromYmd(c.k).getDay()]+')',w:c.work,s:c.sum,ow:c.full?c.work:0,o:c.full?c.occ:0,sun:fromYmd(c.k).getDay()===0}));
   else{const g={},multi=C[0].k.slice(0,4)!==C[C.length-1].k.slice(0,4);C.forEach(c=>{const ym=c.k.slice(0,7),r=g[ym]=g[ym]||{l:(multi?ym.slice(2,4)+'年':'')+(+ym.slice(5))+'月',w:0,s:0,ow:0,o:0};r.w+=c.work;r.s+=c.sum;if(c.full){r.ow+=c.work;r.o+=c.occ}});Object.keys(g).sort().forEach(k=>rows.push(g[k]))}
@@ -3735,23 +3795,24 @@ function aTime(ks,C,unit){
   h+='<table class="mtable a5 a5t'+(unit==='day'?' dt':'')+'"><thead><tr><th>'+(unit==='day'?'日付':'月')+'</th><th>稼働</th><th>営収</th><th>時間あたり</th><th>実車時間率</th></tr></thead><tbody>'+rows.map(r=>'<tr'+(r.sun?' class="sun"':'')+'><td class="pl">'+r.l+'</td><td class="n pl">'+hmTxt(Math.round(r.w))+'</td><td class="n pl">'+yen(r.s)+'</td><td class="n pl'+(r===best?' best':'')+'">'+yen(perHour(r.s,r.w))+'</td><td class="n pl">'+(r.ow?Math.round(r.o/r.ow*100)+'%':'—')+'</td></tr>').join('')+'</tbody></table>';
   const skip=ks.length-C.length;
   h+='<div class="hint"><span>稼働時間は、帰庫−出庫から休憩を引いた時間です。'+(best?'緑の数字は、時間あたり営収がいちばん高い'+(unit==='day'?'日':'月')+'です。営収の多い日と、効率よく稼げた日が同じとは限りません。':'')
-    +'実車時間率は、どの乗車にも乗車・降車の時刻が入っている日だけで出しています。'+(skip?'時間を計算できない'+skip+'日（出庫か帰庫の時刻がない日、22時間を超える日）は入れていません。':'')+'</span></div>';
+    +'実車時間率は、どの乗車にも乗車・降車の時刻が入っている日だけで出しています。「前の期間より」は、すぐ前の同じ日数の期間との比べで、どちらにも出庫・帰庫の時刻が入った日が'+MINA+'日以上あるときに出ます（緑は良くなった、赤は悪くなった）。'+(skip?'時間を計算できない'+skip+'日（出庫か帰庫の時刻がない日、22時間を超える日）は入れていません。':'')+'</span></div>';
   return h;
 }
 function aHeat(C){
   const t='<div class="ctitle">曜日×時間帯</div>';
   if(!C.length)return t+'<div class="hint"><span>'+noClock+'</span></div>';
-  const g={},at=(w,h)=>g[w+'|'+h]=g[w+'|'+h]||{m:0,s:0};
-  C.forEach(c=>{const w=awi(c.k);for(const h in c.band)at(w,h).m+=c.band[h];days[c.k].trips.forEach(x=>{const h=hourOf(x);if(h)at(w,h).s+=x.fare||0})});
+  const g={},at=(w,h)=>g[w+'|'+h]=g[w+'|'+h]||{m:0,s:0,d:0};
+  C.forEach(c=>{const w=awi(c.k);for(const h in c.band){at(w,h).m+=c.band[h];at(w,h).d++}days[c.k].trips.forEach(x=>{const h=hourOf(x);if(h)at(w,h).s+=x.fare||0})});
+  const sure=(w,h)=>{const x=g[w+'|'+h];return x&&x.m>=60&&x.d>=2};
   const val=(w,h)=>{const x=g[w+'|'+h];return x&&x.m>=30?x.s/x.m*60:null};
   const hs=AHO.filter(h=>AWD.some((_,w)=>val(w,h)!=null));
   if(!hs.length)return t+'<div class="hint"><span>どの時間帯も、働いた時間がまだ30分に足りません。</span></div>';
-  let mx=0,top='';hs.forEach(h=>AWD.forEach((_,w)=>{const v=val(w,h);if(v!=null&&v>mx){mx=v;top=w+'|'+h}}));
-  const cell=(w,h)=>{const v=val(w,h);if(v==null)return '<td class="nx"></td>';const r=mx?v/mx:0;
-    return '<td class="'+(r>.5?'hi':'')+(w+'|'+h===top?' top':'')+'" style="background:color-mix(in srgb,var(--accent) '+Math.round(8+r*82)+'%,var(--surface))" title="'+AWD[w]+'曜 '+h+'　1時間あたり ¥'+yen(v)+'">'+(v/1000).toFixed(1)+'</td>'};
+  let mx=0,top='',mxa=0;hs.forEach(h=>AWD.forEach((_,w)=>{const v=val(w,h);if(v==null)return;if(v>mxa)mxa=v;if(sure(w,h)&&v>mx){mx=v;top=w+'|'+h}}));
+  const cell=(w,h)=>{const v=val(w,h);if(v==null)return '<td class="nx"></td>';const r=mxa?v/mxa:0;
+    return '<td class="'+(r>.5?'hi':'')+(w+'|'+h===top?' top':'')+(sure(w,h)?'':' few')+'" style="background:color-mix(in srgb,var(--accent) '+Math.round(8+r*82)+'%,var(--surface))" title="'+AWD[w]+'曜 '+h+'　1時間あたり ¥'+yen(v)+'">'+(v/1000).toFixed(1)+'</td>'};
   const tp=top.split('|');
-  return t+'<p class="asum">'+(mx>0?'いちばん稼げたのは <b>'+AWD[tp[0]]+'曜 '+tp[1]+'</b>（1時間 ¥'+yen(mx)+'）':'営収の入った時間帯がまだありません')+'</p><!--B--><div class="hwrap"><table class="htable"><thead><tr><th>時間</th>'+AWD.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+hs.map(h=>'<tr><th scope="row">'+h.replace('時台','時')+'</th>'+AWD.map((_,w)=>cell(w,h)).join('')+'</tr>').join('')+'</tbody></table></div>'
-    +'<div class="hint"><span>数字は1時間あたりの営収（千円）で、色が濃いほど稼げた時間です。枠のついたところがいちばん高い時間です。働いた時間が30分に満たないところは空けています。日付をまたいだ深夜は、出庫した日の曜日に入れています。</span></div>';
+  return t+'<p class="asum">'+(mx>0?'いちばん稼げたのは <b>'+AWD[tp[0]]+'曜 '+tp[1]+'</b>（1時間 ¥'+yen(mx)+'）':'まだ、2日以上・1時間以上働いた時間帯がないので、いちばんは決めていません')+'</p><!--B--><div class="hwrap"><table class="htable"><thead><tr><th>時間</th>'+AWD.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+hs.map(h=>'<tr><th scope="row">'+h.replace('時台','時')+'</th>'+AWD.map((_,w)=>cell(w,h)).join('')+'</tr>').join('')+'</tbody></table></div>'
+    +'<div class="hint"><span>数字は1時間あたりの営収（千円）で、色が濃いほど稼げた時間です。枠のついたところがいちばん高い時間です。働いた時間が30分に満たないところは空けています。働いたのが1日だけか、合わせて1時間に満たないところは、数字を薄くしています（たまたまの1回で高く見えることがあるため、「いちばん」には選びません）。日付をまたいだ深夜は、出庫した日の曜日に入れています。</span></div>';
 }
 function aPlace(p,ks,C){
   const lv=ui.aplace==='name'?'name':'muni',pl=s=>lv==='name'?String(s||'').trim():muniOf(s);
@@ -3808,11 +3869,11 @@ function aCond(ks,C){
   const g={};ks.forEach(k=>days[k].trips.forEach(x=>{const n=key(x);if(!n)return;const r=g[n]=g[n]||{n:0,s:0,cn:0,cm:0,cs:0};r.n++;r.s+=x.fare||0;if(cost[x.id]!=null){r.cn++;r.cm+=cost[x.id];r.cs+=x.fare||0}}));
   const order=c==='src'?SRCS.map(x=>x[1]):c==='seg'?SEGS.map(x=>x[1]):WXS,rs=order.filter(n=>g[n]).concat(Object.keys(g).filter(n=>order.indexOf(n)<0));
   if(!rs.length)return t+h+'<div class="hint"><span>この期間は、'+nm+'を入れた乗車がありません。乗車を記録するときに'+nm+'を選ぶと、ここで比べられます。</span></div>';
-  const ph=r=>r.cm>0?r.cs/r.cm*60:null;let best=null;if(rs.filter(n=>ph(g[n])!=null).length>1)rs.forEach(n=>{if(ph(g[n])!=null&&(best==null||ph(g[n])>ph(g[best])))best=n});
-  {let top=rs[0];rs.forEach(n=>{if(g[n].s/g[n].n>g[top].s/g[top].n)top=n});
-   h=t+'<p class="asum">'+(best?'時間あたりがいちばん高い'+nm+' <b>'+esc(best)+'</b>（1時間 ¥'+yen(ph(g[best]))+'）':'単価がいちばん高い'+nm+' <b>'+esc(top)+'</b>（¥'+yen(g[top].s/g[top].n)+'）')+'</p><!--B-->'+h}
-  h+='<table class="mtable a5 a5e"><thead><tr><th>'+nm+'</th><th>回数</th><th>単価</th><th>1回の時間</th><th>時間あたり</th></tr></thead><tbody>'+rs.map(n=>{const r=g[n];return '<tr><td class="pl">'+esc(n)+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+yen(r.s/r.n)+'</td><td class="n pl">'+(r.cn?minTxt(r.cm/r.cn):'—')+'</td><td class="n pl'+(n===best?' best':'')+'">'+(r.cn?yen(ph(r)):'—')+'</td></tr>'}).join('')+'</tbody></table>'
-    +'<div class="hint"><span>1回の時間は、前の降車（その日の最初は出庫）から、その乗車の降車までの平均です。お客さんを探した時間や付け待ちの時間も入ります。時間あたりは、営収をその時間で割ったものです。'+(best?'緑の数字は、時間あたりがいちばん高い'+nm+'です。':'')+'時間は、出庫・帰庫の時刻が両方入った日の分だけで出しています。</span></div>';
+  const ph=r=>r.cm>0?r.cs/r.cm*60:null,en=n=>g[n].cn>=MINA;let best=null;if(rs.filter(n=>ph(g[n])!=null&&en(n)).length>1)rs.forEach(n=>{if(ph(g[n])!=null&&en(n)&&(best==null||ph(g[n])>ph(g[best])))best=n});
+  {let top=null;rs.forEach(n=>{if(g[n].n>=MINA&&(!top||g[n].s/g[n].n>g[top].s/g[top].n))top=n});
+   h=t+'<p class="asum">'+(best?'時間あたりがいちばん高い'+nm+' <b>'+esc(best)+'</b>（1時間 ¥'+yen(ph(g[best]))+'）':top?'単価がいちばん高い'+nm+' <b>'+esc(top)+'</b>（¥'+yen(g[top].s/g[top].n)+'）':'どの'+nm+'も'+MINA+'回に満たないので、まだ比べられません')+'</p><!--B-->'+h}
+  h+='<table class="mtable a5 a5e"><thead><tr><th>'+nm+'</th><th>回数</th><th>単価</th><th>1回の時間</th><th>時間あたり</th></tr></thead><tbody>'+rs.map(n=>{const r=g[n];return '<tr><td class="pl">'+esc(n)+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+yen(r.s/r.n)+'</td><td class="n pl">'+(r.cn?minTxt(r.cm/r.cn):'—')+'</td><td class="n pl'+(n===best?' best':'')+(r.cn&&r.cn<MINA?' few':'')+'">'+(r.cn?yen(ph(r)):'—')+'</td></tr>'}).join('')+'</tbody></table>'
+    +'<div class="hint"><span>1回の時間は、前の降車（その日の最初は出庫）から、その乗車の降車までの平均です。お客さんを探した時間や付け待ちの時間も入ります。時間あたりは、営収をその時間で割ったものです。'+(best?'緑の数字は、時間あたりがいちばん高い'+nm+'です。':'')+'時間は、出庫・帰庫の時刻が両方入った日の分だけで出しています。'+MINA+'回に満たないものは薄くしていて、「いちばん」には選びません。</span></div>';
   return h;
 }
 function aDays(ks,C){
@@ -4489,7 +4550,8 @@ const mshift=n=>{const a=curMonth.split('-').map(Number);const d=new Date(a[0],a
 ['m','y'].forEach(p=>{
   $(p+'-view').addEventListener('click',e=>{const b=e.target.closest('[data-av]');if(!b)return;ui[p==='m'?'mview':'yview']=b.dataset.av;saveUi();if(p==='m')renderMonth();else renderYear()});
   $(p+'-ana').addEventListener('click',e=>{
-    const a=e.target.closest('[data-apl],[data-acd],[data-go],[data-aopen]');if(!a)return;
+    const a=e.target.closest('[data-apl],[data-acd],[data-go],[data-aopen],[data-akey]');if(!a)return;
+    if(a.dataset.akey){const i=a.dataset.akey;if(!ui.aopen[i]){ui.aopen[i]=true;saveUi();if(p==='m')renderMonth();else renderYear()}const c=$(p+'-a'+i);if(c)c.scrollIntoView({block:'start',behavior:'smooth'});return}
     if(a.dataset.aopen){const i=a.dataset.aopen;if(ui.aopen[i])delete ui.aopen[i];else ui.aopen[i]=true;saveUi();if(p==='m')renderMonth();else renderYear();const b=$(p+'-ana').querySelector('[data-aopen="'+i+'"]');if(b)b.focus({preventScroll:true});return}
     if(a.dataset.go){navigated=true;cur=a.dataset.go;location.hash='#day';renderDay();return}
     if(a.dataset.apl)ui.aplace=a.dataset.apl;else ui.acond=a.dataset.acd;saveUi();if(p==='m')renderMonth();else renderYear()});
