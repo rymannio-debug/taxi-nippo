@@ -152,7 +152,7 @@ console.log('12. 要点とたたみ');
  ok(/いちばんは決めていません/.test(S[0])&&/1万円以上（営収の65%）\s?ロング（1万円以上） 2回/.test(S[2]),'曜日×時間帯（1日だけでは決めない）・料金帯の要点');
  ok(/単価がいちばん高いきっかけ 流し/.test(S[3])&&/良い日の営収 平均 ¥18,500\s?悪い日の営収 平均 ¥2,400/.test(S[4]),'条件別（3回以上のものから）・良い日悪い日の要点');
  ok(await q.$$eval('#m-ana .abody[hidden]',e=>e.length)>=6&&await vis(q,'#m-a0 .astat'),'表は6枚ともたたまれ、時間の使い方の数字は見えている');
- const h0=await q.evaluate(()=>document.getElementById('m-ana').getBoundingClientRect().height);ok(h0<2400,'分析の長さ '+Math.round(h0)+'px（たたむ前は7,000px台）');
+ const h0=await q.evaluate(()=>document.getElementById('m-ana').getBoundingClientRect().height);ok(h0<2800,'分析の長さ '+Math.round(h0)+'px（たたむ前は7,000px台。AIのアドバイスのカードの分だけ長い）');
  await C(q,'#m-a4 [data-aopen="4"]');await q.waitForTimeout(300);await reloadKeep(q);await q.waitForTimeout(800);await C(q,'#tab-month');await q.waitForTimeout(400);
  ok(await vis(q,'#m-a4 table')&&!(await vis(q,'#m-a3 table')),'開いたカードは開き直しても開いたまま');
  await C(q,'#m-a4 [data-aopen="4"]');await q.waitForTimeout(300);ok(!(await vis(q,'#m-a4 table')),'「表をたたむ」で閉じる');

@@ -27,7 +27,9 @@ async function page(mode){
   }},[seed,mode]);
  await p.goto((process.env.APP_URL||'file://'+__dirname+'/../index.html'));await p.waitForTimeout(800);return p}
 const store=(p)=>p.evaluate(k=>JSON.parse(JSON.stringify(days))[k].trips,today);
-for(const mode of ['solo','claude']){
+/* Claude版は iPhone版の写し（v96〜）で記録しないので、声で記録する流れは単体版だけ。Claude版は「話す」が出ないことを確かめる */
+{const p=await page('claude');ok(!(await p.isVisible('#vbtn'))&&await p.evaluate(()=>document.body.classList.contains('ro')),'Claude版（写し）には「話す」が出ない');await p.context().close()}
+for(const mode of ['solo']){
 console.log('==',mode==='solo'?'単体版（ブラウザの音声認識）':'Claude版（dictation）');
 const p=await page(mode);
 ok(await p.isVisible('#vbtn'),'下に「話す」ボタンがある');
