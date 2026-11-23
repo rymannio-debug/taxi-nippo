@@ -1053,6 +1053,7 @@ label.chk input{width:22px;height:22px}
 body.driving #stpill,body.driving #toast{display:none!important}
 #boot[hidden]{display:none}
 /* 版の名前: 本番は iPhone のホーム画面版、Claude版は試し用 */
+.top h1 .ed.stage{background:#c62828;color:#fff}
 .top h1 .ed{display:inline-block;margin-left:8px;vertical-align:middle;font-family:var(--body);font-size:12px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--ink)}
 .about{display:flex;flex-direction:column;gap:6px}
 .about b{font-size:15px}
@@ -1640,6 +1641,10 @@ body.driving #stpill,body.driving #toast{display:none!important}
 <div id="toast" hidden role="status"><span id="toast-t"></span><span class="tbtns"><button id="toast-m" hidden>メモ</button><button id="toast-e" hidden>直す</button><button id="toast-b">取り消す</button></span></div>
 
 <script>
+/* 試し版（…/test/ で開いたとき）: 本番と同じ場所に置くので、記録・設定の保存先を本番と分ける */
+const STAGE=/\/test\/(index\.html)?$/.test(location.pathname);
+if(STAGE){const P=Storage.prototype,g=P.getItem,st=P.setItem,rm=P.removeItem,f=k=>typeof k==='string'&&k.startsWith('taxi-nippo-')?'taxi-nippo-stage-'+k.slice(11):k;
+  P.getItem=function(k){return g.call(this,f(k))};P.setItem=function(k,v){return st.call(this,f(k),v)};P.removeItem=function(k){return rm.call(this,f(k))}}
 /*PARSE-START*/
 const PAYS=[['cash','現金'],['card','カード'],['emoney','電子マネー'],['qr','QR決済'],['app','アプリ決済'],['ticket','チケット']];
 const PAYNAME=Object.fromEntries(PAYS);
@@ -2008,7 +2013,7 @@ function setWx(w){wxSel=w;try{localStorage.setItem(LSX,JSON.stringify({d:ymd(new
    保存はいつも最新の記録だけを書き、失敗したら画面の上の赤い帯で知らせる（黙って失敗しない）。 */
 const MOVED='{"_moved":"indexeddb"}',IDBK=TESTMODE?'days-test':'days';
 const STORE={db:null,loaded:false,changed:false,want:false,ready:null,fail:'',persisted:null};
-function idbOpen(){return new Promise((res,rej)=>{try{const r=indexedDB.open('taxi-nippo',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'))}catch(e){rej(e)}})}
+function idbOpen(){return new Promise((res,rej)=>{try{const r=indexedDB.open(STAGE?'taxi-nippo-stage':'taxi-nippo',1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('kv'))r.result.createObjectStore('kv')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'))}catch(e){rej(e)}})}
 function idbReq(mode,f){return new Promise((res,rej)=>{let tx;try{tx=STORE.db.transaction('kv',mode)}catch(e){rej(e);return}let out;const q=f(tx.objectStore('kv'));q.onsuccess=()=>{out=q.result};tx.oncomplete=()=>res(out);tx.onerror=()=>rej(tx.error||q.error);tx.onabort=()=>rej(tx.error||new Error('abort'))})}
 const idbGet=k=>idbReq('readonly',o=>o.get(k)),idbPut=(k,v)=>idbReq('readwrite',o=>o.put(v,k)),idbDel=k=>idbReq('readwrite',o=>o.delete(k));
 function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}}
@@ -2479,7 +2484,7 @@ async function undoDelete(){
 const SOLO=!(window.claude&&window.claude.use);
 const RO=!SOLO&&!TESTMODE;  /* Claude版のAI分析は iPhone版の写し（見る・分析するだけ）。テストのときは記録できる */
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v100',APP_DATE='2026-11-23';
+const APP_VER='v101',APP_DATE='2026-11-23';
 const LSG=NSK('taxi-nippo-geo-v1');
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -4120,7 +4125,7 @@ function openMan(){const here=manHere(),t={'#list':'一覧','#month':'月集計'
 function closeMan(){$('mv').hidden=true;$('man-b').focus()}
 function aboutUi(){
   $('ab-ver').textContent=(SOLO?'iPhone版（本番）':'Claude版（試し用）')+'　'+APP_VER+'（'+APP_DATE.replace(/-/g,'/')+'）';
-  $('ab-ed').textContent=SOLO?'ふだんの記録はこの版で取ります。Claude版で見る・分析するときは、バックアップの「Claude版へ送る」でGoogleドライブに保存します。記録はiPhone版からClaude版へだけ送ります（Claude版のバックアップは、この版には読み込めません）。':TESTMODE?'この版（Claude版）のテストです。試しに記録できます。記録はテスト用の場所に入り、AI分析の写しやiPhone版には入りません。':'この版はiPhone版の写しで、見る・分析するだけです（AI分析）。記録はiPhone版で取り、iPhone版の「Claude版へ送る」→ この版の「iPhone版から取り込む」で写します。';
+  $('ab-ed').textContent=STAGE?'これは試し版です。新しい機能を本番の前に試せます。記録と設定は本番とは別に保存され、本番には混ざりません（Claude版へは送れません）。':SOLO?'ふだんの記録はこの版で取ります。Claude版で見る・分析するときは、バックアップの「Claude版へ送る」でGoogleドライブに保存します。記録はiPhone版からClaude版へだけ送ります（Claude版のバックアップは、この版には読み込めません）。':TESTMODE?'この版（Claude版）のテストです。試しに記録できます。記録はテスト用の場所に入り、AI分析の写しやiPhone版には入りません。':'この版はiPhone版の写しで、見る・分析するだけです（AI分析）。記録はiPhone版で取り、iPhone版の「Claude版へ送る」→ この版の「iPhone版から取り込む」で写します。';
 }
 function route(){
   const h=location.hash==='#month'?'month':location.hash==='#year'?'year':location.hash==='#list'?'list':location.hash==='#set'?'set':location.hash==='#map'&&!(window.claude&&window.claude.use)?'map':'day';
@@ -4905,7 +4910,7 @@ $('savebad-bk').addEventListener('click',()=>{location.hash='#set';route();const
 /* dl.save({filename,data}) hands the viewer a file: Claude's own saver on Claude, the browser's share sheet or download in the stand-alone build */
 function wireDownloads(dl){
    dlNs=dl;
-   if(SOLO){$('bk-send').hidden=false;$('bk-send-h').hidden=false}
+   if(SOLO&&!STAGE){$('bk-send').hidden=false;$('bk-send-h').hidden=false}
    const b=$('csv-save');b.hidden=false;
     const yb=$('y-csv-save');yb.hidden=false;
     const kb=$('bk-save');kb.hidden=false;
@@ -5105,7 +5110,8 @@ if(window.claude&&window.claude.use){
     mic.addEventListener('click',()=>voStart(''));
   }).catch(()=>{});
 }
-$('ed-badge').hidden=SOLO;
+$('ed-badge').hidden=SOLO&&!STAGE;
+if(STAGE){$('ed-badge').textContent='試し版';$('ed-badge').classList.add('stage');document.title='試し版 '+document.title}
 if(!SOLO){
   [...$('cmodechips').children].forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.cmode==='test')===TESTMODE)));
   $('cmode-h').textContent=TESTMODE?'いまは「テスト」です。試しに記録でき、記録はこの版のテスト用の場所に入ります。AI分析の写しやiPhone版には混ざりません。':'いまは「AI分析」です。iPhone版の写しを見る・分析するだけで、記録はできません。';

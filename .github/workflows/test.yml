@@ -1,5 +1,6 @@
 # 自動テストと公開
-#   dev に入れる → 組み立ての確認 → テスト（Chromium と WebKit、それぞれ4つに分けて同時に）→ 全部通ったら main へ反映 → GitHub Pages が公開
+#   dev に入れる → 組み立ての確認 → テスト（Chromium と WebKit、それぞれ4つに分けて同時に）→ 全部通ったら試し版（…/test/）に出す
+#   試し版で確かめたら、手動で「promote」を付けて動かす → 本番（main の上）に出す。test/ の試し版は残る
 #   main に直接入れたときや、プルリクエストのときは、テストだけ走らせる
 name: テストと公開
 on:
@@ -7,6 +8,11 @@ on:
     branches: [dev, main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      promote:
+        description: 試し版で確かめた dev を本番（main）に出す
+        type: boolean
+        default: false
 permissions:
   contents: write
   pages: write
@@ -50,17 +56,54 @@ jobs:
           BROWSER: ${{ matrix.browser }}
           SHARD: ${{ matrix.shard }}/4
           TZ: Asia/Tokyo
-  publish:
-    name: 公開（main へ反映）
+  stage:
+    name: 試し版に出す（…/test/）
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: dev を main へ（main が先に進んでいたら止める）
-        run: git push origin HEAD:main
+          path: src
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site
+      - name: dev の組み立てたものを main の test/ に置く（本番はそのまま）
+        run: |
+          python3 src/tools/stage.py src site/test
+          cd site
+          git config user.name "github-actions[bot]"
+          git config user.email "41898729+github-actions[bot]@users.noreply.github.com"
+          git add -A test
+          git diff --cached --quiet || git commit -qm "試し版: $(grep -o "APP_VER='v[0-9]*'" ../src/src/app.html)（dev ${GITHUB_SHA::7}）"
+          git push origin HEAD:main
+      - name: GitHub Pages の公開を頼む
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages の公開は自動で始まります"
+  promote:
+    name: 本番に出す（試し版と同じ dev を main へ）
+    if: github.event_name == 'workflow_dispatch' && inputs.promote && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site
+      - name: main の中身を dev と同じにする（test/ の試し版は残す）
+        run: |
+          cd site
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name test -exec rm -rf {} +
+          (cd ../src && git archive HEAD) | tar -x
+          git config user.name "github-actions[bot]"
+          git config user.email "41898729+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -qm "本番: $(grep -o "APP_VER='v[0-9]*'" src/app.html)（dev ${GITHUB_SHA::7}）"
+          git push origin HEAD:main
       - name: GitHub Pages の公開を頼む
         env:
           GH_TOKEN: ${{ github.token }}

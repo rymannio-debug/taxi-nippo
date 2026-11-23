@@ -40,7 +40,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <header class="bar"><a class="back" id="back" href="#" role="button">‹ 戻る</a><span class="t">かんたん手順書</span></header>
 <p class="ro hint" id="backhint" hidden>iPhoneのホーム画面のアプリから開いたときは、左上か下の「完了」を押すと、アプリに戻ります。ほかの画面で開いたときは、この画面（タブ）を閉じてください。</p>
 <main>
-<h1>タクシー売上日報 かんたん手順書</h1><p class="ro">このページは読むだけのマニュアルです。書き換えはできません（内容の直しはClaudeが行います）。青い字を押すと、その場所へ移ります。</p><details class="toc"><summary>目次（押すとその章へ）</summary><ol><li><a href="#start">最初に1回だけ</a></li><li><a href="#flow">1日の流れ</a></li><li><a href="#ride">お客様1人を記録する</a></li><li><a href="#voice">声で入れるとき</a></li><li><a href="#kiko">帰庫したら</a></li><li><a href="#mistake">間違えたとき</a></li><li><a href="#look">振り返るとき</a></li><li><a href="#backup">月に1回：バックアップ</a></li><li><a href="#trouble">困ったとき</a></li></ol></details>
+<h1>タクシー売上日報 かんたん手順書</h1><p class="ro">このページは読むだけのマニュアルです。書き換えはできません（内容の直しはClaudeが行います）。青い字を押すと、その場所へ移ります。</p><details class="toc"><summary>目次（押すとその章へ）</summary><ol><li><a href="#start">最初に1回だけ</a></li><li><a href="#flow">1日の流れ</a></li><li><a href="#ride">お客様1人を記録する</a></li><li><a href="#voice">声で入れるとき</a></li><li><a href="#kiko">帰庫したら</a></li><li><a href="#mistake">間違えたとき</a></li><li><a href="#look">振り返るとき</a></li><li><a href="#backup">月に1回：バックアップ</a></li><li><a href="#stage">試し版</a></li><li><a href="#trouble">困ったとき</a></li></ol></details>
 <p>毎日の記録は、画面のいちばん下の大きいボタンを、出てくる順に押すだけです。どうしても入れるのは料金だけで、ほかは入れなくても記録できます。</p>
 <h2 id="start">最初に1回だけ</h2>
 <ol>
@@ -171,6 +171,8 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </ol>
 <p>戻すときは、「設定」の「バックアップのファイルを選ぶ」で保存したファイルを選び、「復元する」を押します。</p>
 <p>Claude版で見る・分析するときは、「Claude版へ送る（Googleドライブ）」を押して「ドライブ」に保存します。Claude版を開くと取り込まれます。記録はiPhone版からClaude版へだけ送ります。Claude版はテスト用とAI分析用で、ふだんの記録はiPhone版で取ります。Claude版のAIのモデルとエフォート（考える深さ）は、Claude版の設定の「AIのモデルとエフォート」で選べます。いまの設定と、前に答えたモデルもそこに出ます。Claude版の記録を消すときは、Claude版の設定の「Claude版の記録を全部消す」を押します（iPhone版の記録は消えません）。</p>
+<h2 id="stage">試し版</h2>
+<p>新しい機能は、まず「試し版」に出ます。試し版は本番のアドレスの最後に <code>test/</code> を付けたページです（題名の横に赤い「試し版」の印が出ます）。試し版で取った記録は本番とは別に保存され、本番には混ざりません。試して問題がなければ、Claudeに「本番に出して」と言うと本番に出ます。</p>
 <h2 id="trouble">困ったとき</h2>
 <div class="tw"><table>
 <thead>
@@ -229,7 +231,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>画面を見ながら覚えるときは<a href="zukai.html">図解マニュアル</a>、地図・集計・記録を消すなど、ここにない使い方は<a href="tsukaikata.html">使い方マニュアル</a>を見てください。</p>
 <nav class="others"><a href="zukai.html">図解マニュアル</a><a href="tsukaikata.html">使い方マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v100（2026-11-23）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v101（2026-11-23）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();
