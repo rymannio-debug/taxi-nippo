@@ -941,6 +941,9 @@ body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5
 .astat em.dlt.dn,.akeys b.dn,.asum b.dn{color:var(--danger,#c0392b)}
 .htable td.few{opacity:.55;font-style:italic}
 .mtable td.few{opacity:.55}
+.aimnow{display:flex;flex-direction:column;gap:1px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--field)}
+.aimnow span{font-size:calc(12.5px*var(--fs,1));color:var(--muted)}.aimnow b{font-size:calc(18px*var(--fs,1))}.aimnow i{font-style:normal;font-size:calc(13px*var(--fs,1));color:var(--muted)}.aimnow em{font-style:normal;font-size:calc(13px*var(--fs,1));margin-top:2px}
+.aimby{display:block;margin-top:6px;font-size:calc(12.5px*var(--fs,1));color:var(--muted)}
 .advbtns{display:flex;gap:8px}.advbtns .btn{flex:1}
 .advout{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:calc(15px*var(--fs,1));line-height:1.65}
 .advout[hidden]{display:none}
@@ -1317,8 +1320,14 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <div class="cmdbox" id="ro-clear-ok" hidden><b>Claude版の記録を全部消しますか？</b><em id="ro-clear-n"></em><div class="btnrow"><button type="button" class="btn" data-rc="no">やめる</button><button type="button" class="btn danger" data-rc="yes">全部消す</button></div></div>
     </div>
     <div class="card" id="aimodel" hidden>
-      <b class="disp-h">AIのモデル（Claude版）</b>
-      <div class="chips" id="aimchips" role="group" aria-label="AIのモデル"></div>
+      <b class="disp-h">AIのモデルとエフォート（Claude版）</b>
+      <div class="aimnow" id="aim-now"></div>
+      <b class="sub-h">モデル</b>
+      <div class="chips" id="aimdl" role="group" aria-label="モデルを名前で選ぶ"></div>
+      <b class="sub-h">モデルの種類（名前で選ばないとき・使えないときの代わり）</b>
+      <div class="chips" id="aimchips" role="group" aria-label="モデルの種類"></div>
+      <b class="sub-h">エフォート（考える深さ）</b>
+      <div class="chips" id="aimeff" role="group" aria-label="エフォート"></div>
       <span class="disp-n" id="aim-h"></span>
     </div>
     <div class="card" id="aiset" hidden>
@@ -2470,7 +2479,7 @@ async function undoDelete(){
 const SOLO=!(window.claude&&window.claude.use);
 const RO=!SOLO&&!TESTMODE;  /* Claude版のAI分析は iPhone版の写し（見る・分析するだけ）。テストのときは記録できる */
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v99',APP_DATE='2026-11-23';
+const APP_VER='v100',APP_DATE='2026-11-23';
 const LSG=NSK('taxi-nippo-geo-v1');
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -3840,7 +3849,7 @@ function aAdv(p,ks){const t='<div class="ctitle">AIのアドバイス</div>',r=A
   if(!advReady())return t+'<div class="hint"><span>'+(SOLO?'設定の「AIに聞く（Gemini・無料）」でキーを入れると、この期間の実績から、AIが傾向と改善点を書きます。':'この画面ではAIを使えません。')+'</span></div>';
   if(ks.length<2)return t+'<div class="hint"><span>出番が2日以上ある期間で使えます。</span></div>';
   return t+'<div class="advbtns"><button type="button" class="btn pri" data-adv="go"'+(r&&r.busy?' hidden':'')+'>'+(r&&r.text?'もう一度アドバイスをもらう':'アドバイスをもらう')+'</button><button type="button" class="btn" data-adv="stop"'+(r&&r.busy?'':' hidden')+'>止める</button></div>'
-    +'<div class="advout" id="'+p+'-adv"'+(r?'':' hidden')+'>'+(r?advHtml(r.text,r.busy,r.err):'')+'</div>'
+    +'<div class="advout" id="'+p+'-adv"'+(r?'':' hidden')+'>'+(r?advHtml(r.text,r.busy,r.err,r.model):'')+'</div>'
     +'<div class="hint"><span>この期間の分析の数字（時間あたり・曜日×時間帯・場所は市区町村まで・条件別・料金帯・訪日客・記録のそろい具合など）をAI（'+(SOLO?'Gemini・無料枠':'Claude')+'）に渡します。一件ごとの記録・詳しい住所・メモは渡しません。AIの答えは参考です。数字は、ボタンのカードで確かめてください。'+(SOLO?'':'あなたのClaudeの利用枠を使います。')+'</span></div>'}
 const ADVCARD={a0:['0','時間の使い方'],a1:['1','曜日×時間帯'],a2:['2','場所'],a3:['3','料金帯'],a4:['4','条件別の効率'],a5:['5','良い日・悪い日'],a6:['6','訪日客'],a7:['7','場所の種類'],a9:['9','記録のそろい具合']};
 function advHtml(text,busy,err){if(!text&&busy)return '<p class="advwait">実績を読んでいます…（数十秒かかることがあります）</p>';
@@ -3854,6 +3863,7 @@ function advHtml(text,busy,err){if(!text&&busy)return '<p class="advwait">実績
   h=h.replace(/(<li>[\s\S]*?<\/li>)(?!<li>)/g,'$1</ul>').replace(/(^|<\/p>|<\/div>|<\/ul>)(<li>)/g,'$1<ul>$2');
   if(!busy&&used.length)h+='<div class="advref">'+used.map(k=>'<button type="button" class="chip" data-akey="'+ADVCARD[k][0]+'">'+ADVCARD[k][1]+' ›</button>').join('')+'</div>';
   if(err)h+='<p class="advwait">'+esc(err)+'</p>';
+  if(!busy&&arguments[3])h+='<small class="aimby">答えたモデル：'+esc(arguments[3])+'</small>';
   return h||'<p class="advwait">'+(busy?'書いています…':'答えが空でした。もう一度押してください。')+'</p>'}
 /* AI に渡す、この期間の数字のまとめ（件数の少ないものには「少」を付ける） */
 function advData(p,X){const {ks,C,cur,pv,prev}=X,all=[];ks.forEach(k=>days[k].trips.forEach(x=>all.push(x)));const L=[],Y=v=>v==null?'不明':'¥'+yen(v),few=n=>n<MINA?'（少'+n+'件）':'（'+n+'件）';
@@ -3881,7 +3891,7 @@ function advData(p,X){const {ks,C,cur,pv,prev}=X,all=[];ks.forEach(k=>days[k].tr
   if(settings.closeDay||settings.monthGoal)L.push('目標: '+(settings.monthGoal?'月の営収目標 '+Y(settings.monthGoal):'')+(settings.dayGoal?'、1出番の目標 '+Y(settings.dayGoal):''));
   return L.join('\n')}
 async function advRun(p){const X=AADV.ctx[p];if(!X||!advReady())return;const key=advKey(p,X.ks);
-  const r=AADV.res[key]={text:'',busy:true,err:''};const out=()=>{const el=$(p+'-adv');if(el){el.hidden=false;el.innerHTML=advHtml(r.text,r.busy,r.err)}const bx=$(p+'-a10');if(bx){const g=bx.querySelector('[data-adv="go"]'),st=bx.querySelector('[data-adv="stop"]');if(g){g.hidden=r.busy;g.textContent=r.text?'もう一度アドバイスをもらう':'アドバイスをもらう'}if(st)st.hidden=!r.busy}};out();
+  const r=AADV.res[key]={text:'',busy:true,err:''};const out=()=>{const el=$(p+'-adv');if(el){el.hidden=false;el.innerHTML=advHtml(r.text,r.busy,r.err,r.model)}const bx=$(p+'-a10');if(bx){const g=bx.querySelector('[data-adv="go"]'),st=bx.querySelector('[data-adv="stop"]');if(g){g.hidden=r.busy;g.textContent=r.text?'もう一度アドバイスをもらう':'アドバイスをもらう'}if(st)st.hidden=!r.busy}};out();
   const prompt='あなたは東京のタクシー乗務員の売上アドバイザーです。下の「実績のまとめ」だけを根拠に、この運転手に日本語でアドバイスしてください。\n'
    +'書き方:\n- 次の3つの見出しをこの順で使う：【傾向】【改善点】【気をつけること】。各見出しの下に「- 」で始まる短い文を2〜3つ。\n'
    +'- 【傾向】は数字から言えること（何が良い・悪い・前の期間からどう変わったか）。【改善点】は次の乗務で試せる具体的な行動（いつ・どこで・どう動くか）。【気をつけること】は件数が少なくて言い切れないことや、記録の抜け。\n'
@@ -3891,7 +3901,7 @@ async function advRun(p){const X=AADV.ctx[p];if(!X||!advReady())return;const key
    +'- 太字や表は使わない。全体で400字くらいまで。\n\n--- 実績のまとめ ---\n'+advData(p,X);
   AADV.ctl=new AbortController();
   try{if(SOLO){r.text=await gemCall(aiKey(),prompt,AADV.ctl.signal)}
-    else{const z=await AI.s(prompt,{modelTier:aimTier('adv'),signal:AADV.ctl.signal,onText:({text})=>{r.text=text;out()}});r.text=z.text;aimNote(z)}}
+    else{const z=await AI.s(prompt,{...aimOpts('adv'),signal:AADV.ctl.signal,onText:({text})=>{r.text=text;out()}});r.text=z.text;r.model=aimLabel(z);aimNote(z)}}
   catch(e){const c=e&&(e.name==='AbortError'?'cancelled':typeof e.code==='string'?e.code:'');
     r.err={cancelled:'止めました。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',busy:'いまGeminiが混み合っています。少し時間をおいて、もう一度押してください。',bad_key:'Geminiのキーが使えませんでした。設定の「AIに聞く」でキーを確かめてください。',not_granted:'AIを使う許可が出ませんでした。'}[c]||'アドバイスを出せませんでした。もう一度押してください。'}
   finally{r.busy=false;AADV.ctl=null;out()}}
@@ -4937,11 +4947,25 @@ const AIM=[['auto','自動（おすすめ）','AIに聞くは「速い」、AI�
 const aimGet=()=>{try{const v=localStorage.getItem('taxi-nippo-aimodel');return AIM.some(x=>x[0]===v)?v:'auto'}catch(e){return 'auto'}};
 const aimTier=use=>{const v=aimGet();return v==='auto'?(use==='ask'?'quick':'default'):v};
 const AIMN={quick:'速い',default:'標準',complex:'じっくり'};
+/* 名前で選ぶモデル（使えないときは、その種類のモデルが代わりに答える）とエフォート */
+const AIMD=[['','指定しない',''],['claude-haiku-5-5','Haiku 5.5','quick'],['claude-sonnet-5-5','Sonnet 5.5','default'],['claude-opus-5-5','Opus 5.5','complex'],['claude-fable-5-2','Fable 5.2','complex']];
+const AIME=[['','指定しない'],['low','低い'],['medium','普通'],['high','高い']];
+const lsg=(k,ok)=>{try{const v=localStorage.getItem(k)||'';return ok.includes(v)?v:''}catch(e){return ''}};
+const aimModel=()=>lsg('taxi-nippo-aimodelid',AIMD.map(x=>x[0])),aimEffort=()=>lsg('taxi-nippo-aieffort',AIME.map(x=>x[0]));
+/* sample() に渡すモデルの指定。名前で選んだときは、その種類も一緒に渡す（使えないときの代わり） */
+function aimOpts(use){const m=aimModel(),e=aimEffort(),o={modelTier:aimTier(use)};
+  if(m){const d=AIMD.find(x=>x[0]===m);o.model=m;if(o.modelTier==='inherit')o.modelTier=d[2]}
+  if(e)o.effort=e;return o}
+const aimLabel=r=>{if(!r)return '';const d=AIMD.find(x=>x[0]===r.modelApplied);return (d?d[1]:r.modelApplied?r.modelApplied:'')+(r.modelApplied?'（':'')+(AIMN[r.modelTierApplied]||r.modelTierApplied||'')+(r.modelApplied?'）':'')+(aimEffort()?'・エフォート '+AIME.find(x=>x[0]===aimEffort())[1]:'')};
 let aimLast='',aimTiers=null;
-function aimNote(r){if(!r)return;aimLast=(r.modelApplied?r.modelApplied+'・':'')+(AIMN[r.modelTierApplied]||r.modelTierApplied||'');aimUi(aimTiers)}
-function aimUi(tiers){const v=aimGet(),ok=x=>!tiers||x==='auto'||tiers.includes(x);
+function aimNote(r){if(!r)return;aimLast=aimLabel(r);aimUi(aimTiers)}
+function aimUi(tiers){const v=aimGet(),m=aimModel(),e=aimEffort(),ok=x=>!tiers||x==='auto'||tiers.includes(x);
   $('aimchips').innerHTML=AIM.filter(x=>ok(x[0])).map(x=>'<button type="button" class="chip" data-aim="'+x[0]+'" aria-pressed="'+(x[0]===v)+'">'+x[1]+'</button>').join('');
-  $('aim-h').textContent=(AIM.find(x=>x[0]===v)||AIM[0])[2]+(aimLast?'　前回答えたモデル：'+aimLast:'')}
+  $('aimdl').innerHTML=AIMD.map(x=>'<button type="button" class="chip" data-aimd="'+x[0]+'" aria-pressed="'+(x[0]===m)+'">'+x[1]+'</button>').join('');
+  $('aimeff').innerHTML=AIME.map(x=>'<button type="button" class="chip" data-aime="'+x[0]+'" aria-pressed="'+(x[0]===e)+'">'+x[1]+'</button>').join('');
+  const md=AIMD.find(x=>x[0]===m),en=AIME.find(x=>x[0]===e);
+  $('aim-now').innerHTML='<span>いまの設定</span><b>'+esc(m?md[1]:(AIM.find(x=>x[0]===v)||AIM[0])[1])+'</b><i>'+esc(m?'使えないときは「'+(AIMN[md[2]]||'')+'」の種類':'モデルの種類で選ぶ')+'・エフォート '+esc(e?en[1]:'指定しない')+'</i>'+(aimLast?'<em>前回答えたモデル：'+esc(aimLast)+'</em>':'');
+  $('aim-h').textContent=(m?'名前で選んだモデルが、あなたのプランで使えないときや混んでいるときは、その種類のモデルが答えます。':(AIM.find(x=>x[0]===v)||AIM[0])[2])+'エフォートは、考えてから答えるモデルでだけ効きます（高いほど時間と利用枠を使います）。'}
 const AI={s:null,secs:null,ctl:null},AIDOC={easy:'かんたん手順書',zukai:'図解マニュアル',tsukaikata:'使い方マニュアル'};
 async function aiSecs(){if(AI.secs)return AI.secs;const out=[];
   for(const d of Object.keys(AIDOC)){const r=await fetch('manual/src/'+d+'.md');if(!r.ok)throw new Error('md');const t=await r.text();let cur=null,h2='';
@@ -5013,7 +5037,7 @@ async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-s
   AI.ctl=new AbortController();const to=SOLO?setTimeout(()=>{AI.timeout=true;AI.ctl&&AI.ctl.abort()},30000):0;AI.timeout=false;
   try{
     if(SOLO){const t=await gemCall(key,prompt,AI.ctl.signal);aiShow(t.replace(/\*\*/g,''),secs,true)}
-    else{const r=await AI.s(prompt,{modelTier:aimTier('ask'),signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true);aimNote(r)}}
+    else{const r=await AI.s(prompt,{...aimOpts('ask'),signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true);aimNote(r);{const a=$('ai-a'),l=aimLabel(r);if(l)a.insertAdjacentHTML('beforeend','<small class="aimby">答えたモデル：'+esc(l)+'</small>')}}}
   catch(e){// fetch を止めたときの DOMException は code が数字(20)なので、名前で先に見分ける
     const c=e&&(e.name==='AbortError'?(AI.timeout?'timeout':'cancelled'):typeof e.code==='string'?e.code:navigator.onLine===false?'offline':SOLO?'network':'');
     if(!SOLO&&(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared')){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
@@ -5058,7 +5082,9 @@ if(window.claude&&window.claude.use){
   window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false;
     $('aimodel').hidden=false;{const v=$('v-set'),a=$('isync');if(a&&a.nextSibling)v.insertBefore($('aimodel'),a.nextSibling)}
     Promise.resolve(sm.limits?sm.limits():null).then(l=>{aimTiers=l&&Array.isArray(l.modelTiers)?l.modelTiers:null;aimUi(aimTiers)}).catch(()=>aimUi(null));
-    $('aimchips').addEventListener('click',e=>{const b=e.target.closest('[data-aim]');if(!b)return;try{localStorage.setItem('taxi-nippo-aimodel',b.dataset.aim)}catch(x){}aimUi(aimTiers);for(const k in AADV.res)delete AADV.res[k]})}).catch(()=>{});
+    $('aimodel').addEventListener('click',e=>{const b=e.target.closest('[data-aim],[data-aimd],[data-aime]');if(!b)return;
+      try{if(b.dataset.aim!=null)localStorage.setItem('taxi-nippo-aimodel',b.dataset.aim);else if(b.dataset.aimd!=null)localStorage.setItem('taxi-nippo-aimodelid',b.dataset.aimd);else localStorage.setItem('taxi-nippo-aieffort',b.dataset.aime)}catch(x){}
+      aimUi(aimTiers);for(const k in AADV.res)delete AADV.res[k]})}).catch(()=>{});
   window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false;
     /* 前に取り込んだことがあれば、開いたときに新しいものを探す（初めては「iPhone版から取り込む」を押してから） */
     if(RO&&syncInfo())setTimeout(()=>syncImport(true),1500)}).catch(()=>{});

@@ -1746,7 +1746,9 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tbody>
 </table></div>
 <p>記録はiPhone版からClaude版へだけ送ります。Claude版からiPhone版へは送れません（テストで作ったバックアップも、iPhone版には読み込めません）。</p>
-<p><strong>AIのモデル</strong>　Claude版の「設定」の「AIのモデル（Claude版）」で、「AIに聞く」と「AIのアドバイス」に使うモデルを選べます。選んだものはこの端末に残ります。</p>
+<p><strong>AIのモデルとエフォート</strong>　Claude版の「設定」の「AIのモデルとエフォート（Claude版）」で、「AIに聞く」と「AIのアドバイス」に使うモデルと、エフォート（考える深さ）を選べます。選んだものはこの端末に残ります。欄のいちばん上に「いまの設定」と「前回答えたモデル」が出ます。</p>
+<p><strong>モデル（名前で選ぶ）</strong>　「指定しない」「Haiku 5.5」「Sonnet 5.5」「Opus 5.5」「Fable 5.2」から選びます。名前で選んだモデルがあなたのプランで使えないときや混んでいるときは、そのモデルの種類（Haikuは速い、Sonnetは標準、Opus・Fableはじっくり）のモデルが代わりに答えます。</p>
+<p><strong>モデルの種類</strong>　名前を「指定しない」ときは、下の表の種類で選びます。</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -1777,7 +1779,9 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 </tr>
 </tbody>
 </table></div>
-<p>あなたのClaudeのプランで使えないモデルは出ません。前回答えたモデルの名前が、欄の下に出ます。</p>
+<p>あなたのClaudeのプランで使えない種類は出ません。</p>
+<p><strong>エフォート</strong>　「指定しない」「低い」「普通」「高い」から選びます。高いほどよく考えて答えますが、時間とClaudeの利用枠を多く使います。考えてから答えるモデルでだけ効きます。</p>
+<p><strong>答えたモデル</strong>　「AIに聞く」の答えと「AIのアドバイス」の下に、実際に答えたモデルの名前が出ます。名前で選んだモデルと違うときは、代わりのモデルが答えています。</p>
 <h3 id="sync">iPhone版からClaude版へ送る</h3>
 <ol>
 <li>iPhone版の「設定」→「バックアップ」の「Claude版へ送る（Googleドライブ）」を押す</li>
@@ -1869,7 +1873,7 @@ footer{max-width:760px;margin:0 auto;padding:16px;color:var(--mute);font-size:14
 <p>連携の手順はClaudeのヘルプ「Use connectors to extend Claude's capabilities」と「Use Google Workspace connectors」（2026年11月16日時点）によります。</p>
 <nav class="others"><a href="easy.html">かんたん手順書</a><a href="zukai.html">図解マニュアル</a></nav>
 </main>
-<footer>タクシー売上日報 v99（2026-11-23）のマニュアル。読むだけのページです。</footer>
+<footer>タクシー売上日報 v100（2026-11-23）のマニュアル。読むだけのページです。</footer>
 <script>(function(){var c=/[?&]from=claude/.test(location.search),b=document.getElementById('back'),h=document.getElementById('backhint');
 if(c){document.querySelectorAll('a[href]').forEach(function(a){var x=a.getAttribute('href');if(/^[a-z]+\.html/.test(x))a.setAttribute('href',x.replace(/^([a-z]+\.html)/,'$1?from=claude'))})}
 b.addEventListener('click',function(e){e.preventDefault();
