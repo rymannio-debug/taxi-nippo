@@ -1,0 +1,32 @@
+// Claude版のAIのモデル: 自動・速い・標準・じっくり・チャットと同じ を選べ、AIに聞く・AIのアドバイスに効く。答えたモデルを出す
+(async()=>{const {chromium}=require('./pw');const fr=require('./fontroute');const b=await chromium.launch();
+const ok=(c,m)=>console.log((c?'  ✓ ':'  ✗ ')+m);
+const APP=(process.env.APP_URL||'file://'+__dirname+'/../index.html');
+const day=(k)=>({type:'day',date:k,startTime:'08:00',endTime:'16:00',breaks:[],trips:[0,1,2].map(i=>({id:k+i,t:(9+i*2)+':00',tin:(9+i*2)+':00',tout:(9+i*2)+':40',fare:3000,pay:'cash',ts:i,from:'府中市宮町',src:'wait'}))});
+const D={};['2026-11-03','2026-11-10','2026-11-17'].forEach(k=>D[k]=day(k));
+async function page(tiers){const ctx=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});await fr(ctx);await ctx.route(/nominatim|gsi|tile|open-meteo|cyberjapan/,r=>r.abort());
+  const p=await ctx.newPage();const E=[];p.on('pageerror',e=>E.push(e.message));p.E=E;await p.clock.install({time:new Date(2026,10,22,19,0)});
+  await p.addInitScript(([sd,tiers])=>{window.__o=[];const sample=(input,o)=>{window.__o.push(o.modelTier);return Promise.resolve({text:'【傾向】\n- テスト [[a0]]',truncated:false,modelTierApplied:o.modelTier==='inherit'?'default':o.modelTier,modelApplied:o.modelTier==='complex'?'claude-opus-5-5':undefined})};sample.limits=()=>Promise.resolve({modelTiers:tiers});
+    window.claude={use:n=>Promise.resolve(n==='sample'?sample:null)};if(sessionStorage.getItem('s'))return;sessionStorage.setItem('s','1');localStorage.clear();localStorage.setItem('taxi-nippo-v1',JSON.stringify(sd));localStorage.setItem('taxi-nippo-ui-v1',JSON.stringify({mview:'ana'}))},[D,tiers]);
+  await p.goto(APP);await p.waitForTimeout(900);return p}
+let p=await page(['quick','default','complex','inherit']);
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(300);
+ok(await p.locator('#aimodel').isVisible(),'設定に「AIのモデル（Claude版）」（AI分析のときも見える）');
+ok((await p.$$eval('#aimchips .chip',e=>e.map(x=>x.textContent))).join()==='自動（おすすめ）,速い,標準,じっくり,チャットと同じ','5つから選べる');
+ok(await p.getAttribute('#aimchips [data-aim="auto"]','aria-pressed')==='true','はじめは「自動」');
+await p.evaluate(()=>{location.hash='#month';route()});await p.waitForTimeout(400);await p.locator('#m-a10 [data-adv="go"]').tap();await p.waitForTimeout(400);
+await p.locator('#man-b').tap();await p.waitForTimeout(200);await p.locator('#ai-q').fill('足切り');await p.locator('#ai-go').tap();await p.waitForTimeout(400);await p.locator('#mv-close').tap();
+ok(await p.evaluate(()=>window.__o.join())==='default,quick','自動: アドバイスは標準、AIに聞くは速い');
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(300);await p.locator('#aimchips [data-aim="complex"]').tap();await p.waitForTimeout(200);
+ok(await p.evaluate(()=>localStorage.getItem('taxi-nippo-aimodel'))==='complex'&&await p.getAttribute('#aimchips [data-aim="complex"]','aria-pressed')==='true','「じっくり」を選ぶと覚える');
+await p.evaluate(()=>{window.__o=[];location.hash='#month';route()});await p.waitForTimeout(400);await p.locator('#m-a10 [data-adv="go"]').tap();await p.waitForTimeout(400);
+await p.locator('#man-b').tap();await p.waitForTimeout(200);await p.locator('#ai-q').fill('足切り');await p.locator('#ai-go').tap();await p.waitForTimeout(400);await p.locator('#mv-close').tap();
+ok(await p.evaluate(()=>window.__o.join())==='complex,complex','アドバイスもAIに聞くも「じっくり」');
+await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(300);
+ok(/前回答えたモデル：claude-opus-5-5・じっくり/.test(await p.textContent('#aim-h')),'答えたモデルを出す: '+await p.textContent('#aim-h'));
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+p=await page(['quick','default']);await p.evaluate(()=>{location.hash='#set';route()});await p.waitForTimeout(300);
+ok((await p.$$eval('#aimchips .chip',e=>e.map(x=>x.textContent))).join()==='自動（おすすめ）,速い,標準','使えないモデルは出さない');
+ok(!p.E.length,'エラーなし '+p.E.join('/'));await p.context().close();
+p=await page(null);await p.evaluate(()=>{window.claude=undefined});await p.context().close();
+await b.close()})();

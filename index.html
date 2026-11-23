@@ -954,7 +954,7 @@ body.dock:not(.typing) #dockrow{grid-template-columns:minmax(0,1fr) minmax(0,1.5
 .mtable.ab td:first-child,.mtable.ab th:first-child{min-width:6.5em;word-break:keep-all}
 /* Claude版は iPhone版の写し: 記録・修正・設定の操作を出さない（見る・分析するだけ） */
 body.ro #shift .ride-b,body.ro #sh-x,body.ro #ride,body.ro #composer,body.ro #bar,body.ro #dockrow,body.ro #drv,body.ro .bk-rw,body.ro #e-save,body.ro #e-del,body.ro #toast-e,body.ro #toast-b,body.ro #toast-m{display:none!important}
-body.ro #v-set>.card:not(#isync):not(#disp):not(#about):not(#bk){display:none!important}
+body.ro #v-set>.card:not(#isync):not(#aimodel):not(#disp):not(#about):not(#bk){display:none!important}
 .btn.danger{background:var(--danger,#c0392b);color:#fff;border-color:var(--danger,#c0392b)}
 #ro-clear-ok em{display:block;margin:4px 0 8px}
 .rob{margin:6px 0;padding:8px 12px;border:1px dashed var(--line);border-radius:12px;font-size:calc(13.5px*var(--fs,1));color:var(--muted);background:var(--field)}
@@ -1315,6 +1315,11 @@ body.driving #stpill,body.driving #toast{display:none!important}
       <span class="disp-n" id="ro-clear-d">この版（Claude版）に入っている記録と、取り込みの履歴を全部消します。iPhone版の記録とGoogleドライブのファイルは消えません。消したあとは、開いても自動では取り込みません。もう一度見るときは「iPhone版から取り込む」を押します。</span>
       <button type="button" class="btn" id="ro-clear">Claude版の記録を全部消す</button>
       <div class="cmdbox" id="ro-clear-ok" hidden><b>Claude版の記録を全部消しますか？</b><em id="ro-clear-n"></em><div class="btnrow"><button type="button" class="btn" data-rc="no">やめる</button><button type="button" class="btn danger" data-rc="yes">全部消す</button></div></div>
+    </div>
+    <div class="card" id="aimodel" hidden>
+      <b class="disp-h">AIのモデル（Claude版）</b>
+      <div class="chips" id="aimchips" role="group" aria-label="AIのモデル"></div>
+      <span class="disp-n" id="aim-h"></span>
     </div>
     <div class="card" id="aiset" hidden>
       <b class="disp-h">AIに聞く（Gemini・無料）</b>
@@ -2465,7 +2470,7 @@ async function undoDelete(){
 const SOLO=!(window.claude&&window.claude.use);
 const RO=!SOLO&&!TESTMODE;  /* Claude版のAI分析は iPhone版の写し（見る・分析するだけ）。テストのときは記録できる */
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v98',APP_DATE='2026-11-23';
+const APP_VER='v99',APP_DATE='2026-11-23';
 const LSG=NSK('taxi-nippo-geo-v1');
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -3886,7 +3891,7 @@ async function advRun(p){const X=AADV.ctx[p];if(!X||!advReady())return;const key
    +'- 太字や表は使わない。全体で400字くらいまで。\n\n--- 実績のまとめ ---\n'+advData(p,X);
   AADV.ctl=new AbortController();
   try{if(SOLO){r.text=await gemCall(aiKey(),prompt,AADV.ctl.signal)}
-    else{const z=await AI.s(prompt,{signal:AADV.ctl.signal,onText:({text})=>{r.text=text;out()}});r.text=z.text}}
+    else{const z=await AI.s(prompt,{modelTier:aimTier('adv'),signal:AADV.ctl.signal,onText:({text})=>{r.text=text;out()}});r.text=z.text;aimNote(z)}}
   catch(e){const c=e&&(e.name==='AbortError'?'cancelled':typeof e.code==='string'?e.code:'');
     r.err={cancelled:'止めました。',rate_limited:SOLO?'Geminiの無料で使える回数を超えました。しばらく（長いときは翌日）待ってから押してください。':'いまは混み合っています。少し待ってからもう一度押してください。',busy:'いまGeminiが混み合っています。少し時間をおいて、もう一度押してください。',bad_key:'Geminiのキーが使えませんでした。設定の「AIに聞く」でキーを確かめてください。',not_granted:'AIを使う許可が出ませんでした。'}[c]||'アドバイスを出せませんでした。もう一度押してください。'}
   finally{r.busy=false;AADV.ctl=null;out()}}
@@ -4927,6 +4932,16 @@ function wireDownloads(dl){
 }
 /* AIに聞く: マニュアルの原稿 (manual/src/*.md、Claude版と一緒に置く) を章に分け、
    質問に近い章だけを Claude に渡して答えさせる。答えの [[doc#id]] は、その章へのリンクにする */
+/* Claude版のAIのモデル: 自動（AIに聞くは速い・アドバイスは標準）／速い／標準／じっくり／チャットと同じ。この端末に覚える */
+const AIM=[['auto','自動（おすすめ）','AIに聞くは「速い」、AIのアドバイスは「標準」で答えます。'],['quick','速い','すぐ答えます。短い質問向き。'],['default','標準','ふだんのモデル。少し考えてから答えます。'],['complex','じっくり','いちばん賢いモデル。時間がかかり、利用枠も多く使います。'],['inherit','チャットと同じ','いまClaudeのチャットで選んでいるモデルで答えます。']];
+const aimGet=()=>{try{const v=localStorage.getItem('taxi-nippo-aimodel');return AIM.some(x=>x[0]===v)?v:'auto'}catch(e){return 'auto'}};
+const aimTier=use=>{const v=aimGet();return v==='auto'?(use==='ask'?'quick':'default'):v};
+const AIMN={quick:'速い',default:'標準',complex:'じっくり'};
+let aimLast='',aimTiers=null;
+function aimNote(r){if(!r)return;aimLast=(r.modelApplied?r.modelApplied+'・':'')+(AIMN[r.modelTierApplied]||r.modelTierApplied||'');aimUi(aimTiers)}
+function aimUi(tiers){const v=aimGet(),ok=x=>!tiers||x==='auto'||tiers.includes(x);
+  $('aimchips').innerHTML=AIM.filter(x=>ok(x[0])).map(x=>'<button type="button" class="chip" data-aim="'+x[0]+'" aria-pressed="'+(x[0]===v)+'">'+x[1]+'</button>').join('');
+  $('aim-h').textContent=(AIM.find(x=>x[0]===v)||AIM[0])[2]+(aimLast?'　前回答えたモデル：'+aimLast:'')}
 const AI={s:null,secs:null,ctl:null},AIDOC={easy:'かんたん手順書',zukai:'図解マニュアル',tsukaikata:'使い方マニュアル'};
 async function aiSecs(){if(AI.secs)return AI.secs;const out=[];
   for(const d of Object.keys(AIDOC)){const r=await fetch('manual/src/'+d+'.md');if(!r.ok)throw new Error('md');const t=await r.text();let cur=null,h2='';
@@ -4998,7 +5013,7 @@ async function aiAsk(){const q=$('ai-q').value.trim(),go=$('ai-go'),stop=$('ai-s
   AI.ctl=new AbortController();const to=SOLO?setTimeout(()=>{AI.timeout=true;AI.ctl&&AI.ctl.abort()},30000):0;AI.timeout=false;
   try{
     if(SOLO){const t=await gemCall(key,prompt,AI.ctl.signal);aiShow(t.replace(/\*\*/g,''),secs,true)}
-    else{const r=await AI.s(prompt,{modelTier:'quick',signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true)}}
+    else{const r=await AI.s(prompt,{modelTier:aimTier('ask'),signal:AI.ctl.signal,onText:({text})=>aiShow(text,secs,false)});aiShow(r.text,secs,true);aimNote(r)}}
   catch(e){// fetch を止めたときの DOMException は code が数字(20)なので、名前で先に見分ける
     const c=e&&(e.name==='AbortError'?(AI.timeout?'timeout':'cancelled'):typeof e.code==='string'?e.code:navigator.onLine===false?'offline':SOLO?'network':'');
     if(!SOLO&&(c==='not_granted'||c==='sampling_disabled'||c==='capability_disabled'||c==='capability_removed'||c==='not_declared')){$('ai').hidden=true;toast('AIに聞く機能は使えません。マニュアルのリンクから探してください',false)}
@@ -5040,7 +5055,10 @@ if(SOLO){$('ai').hidden=false;$('aiset').hidden=false;$('ai-key').value=aiKey();
   $('ai-key-del').addEventListener('click',()=>{try{localStorage.removeItem(AIKEY);localStorage.removeItem(AIMODEL)}catch(e){}gemModel='';$('ai-key').value='';st('キーを消しました。');aiNote()});
 }
 if(window.claude&&window.claude.use){
-  window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false}).catch(()=>{});
+  window.claude.use('sample').then(sm=>{if(!sm)return;AI.s=sm;aiNote();$('ai').hidden=false;
+    $('aimodel').hidden=false;{const v=$('v-set'),a=$('isync');if(a&&a.nextSibling)v.insertBefore($('aimodel'),a.nextSibling)}
+    Promise.resolve(sm.limits?sm.limits():null).then(l=>{aimTiers=l&&Array.isArray(l.modelTiers)?l.modelTiers:null;aimUi(aimTiers)}).catch(()=>aimUi(null));
+    $('aimchips').addEventListener('click',e=>{const b=e.target.closest('[data-aim]');if(!b)return;try{localStorage.setItem('taxi-nippo-aimodel',b.dataset.aim)}catch(x){}aimUi(aimTiers);for(const k in AADV.res)delete AADV.res[k]})}).catch(()=>{});
   window.claude.use('mcp').then(m=>{if(!m)return;mcpNs=m;$('bk-drive').hidden=false;$('bk-drive-h').hidden=false;
     /* 前に取り込んだことがあれば、開いたときに新しいものを探す（初めては「iPhone版から取り込む」を押してから） */
     if(RO&&syncInfo())setTimeout(()=>syncImport(true),1500)}).catch(()=>{});
