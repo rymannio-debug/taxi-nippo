@@ -2378,7 +2378,7 @@ async function undoDelete(){
    which a page on Claude cannot, and it saves files through the browser. On Claude all of this stays switched off. */
 const SOLO=!(window.claude&&window.claude.use);
 /* 版の番号は変更を公開するたびに上げる（変更の中身は CHANGELOG.md） */
-const APP_VER='v94',APP_DATE='2026-11-23';
+const APP_VER='v95',APP_DATE='2026-11-23';
 const LSG='taxi-nippo-geo-v1';
 let geo={on:true,from:null,to:null};
 try{const j=JSON.parse(localStorage.getItem(LSG)||'null');if(j&&typeof j==='object'){geo.on=j.on!==false;['from','to'].forEach(k=>{const g=j[k];if(g&&typeof g.la==='number'&&typeof g.lo==='number')geo[k]={la:g.la,lo:g.lo,acc:g.acc||null,n:typeof g.n==='string'?g.n:''}})}}catch(e){}
@@ -3148,18 +3148,18 @@ function multiYearHtml(from,to,label,short,note,bars){
   return tb+hint+ch;
 }
 /* months across, one line per year: this year thick in the accent, older years in fading ink */
-function lineChart(labels,ser,desc){
+function lineChart(labels,ser,desc,o){o=o||{};const fmt=o.fmt||(v=>yen(v)+'円');
   const W=340,H=190,L=36,R=30,T=12,B=22,n=labels.length;if(!n||!ser.length)return '';
-  let max=0,min=Infinity;ser.forEach(s=>s.v.forEach(v=>{if(v==null)return;if(v>max)max=v;if(v<min)min=v}));if(!isFinite(min))min=0;if(max<=min)max=min+1000;
-  const span=(max-min)/4,pw=Math.pow(10,Math.floor(Math.log10(span))),m=span/pw,step=Math.max(1000,(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*pw),bot=Math.max(0,Math.floor(min/step)*step),top=Math.ceil(max/step)*step;
-  const x=i=>n===1?L+(W-L-R)/2:L+(W-L-R)*i/(n-1),y=v=>T+(H-T-B)*(1-(v-bot)/(top-bot||1)),ax=v=>v>=10000?(Math.round(v/1000)/10)+'万':yen(v);
+  let max=0,min=Infinity;ser.forEach(s=>s.v.forEach(v=>{if(v==null)return;if(v>max)max=v;if(v<min)min=v}));if(!isFinite(min))min=0;if(max<=min)max=min+(o.min||1000);
+  const span=(max-min)/4,pw=Math.pow(10,Math.floor(Math.log10(span))),m=span/pw,step=Math.max(o.min||1000,(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*pw),bot=Math.max(0,Math.floor(min/step)*step),top=Math.ceil(max/step)*step;
+  const x=i=>n===1?L+(W-L-R)/2:L+(W-L-R)*i/(n-1),y=v=>T+(H-T-B)*(1-(v-bot)/(top-bot||1)),ax=o.fmt?(v=>String(Math.round(v))):(v=>v>=10000?(Math.round(v/1000)/10)+'万':yen(v));
   let g='';for(let v=bot;v<=top+1;v+=step)g+='<line class="gl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v).toFixed(1)+'" y2="'+y(v).toFixed(1)+'"/><text x="'+(L-5)+'" y="'+(y(v)+3.5).toFixed(1)+'" text-anchor="end">'+ax(v)+'</text>';
   const every=Math.ceil(n/12);labels.forEach((l,i)=>{if(i%every===0)g+='<text x="'+x(i).toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle">'+esc(l)+'</text>'});
   ser.slice().sort((a,b)=>b.i-a.i).forEach(s=>{
     const c=Math.min(s.i,4);let d='',pen=false,last=-1;
     s.v.forEach((v,i)=>{if(v==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true;last=i});
     if(d)g+='<path class="ly ly'+c+'" d="'+d+'"/>';
-    s.v.forEach((v,i)=>{if(v==null)return;g+=(s.i===0?'<circle class="dt0" cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="3.2"/>':'')+'<circle class="hit" cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="8"><title>'+esc(s.l+' '+labels[i]+'月 '+yen(v)+'円')+'</title></circle>'});
+    s.v.forEach((v,i)=>{if(v==null)return;g+=(s.i===0?'<circle class="dt0" cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="3.2"/>':'')+'<circle class="hit" cx="'+x(i).toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="8"><title>'+esc(s.l+' '+labels[i]+'月 '+fmt(v))+'</title></circle>'});
     if(last>=0&&s.i===0)g+='<text class="el" x="'+(x(last)+6).toFixed(1)+'" y="'+(y(s.v[last])+3.5).toFixed(1)+'">'+esc(s.s)+'</text>';
   });
   return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(desc)+'">'+g+'</svg>';
@@ -3711,7 +3711,7 @@ function anaHtml(p,ks,unit,prev){
   const fold=(h,i)=>{const at=h.indexOf('<!--B-->');if(at<0)return h;const op=!!ui.aopen[i];
     return h.slice(0,at)+'<button type="button" class="atog" data-aopen="'+i+'" aria-expanded="'+op+'">'+(op?'表をたたむ':'表と説明を見る')+'</button><div class="abody"'+(op?'':' hidden')+'>'+h.slice(at+8)+'</div>'};
   const cur=anaStats(ks),pv=prev&&prev.ks.length?anaStats(prev.ks):null;
-  const H=[aTime(ks,C,unit,cur,pv),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C),aInb(ks),aKind(ks),aKey(p,ks,C,cur,pv,prev),aData(ks,C)];
+  const H=[aTime(ks,C,unit,cur,pv),aHeat(C),aPlace(p,ks,C),aBand(ks),aCond(ks,C),aDays(ks,C),aInb(ks,C,unit),aKind(ks),aKey(p,ks,C,cur,pv,prev),aData(ks,C)];
   /* 並び: 要点 → 時間 → 曜日×時間帯 → 場所 → 場所の種類 → 条件別 → 料金帯 → 良い日悪い日 → 訪日客 → 記録のそろい具合（番号は開いた表を覚えるためのもので変えない） */
   return [8,0,1,2,7,4,3,5,6,9].map(i=>'<div class="card" id="'+p+'-a'+i+'">'+fold(H[i],i)+'</div>').join('');
 }
@@ -3748,27 +3748,49 @@ function aData(ks,C){const t='<div class="ctitle">記録のそろい具合</div>
   h+='<table class="mtable a5 ab"><thead><tr><th>記録</th><th>入っている</th><th>使う分析</th></tr></thead><tbody>'+q.R.map(r=>'<tr><td class="pl">'+r[0]+'</td><td class="n pl'+(r[1]<70?' few':'')+'">'+r[1]+'%</td><td class="pl">'+r[2]+'</td></tr>').join('')+'</tbody></table>';
   return h+'<div class="hint"><span>出庫・帰庫は出番の日数、ほかは乗車'+q.N+'件のうちの割合です。70%に満たないものは薄くしています。出庫・帰庫と、乗車・降車のボタンを押すと時刻が入り、乗車地は単体版なら位置から自動で入ります。きっかけ・客層・天気は、入れたものだけで比べます。</span></div>'}
 /* 訪日客: 言葉・地域・旅の形ごとの回数と単価、乗せた場所の種類、時間帯、支払い、前の年の同じ月との比べ */
-function aGroup(trs,key,names){const g={};trs.forEach(t=>{const k=key(t)||'';const r=g[k]=g[k]||{n:0,s:0,km:0,kn:0};r.n++;r.s+=t.fare||0;if(t.km!=null){r.km+=t.km;r.kn++}});
-  return Object.keys(g).map(k=>({k,l:k?(names[k]||k):'未入力',n:g[k].n,s:g[k].s,avg:Math.round(g[k].s/g[k].n),km:g[k].kn?Math.round(g[k].km/g[k].kn*10)/10:null})).sort((a,b)=>(a.k==='')-(b.k==='')||b.n-a.n||b.s-a.s)}
-function aTable(head,rows,tot){return '<table class="mtable a5 ab"><thead><tr><th>'+head+'</th><th>回数</th><th>割合</th><th>単価</th><th>距離</th></tr></thead><tbody>'+rows.map(r=>'<tr><td class="pl">'+esc(r.l)+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+(tot?Math.round(r.n/tot*100):0)+'%</td><td class="n pl">'+yen(r.avg)+'</td><td class="n pl">'+(r.km!=null?r.km+'km':'—')+'</td></tr>').join('')+'</tbody></table>'}
-function aInb(ks){const t='<div class="ctitle">訪日客</div>';const all=[];ks.forEach(k=>(days[k].trips||[]).forEach(x=>all.push(x)));const ib=all.filter(x=>x.seg==='inbound');
+function aGroup(trs,key,names,cost){const g={};trs.forEach(t=>{const k=key(t)||'';const r=g[k]=g[k]||{n:0,s:0,km:0,kn:0,cm:0,cs:0,cn:0};r.n++;r.s+=t.fare||0;if(t.km!=null){r.km+=t.km;r.kn++}if(cost&&cost[t.id]!=null){r.cm+=cost[t.id];r.cs+=t.fare||0;r.cn++}});
+  return Object.keys(g).map(k=>({k,l:k?(names[k]||k):'未入力',n:g[k].n,s:g[k].s,avg:Math.round(g[k].s/g[k].n),km:g[k].kn?Math.round(g[k].km/g[k].kn*10)/10:null,cn:g[k].cn,ph:g[k].cm>0?g[k].cs/g[k].cm*60:null})).sort((a,b)=>(a.k==='')-(b.k==='')||b.n-a.n||b.s-a.s)}
+/* ph=true: 平均距離の代わりに「時間あたり」（3回に満たないものは薄く） */
+function aTable(head,rows,tot,ph){return '<table class="mtable a5 ab"><thead><tr><th>'+head+'</th><th>回数</th><th>割合</th><th>単価</th><th>'+(ph?'時間あたり':'距離')+'</th></tr></thead><tbody>'+rows.map(r=>'<tr><td class="pl">'+esc(r.l)+'</td><td class="n pl">'+r.n+'</td><td class="n pl">'+(tot?Math.round(r.n/tot*100):0)+'%</td><td class="n pl">'+yen(r.avg)+'</td>'+(ph?'<td class="n pl'+(r.ph!=null&&r.cn<MINA?' few':'')+'">'+(r.ph!=null?yen(r.ph):'—')+'</td>':'<td class="n pl">'+(r.km!=null?r.km+'km':'—')+'</td>')+'</tr>').join('')+'</tbody></table>'}
+function aInb(ks,C,unit){C=C||[];const t='<div class="ctitle">訪日客</div>';const cost={};C.forEach(d=>Object.assign(cost,d.cost));const all=[];ks.forEach(k=>(days[k].trips||[]).forEach(x=>all.push(x)));const ib=all.filter(x=>x.seg==='inbound');
   if(!ib.length)return t+'<div class="hint"><span>この期間に「訪日客」の乗車はありません。客層で「訪日客」を選ぶと、話していた言葉なども残せて、ここで比べられます。</span></div>';
   const S=ib.reduce((a,x)=>a+(x.fare||0),0),AS=all.reduce((a,x)=>a+(x.fare||0),0),avg=Math.round(S/ib.length),aavg=all.length?Math.round(AS/all.length):0;
-  const L=aGroup(ib,x=>x.ib&&x.ib.lang,IBNAME.lang),top=L.find(r=>r.k&&r.n>=2)||null;
-  let h=t+'<div class="astat"><div><span>回数</span><b>'+ib.length+'回</b><i>全体の'+Math.round(ib.length/all.length*100)+'%</i></div><div><span>平均単価</span><b>¥'+yen(avg)+'</b><i>全体 ¥'+yen(aavg)+'</i></div><div><span>多い言葉</span><b>'+(top?esc(top.l):'—')+'</b><i>'+(top?top.n+'回':'同じ言葉が2回以上で出ます')+'</i></div></div><!--B-->';
-  h+='<div class="ctitle sub">話していた言葉</div>'+aTable('言葉',L,ib.length);
-  [['地域',x=>x.ib&&x.ib.reg,IBNAME.reg],['旅の形',x=>x.ib&&x.ib.party,IBNAME.party],['支払い（訪日客）',x=>x.ib&&x.ib.pay,IBNAME.pay]].forEach(([n,f,N])=>{const r=aGroup(ib,f,N);if(r.some(z=>z.k))h+='<div class="ctitle sub">'+n+'</div>'+aTable(n.replace(/（.*/,''),r,ib.length)});
-  h+='<div class="ctitle sub">乗せた場所の種類</div>'+aTable('場所',aGroup(ib,x=>pKind(x.from),PKNAME),ib.length);
+  const L=aGroup(ib,x=>x.ib&&x.ib.lang,IBNAME.lang,cost),top=L.find(r=>r.k&&r.n>=2)||null;
+  /* 1. 時間あたり: 前の降車（その日の最初は出庫）から、その乗車の降車までの時間で割る。訪日客とそれ以外を並べる */
+  const phOf=tr=>{let m=0,f=0,n=0;tr.forEach(x=>{if(cost[x.id]!=null){m+=cost[x.id];f+=x.fare||0;n++}});return {v:m>0?f/m*60:null,n}};
+  const PI=phOf(ib),PO=phOf(all.filter(x=>x.seg!=='inbound'));
+  const lg=ib.filter(x=>(x.fare||0)>=10000),alg=all.filter(x=>(x.fare||0)>=10000);
+  let h=t+'<div class="astat"><div><span>回数</span><b>'+ib.length+'回</b><i>全体の'+Math.round(ib.length/all.length*100)+'%</i></div><div><span>平均単価</span><b>¥'+yen(avg)+'</b><i>全体 ¥'+yen(aavg)+'</i></div><div><span>時間あたり</span><b>'+(PI.v!=null&&PI.n>=MINA?'¥'+yen(PI.v):'—')+'</b><i>'+(PI.v!=null&&PI.n>=MINA?'それ以外 '+(PO.v!=null&&PO.n>=MINA?'¥'+yen(PO.v):'—'):'時刻のある乗車が'+MINA+'回で出ます')+'</i></div><div><span>ロング（1万円以上）</span><b>'+lg.length+'回</b><i>'+(alg.length?'ロング全体の'+Math.round(lg.length/alg.length*100)+'%':'この期間はロングなし')+'</i></div><div><span>多い言葉</span><b>'+(top?esc(top.l):'—')+'</b><i>'+(top?top.n+'回':'同じ言葉が2回以上で出ます')+'</i></div></div><!--B-->';
+  h+='<div class="ctitle sub">話していた言葉</div>'+aTable('言葉',L,ib.length,true);
+  [['地域',x=>x.ib&&x.ib.reg,IBNAME.reg],['旅の形',x=>x.ib&&x.ib.party,IBNAME.party],['支払い（訪日客）',x=>x.ib&&x.ib.pay,IBNAME.pay]].forEach(([n,f,N])=>{const r=aGroup(ib,f,N,cost);if(r.some(z=>z.k))h+='<div class="ctitle sub">'+n+'</div>'+aTable(n.replace(/（.*/,''),r,ib.length,true)});
+  h+='<div class="ctitle sub">乗せた場所の種類</div>'+aTable('場所',aGroup(ib,x=>pKind(x.from),PKNAME,cost),ib.length,true);
+  /* 2. 行き先の種類と、ロング */
+  h+='<div class="ctitle sub">行き先の種類</div>'+aTable('行き先',aGroup(ib,x=>pKind(x.to),PKNAME,cost),ib.length,true);
+  if(lg.length){const lk=aGroup(lg,x=>(PKNAME[pKind(x.from)]||'不明')+' → '+(PKNAME[pKind(x.to)]||'不明'),{});h+='<div class="kv">'+lk.slice(0,3).map(r=>'<span>ロング '+esc(r.l)+'<b>'+r.n+'</b>回</span>').join('')+'</div>'}
+  /* 4. 訪日客を多く乗せた場所（地名ごと、10か所） */
+  {const nx={};C.forEach(c=>c.waits.forEach(w=>{if(w.from&&w.from.seg==='inbound'){nx[w.from.id]=w.m}}));
+   const g={};ib.forEach(x=>{const n=String(x.from||'').trim();if(!n||n==='—')return;const r=g[n]=g[n]||{n:0,s:0,wm:0,wn:0};r.n++;r.s+=x.fare||0;if(nx[x.id]!=null){r.wm+=nx[x.id];r.wn++}});
+   const ps=Object.keys(g).sort((a,b)=>g[b].n-g[a].n||g[b].s-g[a].s).slice(0,10);
+   if(ps.length)h+='<div class="ctitle sub">訪日客を多く乗せた場所</div><table class="mtable a4 ab"><thead><tr><th>場所</th><th>回数</th><th>単価</th><th>降ろして次まで</th></tr></thead><tbody>'+ps.map(n=>{const r=g[n];return '<tr><td class="pl">'+esc(n)+'<small>'+(PKNAME[pKind(n)]||'')+'</small></td><td class="n pl">'+r.n+'</td><td class="n pl">'+yen(r.s/r.n)+'</td><td class="n pl">'+(r.wn?minTxt(r.wm/r.wn):'—')+'</td></tr>'}).join('')+'</tbody></table>'}
   const HB=[['早朝','5〜8時',5,9],['朝〜昼','9〜14時',9,15],['夕方','15〜18時',15,19],['夜','19〜22時',19,23],['深夜','23〜4時',23,29]];
-  const hr=x=>{const h0=+String(x.t||'').slice(0,2);return isNaN(h0)?null:(h0<5?h0+24:h0)};
-  h+='<div class="ctitle sub">時間帯</div>'+aTable('時間帯',HB.map(b=>{const tr=ib.filter(x=>{const v=hr(x);return v!=null&&v>=b[2]&&v<b[3]});return {k:b[0],l:b[0]+' '+b[1],n:tr.length,avg:tr.length?Math.round(tr.reduce((a,x)=>a+(x.fare||0),0)/tr.length):0,km:null}}).filter(r=>r.n),ib.length);
+  const hr=x=>{const h0=parseInt(String(x.tin||x.t||'').split(':')[0],10);return isNaN(h0)?null:(h0<5?h0+24:h0)};
+  {const bk=x=>{const v=hr(x);const b=HB.find(b=>v!=null&&v>=b[2]&&v<b[3]);return b?b[0]:''},nm={};HB.forEach(b=>nm[b[0]]=b[0]+' '+b[1]);
+   const R=aGroup(ib,bk,nm,cost).filter(r=>r.k).sort((a,b)=>HB.findIndex(x=>x[0]===a.k)-HB.findIndex(x=>x[0]===b.k));
+   if(R.length)h+='<div class="ctitle sub">時間帯</div>'+aTable('時間帯',R,ib.length,true)}
+  /* 6. 月ごとの推移（年集計）: 回数・割合・単価と、前の年の同じ月の回数。線グラフは今回と前の年 */
+  if(unit==='month'){const yms=[...new Set(ks.map(k=>k.slice(0,7)))].sort();
+    if(yms.length>=2){const py=ym=>(+ym.slice(0,4)-1)+ym.slice(4),M=ym=>{let n=0,a=0,s2=0;Object.keys(days).forEach(k=>{if(k.slice(0,7)!==ym)return;(days[k].trips||[]).forEach(x=>{a++;if(x.seg==='inbound'){n++;s2+=x.fare||0}})});return {n,a,s:s2}};
+      const R=yms.map(ym=>({ym,c:M(ym),p:M(py(ym))})),hasP=R.some(r=>r.p.n);
+      const ser=[{i:0,l:'今回',s:'今回',v:R.map(r=>r.c.n)}].concat(hasP?[{i:1,l:'前の年',s:'前の年',v:R.map(r=>r.p.n)}]:[]);
+      h+='<div class="ctitle sub">月ごとの推移</div><div class="chart"><div class="lg">'+ser.map(x=>'<span><i class="ln l'+x.i+'"></i>'+x.l+'</span>').join('')+'</div>'+lineChart(R.map(r=>String(+r.ym.slice(5))),ser,'訪日客の月ごとの回数',{min:1,fmt:v=>v+'回'})+'</div>'
+       +'<table class="mtable a5 ab"><thead><tr><th>月</th><th>回数</th><th>割合</th><th>単価</th><th>前の年</th></tr></thead><tbody>'+R.map(r=>'<tr><td class="pl">'+r.ym.slice(2,4)+'年'+(+r.ym.slice(5))+'月</td><td class="n pl">'+r.c.n+'</td><td class="n pl">'+(r.c.a?Math.round(r.c.n/r.c.a*100):0)+'%</td><td class="n pl">'+(r.c.n?yen(r.c.s/r.c.n):'—')+'</td><td class="n pl">'+(r.p.a?r.p.n:'—')+'</td></tr>').join('')+'</tbody></table>'}}
   const xs=IBX.map(x=>[x[1],ib.filter(t=>t.ib&&(t.ib.x||[]).includes(x[0])).length]).filter(x=>x[1]);
   if(xs.length)h+='<div class="kv">'+xs.map(x=>'<span>'+x[0]+'<b>'+x[1]+'</b>回</span>').join('')+'</div>';
   /* 前の年の同じ月と比べる（季節の波: 春節・桜・紅葉・年末年始） */
   const td=ymd(new Date()),cut=ym=>ym===td.slice(0,7)?td.slice(8):'31',yms=[...new Set(ks.map(k=>k.slice(0,7)))].sort(),cnt=(ym,c)=>{let n=0;Object.keys(days).forEach(k=>{if(k.slice(0,7)===ym&&k.slice(8)<=c)(days[k].trips||[]).forEach(x=>{if(x.seg==='inbound')n++})});return n};
   const prev=ym=>(+ym.slice(0,4)-1)+ym.slice(4);
-  if(yms.some(ym=>Object.keys(days).some(k=>k.slice(0,7)===prev(ym))))h+='<div class="ctitle sub">前の年の同じ月と比べる</div><table class="mtable a5"><thead><tr><th>月</th><th>今回</th><th>前の年</th><th>増減</th></tr></thead><tbody>'+yms.map(ym=>{const c=cut(ym),a=cnt(ym,c),b=cnt(prev(ym),c);return '<tr><td class="pl">'+(+ym.slice(5))+'月'+(c!=='31'?'<small>'+(+c)+'日まで</small>':'')+'</td><td class="n pl">'+a+'回</td><td class="n pl">'+b+'回</td><td class="n pl">'+(a-b>0?'+':'')+(a-b)+'</td></tr>'}).join('')+'</tbody></table>';
-  return h+'<div class="hint"><span>言葉・地域などは、客層で「訪日客」を選んだ乗車で、選んだものだけを数えます。「未入力」は選んでいない分です。乗せた場所の種類は、乗車地の名前から自動で分けています（駅・ホテル・空港など）。季節の比べは、同じ月の訪日客の回数です。今月はまだ途中なので、前の年も同じ日までの分で比べています。</span></div>'}
+  if(unit!=='month'&&yms.some(ym=>Object.keys(days).some(k=>k.slice(0,7)===prev(ym))))h+='<div class="ctitle sub">前の年の同じ月と比べる</div><table class="mtable a5"><thead><tr><th>月</th><th>今回</th><th>前の年</th><th>増減</th></tr></thead><tbody>'+yms.map(ym=>{const c=cut(ym),a=cnt(ym,c),b=cnt(prev(ym),c);return '<tr><td class="pl">'+(+ym.slice(5))+'月'+(c!=='31'?'<small>'+(+c)+'日まで</small>':'')+'</td><td class="n pl">'+a+'回</td><td class="n pl">'+b+'回</td><td class="n pl">'+(a-b>0?'+':'')+(a-b)+'</td></tr>'}).join('')+'</tbody></table>';
+  return h+'<div class="hint"><span>言葉・地域などは、客層で「訪日客」を選んだ乗車で、選んだものだけを数えます。「未入力」は選んでいない分です。乗せた場所の種類は、乗車地の名前から自動で分けています（駅・ホテル・空港など）。時間あたりは、前の降車（その日の最初は出庫）からその乗車の降車までの時間で営収を割ったもので、出庫・帰庫の時刻がある日だけで出し、'+MINA+'回に満たないものは薄くしています。「降ろして次まで」は、その場所から乗せた訪日客を降ろしてから、次のお客さんを乗せるまでの平均です。季節の比べは、同じ月の訪日客の回数です。今月はまだ途中なので、前の年も同じ日までの分で比べています。</span></div>'}
 /* 乗せた場所・行き先の種類（すべての乗車。地名から自動） */
 function aKind(ks){const t='<div class="ctitle">乗せた場所・行き先の種類</div>';const all=[];ks.forEach(k=>(days[k].trips||[]).forEach(x=>all.push(x)));
   const named=all.filter(x=>x.from&&x.from!=='—');if(!named.length)return t+'<div class="hint"><span>乗車地の名前が入った記録がまだありません。</span></div>';
